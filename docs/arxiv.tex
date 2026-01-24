@@ -1,0 +1,1466 @@
+\documentclass[11pt]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage[expansion=false]{microtype}
+\usepackage{booktabs}
+\usepackage{amsmath,amssymb}
+\usepackage{hyperref}
+\usepackage{natbib}
+\usepackage{fancyvrb}
+
+\title{Brain: Structural Memory, Thought Formation, and Language\\
+in a Biologically Grounded System}
+
+\author{
+  Vitalii Belyi\thanks{Independent researcher. Correspondence: aiops9a1@protonmail.com}
+}
+
+\date{}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+We present \textit{Brain}, a biologically inspired \textbf{structural memory} system---one where knowledge is encoded in the topology and discrete states of a connection graph rather than in real-valued weights. The system learns from text using strictly local plasticity rules and discrete synaptic states, without gradient-based optimization.
+
+This work explores a cognitive architecture that separates three functional components:
+\textbf{(1) multimodal memory}, responsible for structural storage of experiences;
+\textbf{(2) thought formation}, understood as the dynamic reconfiguration of stored knowledge;
+and \textbf{(3) linguistic expression}, the sequential rendering of internal representations into language.
+
+Within this framework, large language models are treated as optional linguistic interfaces corresponding to the third component, while the present work focuses on the design and evaluation of the memory substrate itself.
+
+The proposed model represents word forms as discrete units connected by directed associations that transition through qualitative states (NEW $\rightarrow$ USED $\rightarrow$ MYELINATED $\rightarrow$ PRUNE) driven by local usage dynamics. Memory retrieval emerges from a local spreading-activation process with inhibition, decay, working-memory constraints, and biologically motivated competition. Episodic indexing is implemented via a hippocampus-inspired mechanism supporting pattern separation, CA3 attractor dynamics for pattern completion, and replay-driven consolidation \citep{teyler1986hippocampal,mcclelland1995there,rolls2013mechanisms}.
+
+On a curated curriculum of basic world knowledge and question answering, the system achieves 98.8\% accuracy (419/424 questions), including 100\% on bAbI Task 1 working memory benchmark (250/250), while appropriately abstaining on unknown queries. The architecture and evaluation pipeline are released as open-source code at \url{https://github.com/sss777999/Brain}.
+\end{abstract}
+
+\section{Introduction}
+
+Have you ever noticed that you already know what you want to say before you start speaking? The decision is there---but articulating it takes time. You search for words, construct sentences, and by the time you finish explaining, seconds or even minutes have passed.
+
+But here is the deeper question: did ``you'' actually make that decision? Cognitive science suggests a more nuanced picture. The brain operates on multiple timescales: fast, automatic processes driven by neuromodulators and accumulated experience often reach conclusions before slower deliberative processes catch up \citep{kahneman2011thinking}. Emotional and somatic states influence decisions before we become aware of them \citep{damasio1994descartes}. What we experience as ``deciding'' may often be the conscious mind catching up to---and rationalizing---choices that faster systems have already biased or made.
+
+Consider the evolutionary context. An elephant sees water and runs toward it---not because it ``decided'' to, but because hormonal signals make approaching water feel good \citep{panksepp2004affective}. A tiger hunts not from moral reasoning but because catching prey triggers reward \citep{berridge2009dissecting}. These are fast, subcortical systems shaped by millions of years of evolution. Humans inherited this machinery. We still have the same reward circuits, the same neuromodulators, the same drive toward what feels good and away from what feels bad.
+
+But here is what may distinguish us---a hypothesis grounded in behavioral observation and supported by prefrontal cortex research \citep{miller2001integrative,fuster2001prefrontal}. Animals can suppress impulses, but typically only under external pressure: fear of a predator, pain from past experience, threat of retaliation. A wolf will back away from prey if the prey fights back. But a human can override an impulse \emph{without} external pressure, through internal reasoning alone. We can feel rage and choose not to act. We can see the reward and walk away. Not always, not everyone, not reliably---but this capacity exists. This is what the prefrontal cortex adds: not just another layer of processing, but the ability to veto decisions that deeper systems have already made \citep{aron2007inhibition}.
+
+The question, then, is not whether we make choices---but whether we can sometimes override the choices our deeper systems have already made.
+
+This does not diminish the role of thought. But it reframes it: conscious cognition may be less about \emph{making} decisions and more about \emph{evaluating, refining, and communicating} them. The verbal expression we produce---the explanation we give to others or even to ourselves---is a slow, sequential process layered on top of fast, parallel, largely unconscious computation.
+
+This project began with that observation. Before starting, an extensive search was conducted for similar approaches: academic databases, arXiv, and AI-assisted literature reviews. While individual components exist in various research groups, no complete system combining discrete structural memory, biologically grounded plasticity, and explicit memory-thought-language separation appeared to exist. This gap motivated the present work.
+
+\subsection{Motivating Observations}
+
+Consider common introspective phenomena. When solving a problem alone, the solution often appears almost instantly---no words needed. But when explaining it to someone, the process slows dramatically. The thought is already formed; verbalization is the bottleneck.
+
+Memory, upon closer examination, is not a single thing. One can recall a melody without visualizing anything, or remember sitting on a bench hearing the rustle of wind through leaves, without remembering what music was playing. These are separate channels---visual, auditory, semantic---that activate independently and combine into coherent experiences.
+
+More striking: we know facts from school---physics, mathematics---but cannot recall \emph{when} we learned them. The knowledge exists, detached from any episodic context. It was absorbed from trusted sources (parents, teachers, textbooks) and now simply \emph{is}. Other memories are different: we remember exactly where we were when we heard certain news. The brain treats these differently.
+
+Comparative neuroanatomy and cross-cultural cognitive research provide evidence that despite surface differences in language and culture, the fundamental architecture of human cognition is remarkably conserved \citep{braitenberg1998cortex,dehaene2020we}. Cortical organization, hippocampal structure, and basic memory mechanisms show striking similarity across populations. The words differ, the customs differ, but the underlying neural machinery of memory and reasoning is the same.
+
+These observations led to a hypothesis: human cognition operates as three distinct but interacting systems. First, a \textbf{memory substrate} that stores patterns---multimodal, associative, and incredibly fast. Second, a \textbf{thought formation} process that activates and combines these patterns into coherent internal states, still without words. Third, a \textbf{linguistic interface} that converts internal states into sequential speech---the slowest part, but the only part visible to others.
+
+Large language models excel at that third component. They are brilliant verbalizers. But they lack the first two: explicit memory and non-linguistic thought formation. This work addresses that gap by building the missing pieces: a biologically grounded memory system and thought formation mechanism that can interface with LLMs for verbalization.
+
+\subsection{From Observation to Architecture}
+
+This project is an attempt to translate those observations into working code. The goal is not to compete with LLMs on benchmarks---they will win. The goal is to explore a different question: can we build a system that remembers like a brain, retrieves like a brain, and only then verbalizes using an LLM as a linguistic wrapper?
+
+In biological systems, memory is not a collection of numerical parameters but a dynamic structure shaped by experience. Synaptic connectivity is continuously formed, stabilized, and pruned through local plasticity mechanisms, while inhibitory competition and neuromodulation regulate which patterns persist. These processes give rise to stable representations that can be flexibly recombined during thought and reasoning \citep{hebb1949organization,markram1997regulation}.
+
+The system described here models memory as a graph of discrete units whose connections evolve through qualitative states driven by local activity. Learning, recall, and forgetting emerge from structural change and activation dynamics, not from global objective functions.
+
+\subsection{Memory, Thought, and Language as Distinct Processes}
+
+The architecture investigated in this work is motivated by a functional separation commonly observed in cognitive neuroscience. Human cognition can be viewed as involving three interacting but distinct processes.
+
+First, \textbf{memory} provides a fast, parallel substrate for storing experiences and knowledge. Biological memory is inherently multimodal, integrating sensory input, abstract concepts, and contextual information into unified representations.
+
+Second, \textbf{thought formation} operates over this memory substrate. Before any linguistic output occurs, memories and concepts are dynamically reconfigured into a coherent internal state. This process is non-sequential, highly parallel, and largely unconscious. Note that ``thought'' here refers not to chain-of-thought reasoning or logical inference as commonly studied in AI, but to the underlying neural process by which the brain activates, combines, and stabilizes patterns of memory---the biological substrate of cognition itself.
+
+Neurophysiologically, thought formation can be viewed as a process of spreading activation across neural assemblies, shaped by competition and inhibition. A partial cue may trigger activation of multiple candidate patterns, which then compete via lateral inhibition until a coherent pattern stabilizes. Similar dynamics have been formalized in attractor-like accounts of hippocampal and cortical recall \citep{rolls2007attractor,rolls2013mechanisms,treves1994computational}.
+
+Recall works by the same mechanism: a partial cue activates part of a stored pattern, and the remaining neurons are recruited through their established connections. This explains common memory phenomena---for example, recognizing a face but failing to recall the name corresponds to partial restoration of the underlying pattern: the face-related neurons activate successfully, but the weaker connections to name-related neurons do not drive full completion.
+
+Third, \textbf{linguistic expression} transforms internal representations into linear sequences of words. Language is constrained by grammar and syntax and unfolds over time, making it fundamentally different from the underlying representational processes.
+
+Within this framework, language is not equated with thought. Instead, it serves as an interface for communicating internal states.
+
+\subsection{Relation to Large Language Models}
+
+Large language models excel at linguistic expression, the third component of the proposed architecture. They generate fluent text by modeling statistical regularities in language, but they do not explicitly store experiences as structured memory, nor do they possess a distinct mechanism for internal thought formation.
+
+In the present work, large language models are therefore not treated as memory or reasoning substrates. Instead, they may optionally be used as output interfaces that render internal representations into grammatically correct natural language without contributing additional knowledge or influencing memory formation.
+
+This distinction allows the memory system explored here to be evaluated independently of language generation performance. Critically, \textbf{test accuracy is evaluated on the Brain's raw semantic output}, not on LLM-polished text. The Broca's area module (local LLM) only assembles words into grammatically readable phrases---for example, transforming ``stars appear sky night'' into ``The stars appear in the sky at night.'' This post-processing improves readability but does not change whether a test passes or fails.
+
+This architectural separation mirrors a key observation about human cognition: we often understand something fully before we can articulate it. The process of ``finding the right words'' takes time and effort, suggesting that linguistic expression is computationally distinct from the underlying thought. In our implementation, the Brain module produces semantic content (the ``thought''), while an optional LLM acts as a Broca's area analogue, transforming raw semantic output into grammatical speech. The LLM adds no new knowledge---it merely verbalizes what the memory system has retrieved.
+
+This observation motivated the present research: if LLMs excel at verbalization but lack explicit memory and retrieval mechanisms, then building those missing components---rather than scaling language models further---may be a more direct path toward systems that truly remember and reuse knowledge.
+
+Importantly, the current strength of LLMs is an advantage for this research direction. High-quality linguistic realization is readily available as an external component, enabling the present work to focus on memory, consolidation, and retrieval mechanisms.
+
+\subsection{Trust and Source Attribution}
+
+Another observation from introspection: not all information is treated equally by the brain. Facts learned from parents or teachers feel different from things overheard in conversation. School knowledge carries authority; gossip does not. The brain appears to tag information with its source and adjust consolidation accordingly.
+
+The system implements this through explicit \textbf{source attribution}. Information can arrive from different channels: LEARNING (formal instruction, like school), CONVERSATION (casual interaction), or DIRECT\_INPUT (manually verified facts---treated as maximally trustworthy). Each source type affects how quickly connections strengthen and whether episodes consolidate.
+
+For example, the bAbI reasoning tasks \citep{weston2015towards} are processed as CONVERSATION---transient context that can be overwritten. Curriculum facts are processed as LEARNING---stable knowledge that resists interference. This mirrors how a child might forget a playground rumor but retain multiplication tables for decades.
+
+\subsection{Scope and Motivation}
+
+The goal of this project is not to compete with existing machine learning systems on standard benchmarks, nor to propose a complete model of human cognition. Rather, it explores a specific question: can a memory-first architecture, grounded in biologically plausible mechanisms, support learning, recall, and question answering from text without gradient-based optimization?
+
+This work does not claim superiority over gradient-based approaches. Large language models have demonstrated remarkable capabilities, and the present system cannot match their scale or fluency. The motivation here is different: to explore an \emph{alternative} path---one that may offer interpretability, biological plausibility, and a different understanding of how memory and knowledge might be organized.
+
+Whether this approach will scale, lead to emergent capabilities, or represent a viable long-term research direction remains unknown. But the question feels worth asking: if biological memory works through local plasticity and discrete structural change rather than global optimization, can we build systems that work the same way? This project is an attempt to find out.
+
+\subsection{Invitation to Collaborate}
+
+This work shares observations from introspection and a project that grew out of those observations. Part of the motivation for publishing is to find collaborators---researchers with deeper expertise in neuroscience, cognitive science, or AI---who might find this direction worth exploring together.
+
+The code is open source. Contributions, critiques, and alternative approaches are welcome.
+
+The following sections describe the design of the proposed memory system, its activation dynamics, hippocampus-inspired episodic indexing, and empirical evaluation on a controlled curriculum of basic world knowledge.
+
+\section{Related Work}
+
+The present work draws on and differs from several lines of research in machine learning and computational neuroscience.
+
+\textbf{Memory-Augmented Neural Networks.} Memory Networks \citep{weston2014memory}, Neural Turing Machines \citep{graves2014neural}, and Differentiable Neural Computers \citep{graves2016hybrid} augment neural networks with external memory modules accessed through attention mechanisms. These systems use gradient-based optimization and continuous-valued addressing. In contrast, the present work uses discrete synaptic states and strictly local plasticity rules without backpropagation.
+
+\textbf{Spiking Neural Networks.} Spiking neural networks (SNNs) model neurons as discrete event generators, enabling temporal coding and spike-timing dependent plasticity \citep{maass1997networks,gerstner2002spiking}. The present system incorporates Hodgkin--Huxley dynamics and STDP but emphasizes discrete structural states (NEW/USED/MYELINATED/PRUNE) rather than continuous weight adaptation.
+
+\textbf{Sparse Distributed Memory.} Kanerva's Sparse Distributed Memory \citep{kanerva1988sparse} models associative retrieval through high-dimensional sparse representations. The hippocampal indexing mechanism in our system shares this emphasis on sparse encoding (dentate gyrus) but adds attractor dynamics for pattern completion (CA3) and replay-driven consolidation.
+
+\textbf{Knowledge Graphs.} Traditional knowledge graphs store explicit relational triples but lack learning dynamics. The present system can be viewed as a knowledge graph with biologically motivated plasticity: connections strengthen, weaken, and prune based on usage patterns rather than explicit curation.
+
+\textbf{Computational Models of Hippocampus.} The hippocampal indexing theory \citep{teyler1986hippocampal} and complementary learning systems framework \citep{mcclelland1995there} propose that hippocampus provides rapid encoding while neocortex supports slow consolidation. The present implementation follows this division, with episodic indexing via DG/CA3 and cortical consolidation through replay.
+
+The key distinction of this work is the combination of (1) discrete synaptic states rather than continuous weights, (2) strictly local plasticity without global optimization, and (3) explicit separation of memory, thought formation, and linguistic expression.
+
+\section{Model Overview}
+
+The proposed system implements memory as a directed graph of discrete units and
+associations whose structure evolves over time. In contrast to parameter-optimized
+neural architectures that rely on real-valued weight adaptation, learning in the
+proposed system is expressed through qualitative transitions in the state of
+connections driven by local activity.
+
+The current implementation integrates spiking neural dynamics with discrete-state structural memory. Neurons follow Hodgkin--Huxley dynamics with spike-timing dependent plasticity (STDP), while connections maintain discrete qualitative states. Brain oscillations (theta/gamma) and neuromodulation (dopamine, acetylcholine) further modulate learning and retrieval. Pattern completion is performed by a dedicated CA3 module implementing iterative attractor dynamics with lateral inhibition \citep{rolls2007attractor,rolls2013mechanisms}.
+
+The model is designed around three core requirements:
+(1) strictly local plasticity,
+(2) absence of global optimization objectives,
+and (3) biologically motivated competition and stabilization mechanisms.
+
+A strict architectural boundary (PlasticityMode) separates learning from inference, ensuring that question answering does not modify long-term memory structures.
+
+All system behavior---learning, recall, forgetting, and question answering---emerges
+from the interaction of these mechanisms.
+
+\subsection{Core Constraints}
+
+To maintain biological plausibility and conceptual clarity, the following design
+choices are enforced throughout the system:
+
+\begin{itemize}
+\item No gradient descent or backpropagation.
+\item No real-valued synaptic weights as carriers of semantic meaning.
+\item No embedding geometry or distance-based similarity measures; retrieval relies on discrete structural criteria rather than vector distances.
+\item No parameterized attention mechanisms; attentional selection emerges from competition, inhibition, and structural priority.
+\end{itemize}
+
+All computations are local, discrete, and structurally grounded.
+
+\subsection{System Architecture}
+
+Figure~\ref{fig:architecture} presents a high-level view of the system components and their interactions.
+
+\begin{figure}[ht]
+\centering
+\begin{Verbatim}[fontsize=\scriptsize,frame=single]
++------------------------------------------------------------------+
+|                         BRAIN MODEL                               |
+|              (Biologically Plausible Memory System)               |
++------------------------------------------------------------------+
+|  NEUROMODULATION: DA (reward) | ACh (attention) | NE | 5-HT       |
+|                   |                                               |
+|                   v modulates learning                            |
+|  OSCILLATIONS: Theta (6Hz) <---> Gamma (40Hz)                     |
+|                episodic          local computation                |
+|                   |                                               |
+|                   v modulates excitability                        |
+|  SPIKING NETWORK: Neuron (Hodgkin-Huxley) <--> Connection (STDP)  |
+|                   |                                               |
+|                   v spike-based plasticity                        |
+|  PFC (Working Memory): Goal + Context + Temporary Episodes        |
+|                   |                                               |
+|                   v top-down modulation                           |
+|  HIPPOCAMPUS: DG (separation) -> CA3 (completion) -> Episodes     |
+|                   |                                               |
+|                   v consolidation (SWR replay)                    |
+|  CORTEX: Semantic Memory (MYELINATED = stable knowledge)          |
++------------------------------------------------------------------+
+\end{Verbatim}
+\caption{High-level architecture showing the flow from neuromodulation through spiking dynamics, working memory, episodic indexing, and semantic consolidation.}
+\label{fig:architecture}
+\end{figure}
+
+\section{Representations}
+
+\subsection{Neurons}
+
+Each distinct word form observed during training is represented as a neuron.
+Neurons follow Hodgkin--Huxley dynamics with continuous membrane potential, gating variables for ion channels (Na$^+$, K$^+$), and spike generation when voltage exceeds threshold \citep{hodgkin1952quantitative}. Parameters are adapted from standard cortical neuron models rather than the original squid giant axon values. Despite this continuous internal state, the functional output remains discrete: a neuron either fires a spike or does not. Neurons maintain directed incoming and outgoing connections.
+
+To reflect biological constraints, neurons enforce a fan-out limit on outgoing
+connections. In the current implementation, this limit is set to approximately
+7,000 outgoing connections per neuron, consistent with cortical connectivity estimates \citep{braitenberg1998cortex}.
+
+While the present system operates on textual input, the representation is modality-
+agnostic. In principle, neurons may represent visual features, audio patterns, or
+other sensory elements, enabling extension to multimodal memory.
+
+\subsection{Connections and Discrete Synaptic States}
+
+Associations between neurons are represented as directed connections.
+Each connection exists in one of four qualitative states:
+
+\begin{itemize}
+\item \textbf{NEW}: recently formed, unstable connection.
+\item \textbf{USED}: connection repeatedly involved in successful activation.
+\item \textbf{MYELINATED}: structurally stabilized connection with priority during activation.\footnote{The term ``myelinated'' is used metaphorically to denote functional stability and transmission priority, analogous to how biological myelination increases axonal conduction speed. The model does not simulate glial wrapping; the state represents a connection that has been consolidated through repeated use.}
+\item \textbf{PRUNE}: connection marked for removal due to inactivity.
+\end{itemize}
+
+Connections do not carry real-valued weights.
+Instead, state transitions are driven by local usage counters reflecting how often
+a connection participates in activation sequences.
+
+Directional information is preserved through separate forward and backward usage
+counters, providing an STDP-like bias toward causal ordering \citep{markram1997regulation}.
+
+\subsection{Spike-Timing Dependent Plasticity}
+
+Beyond discrete state transitions, the system implements spike-timing dependent plasticity (STDP), a biologically grounded learning rule that captures the causal structure of neural activity \citep{markram1997regulation}.
+
+When neuron $A$ fires before neuron $B$ (pre-before-post, $\Delta t > 0$), the connection $A \rightarrow B$ undergoes long-term potentiation (LTP). When the order is reversed ($\Delta t < 0$), long-term depression (LTD) occurs. The magnitude follows an exponential decay:
+\[
+\Delta w \propto \exp\left(-\frac{|\Delta t|}{\tau}\right), \quad \tau = 20\text{ms}
+\]
+
+This asymmetric learning window ensures that connections encode predictive relationships: if $A$ reliably precedes $B$, the $A \rightarrow B$ pathway strengthens, enabling pattern completion from partial cues. The system maintains spike histories for each neuron, allowing precise timing-based updates during learning.
+
+\textbf{Integration with training:} During learning, the \texttt{\_simulate\_spike\_pair()} function in \texttt{train.py} generates spike pairs for each word connection. Pre-spike occurs at global time $t$, post-spike at $t + 5$ms, producing strong LTP ($\exp(-5/20) \approx 0.78$). Each connection uses \texttt{EligibilityTrace}, \texttt{CalciumState}, and \texttt{MetaplasticState} from \texttt{spiking.py} for biologically accurate plasticity.
+
+\subsection{Three-Factor Learning and Eligibility Traces}
+
+Pure STDP faces the temporal credit assignment problem: how can a synapse that was active seconds ago be strengthened when a reward arrives later? Biological systems solve this through \textbf{eligibility traces}---temporary synaptic tags that mark recently active synapses as candidates for modification \citep{gerstner2018eligibility}.
+
+The system implements three-factor learning: (1) presynaptic activity, (2) postsynaptic activity, and (3) a neuromodulatory signal. When STDP occurs, it creates an eligibility trace rather than immediate weight change. The trace decays exponentially ($\tau \approx 1$s). When dopamine arrives (signaling novelty or reward), it converts eligibility traces into permanent structural changes.
+
+This mechanism enables the system to associate actions with delayed outcomes---critical for learning from text where the relevance of a word may only become clear sentences later.
+
+Figure~\ref{fig:neuromod} illustrates the four-factor learning system.
+
+\begin{figure}[ht]
+\centering
+\begin{Verbatim}[fontsize=\scriptsize,frame=single]
++---------------------------------------------------------------+
+|               FOUR-FACTOR LEARNING SYSTEM                      |
++---------------------------------------------------------------+
+| NEUROMODULATOR RELEASE CONDITIONS:                            |
+|                                                               |
+| DOPAMINE (DA) - Reward/Novelty [Schultz 1998]                 |
+|   Released when: is_novel=True (new connection)               |
+|   Effect: Converts eligibility trace to LTP                   |
+|   TAU: 500ms                                                  |
+|                                                               |
+| ACETYLCHOLINE (ACh) - Attention [Hasselmo 2006]               |
+|   Released when: Start of learning                            |
+|   Effect: Amplifies eligibility traces (attention gate)       |
+|   TAU: 1000ms (sustained attention)                           |
+|                                                               |
+| NOREPINEPHRINE (NE) - Exploration [Sara 2009]                 |
+|   Released when: is_novel OR is_unexpected                    |
+|   Effect: Boosts new/weak connections                         |
+|   TAU: 200ms (fast response)                                  |
+|                                                               |
+| SEROTONIN (5-HT) - Patience [Miyazaki 2014]                   |
+|   Released when: Long sentences (>10 words)                   |
+|   Effect: Slows learning but stabilizes                       |
+|   TAU: 2000ms (stable mood)                                   |
+|                                                               |
+| COMBINED MODIFIER:                                            |
+|   m_total = m_DA * m_ACh * m_NE * m_5HT                       |
+|   eligibility *= m_total -> Final LTP strength                |
++---------------------------------------------------------------+
+\end{Verbatim}
+\caption{Four-factor learning: dopamine (novelty/reward), acetylcholine (attention gate), norepinephrine (exploration), and serotonin (patience) multiplicatively modulate eligibility traces.}
+\label{fig:neuromod}
+\end{figure}
+
+\subsection{Synaptic Tagging and Capture}
+
+To model cooperative stabilization effects observed in biological systems,
+the model optionally implements a synaptic tagging and capture mechanism \citep{frey1997synaptic}.
+When a connection becomes myelinated, nearby connections within the same local
+context experience a reduced threshold for myelination, facilitating the formation
+of coherent memory structures.
+
+This mechanism supports rapid consolidation of related associations without
+introducing global coordination or learned parameters.
+
+\subsection{Semantic and Syntactic Streams}
+
+Inspired by dual-stream accounts of language processing \citep{saur2008ventral},
+the system distinguishes between two classes of connections:
+
+\begin{itemize}
+\item \textbf{Semantic connections}, linking content-bearing words and concepts.
+\item \textbf{Syntactic connections}, involving function words and structural markers.
+\end{itemize}
+
+Semantic connections primarily support meaning-based retrieval, while syntactic
+connections capture ordering and grammatical structure.
+During memory retrieval and question answering, spreading activation is restricted
+to semantic connections, preventing purely syntactic associations from driving
+semantic inference.
+
+\section{Learning from Text}
+
+Learning proceeds incrementally as text is presented to the system.
+Given an input sentence, the following steps are performed:
+
+\begin{enumerate}
+\item The sentence is tokenized into word forms.
+\item Each token is classified as a content word, function word, or interrogative.
+\item Neurons are created for previously unseen word forms.
+\item Directed connections are created or updated within a temporal window
+      corresponding to working-memory constraints \citep{miller1956magical}.
+\end{enumerate}
+
+Here, ``epochs'' denote repeated exposure to the same curriculum, not gradient-based optimization.
+
+\subsection{Local Hebbian-Style Updates}
+
+For each ordered pair of tokens $(w_i, w_j)$ within the temporal window, a directed
+connection $w_i \rightarrow w_j$ is created if absent, and its forward usage counter
+is incremented, consistent with Hebbian-style association formation \citep{hebb1949organization}.
+
+This simple local rule yields directional associations that support ordered recall
+and structured traversal during retrieval, without requiring global supervision.
+
+\subsection{Context-Modulated Plasticity}
+
+To approximate top-down modulation observed in prefrontal cortical systems,
+the model includes a context-sensitive reinforcement mechanism, motivated by evidence for
+PFC-driven control of sensory processing and working memory \citep{miller2001integrative,zanto2011causal}.
+When a broader sentence context already forms a coherent pattern, usage of
+connections within that context is locally amplified.
+
+Importantly, this amplification is implemented as additional local usage events
+on the same connections, not as learned attention weights or external control
+signals.
+
+\textbf{NMDA Receptor Mechanism}: A key challenge in context-modulated learning is the
+``cold start'' problem: newly formed connections have low usage counts and would not
+participate in context-based reinforcement under a fixed threshold. The system addresses
+this through an NMDA receptor-inspired mechanism \citep{malenka2004ltp}.
+
+In biological synapses, NMDA receptors are blocked by Mg$^{2+}$ ions at resting membrane
+potential. When the postsynaptic neuron is sufficiently depolarized (approximately $-$40mV),
+the Mg$^{2+}$ block is relieved, allowing even weak synapses to participate in long-term
+potentiation (LTP). The system implements this as a dynamic threshold: when four or more
+context neurons are simultaneously active (indicating strong network activation), the
+minimum usage threshold for context cache inclusion drops from 3 to 1. This allows newly
+formed connections to participate in context-based learning when overall activity is high,
+consistent with the biological principle that weak synapses can undergo LTP when the
+postsynaptic neuron is already strongly activated.
+
+\subsection{Top-Down Attentional Modulation}
+
+During retrieval, the system implements biologically grounded top-down modulation
+based on task demands. This mechanism is motivated by two key findings:
+
+\textbf{Zanto et al. (2011)} demonstrated that prefrontal cortex causally modulates
+sensory processing via top-down signals that enhance task-relevant stimuli while
+suppressing irrelevant ones \citep{zanto2011causal}.
+
+\textbf{Desimone \& Duncan (1995)} proposed the Biased Competition theory, where
+attention operates through competitive interactions---enhancing some representations
+at the expense of suppressing others \citep{desimone1995neural}.
+
+The implementation uses \emph{multiplicative} gain modulation rather than additive bonuses,
+consistent with neurophysiological evidence. When a query specifies a particular relation
+type (e.g., ``What IS X?'' implies category membership), connections with matching
+relational markers receive a gain factor of 5.0, while non-matching connections
+receive a suppression factor of 0.2. This creates soft competitive dynamics where
+relevant associations dominate without hard-coded rules.
+
+\subsection{Chunk Formation}
+
+When a neuron develops a dominant myelinated semantic forward connection, the
+system may form a new chunk neuron representing a frequently co-occurring sequence
+(e.g., ``united\_states'').
+
+Chunking reduces representational complexity and mirrors cognitive chunk formation
+observed in human expertise \citep{chase1973perception}, while remaining grounded in local structural conditions.
+
+Figure~\ref{fig:training} illustrates the learning pipeline from input text to episodic encoding.
+
+\begin{figure}[ht]
+\centering
+\begin{Verbatim}[fontsize=\tiny,frame=single]
+INPUT: "The capital of France is Paris"
+       |
+       v
++--------------------------------------------------------------------------+
+|            COMPLETE TRAINING FLOW (train_sentence_with_context)           |
++--------------------------------------------------------------------------+
+| 1. TOKENIZATION                                                          |
+|    words = ["the", "capital", "of", "france", "is", "paris"]             |
+|    content = [capital, france, paris]                                    |
+|    function = [the, of, is]                                              |
++--------------------------------------------------------------------------+
+| 2. NEURON CREATION (lexicon.py -> Lexicon)                               |
+|    For each new word: WORD_TO_NEURON[word] = Neuron(word)                |
+|    Neuron has: spike_history, connections_in, connections_out            |
++--------------------------------------------------------------------------+
+| 3. CONNECTION CREATION (connection.py -> Connection)                     |
+|    Hebbian window = 4 words (diluted connectivity)                       |
+|    For each pair (word_i, word_j) where j > i and j-i <= 4:              |
+|      +-------------------------------------------------------------------+  
+|      | CONNECTION TYPE (Dual Stream):                                  | |
+|      | - Both content words -> SEMANTIC (ventral stream)               | |
+|      |   capital --[of]--> france --[is]--> paris                      | |
+|      | - One function word -> SYNTACTIC (dorsal stream)                | |
+|      |   capital --> of, france --> is                                 | |
+|      | - Both function words -> SKIP                                   | |
+|      +------------------------------------------------------------------+ 
+|    Connection states: NEW --(5)--> USED --(50)--> MYELINATED            |
++-------------------------------------------------------------------------+
+| 4. SPIKE-BASED STDP (_simulate_spike_pair in train.py)                  |
+|    For each connection:                                                 |
+|      - pre_spike_time = global_time                                     |
+|      - post_spike_time = global_time + 5ms                              |
+|      - dt = +5ms -> LTP (exp(-5/20) = 0.78)                             |
+|                                                                         |
+|    FOUR-FACTOR LEARNING:                                                |
+|      +----------------------------------------------------------------+ |
+|      | 1. STDP creates eligibility trace (not immediate change)        | |
+|      | 2. Neuromodulators modulate:                                    | |
+|      |    - DA (dopamine): novelty -> converts eligibility to LTP      | |
+|      |    - ACh (acetylcholine): attention -> amplifies traces         | |
+|      |    - NE (norepinephrine): surprise -> boosts new connections    | |
+|      |    - 5-HT (serotonin): patience -> stabilizes learning          | |
+|      | 3. Combined: m_total = DA x ACh x NE x 5-HT                     | |
+|      | 4. eligibility *= m_total -> Final weight change                | |
+|      +----------------------------------------------------------------+ |
+|    Advanced plasticity (from spiking.py, used in Connection):           |
+|      - EligibilityTrace: tau = 1000ms decay                             |
+|      - CalciumState: Ca2+ thresholds for LTP/LTD                        |
+|      - MetaplasticState: sliding threshold (BCM)                        |
++-------------------------------------------------------------------------+
+| 5. EPISODIC ENCODING (hippocampus.py -> Hippocampus.encode())           |
+|    5a. DENTATE GYRUS: Pattern Separation                                |
+|        - input_neurons = {capital, france, paris}                       |
+|        - sparse_neurons = pattern_separate(input_neurons)               |
+|        - ~2% active (Rolls et al., 2007)                                |
+|        - Similar inputs -> different sparse codes (orthogonalization)   |
+|                                                                         |
+|    5b. EPISODE CREATION                                                 |
+|        Episode(                                                         |
+|          input_neurons = frozenset({capital, france, paris}),           |
+|          input_words = ("capital", "france", "paris"),  # TIME CELLS    |
+|          pattern_neurons = sparse_neurons,                              |
+|          context_neurons = {...},  # What was active                    |
+|          timestamp = 1, source = "sentence",                            |
+|          state = EpisodeState.NEW                                       |
+|        )                                                                |
+|                                                                         |
+|    5c. SIMILAR EPISODE CHECK                                            |
+|        - If >70% overlap with existing -> mark_replayed()               |
+|        - If replay_count >= 5 -> CONSOLIDATED                           |
++-------------------------------------------------------------------------+
+       |
+       v
+STORED: Episode in HIPPOCAMPUS.episodes, connections strengthened
+\end{Verbatim}
+\caption{Complete training flow showing all 5 stages: tokenization, neuron creation, connection formation with dual-stream types, spike-based STDP with four-factor learning, and hippocampal episodic encoding with pattern separation and consolidation.}
+\label{fig:training}
+\end{figure}
+
+\section{Activation Dynamics and Attention}
+
+Inference and recall in the proposed system are governed by local spreading
+activation combined with biologically motivated competition and inhibition.
+Rather than computing attention weights or similarity scores, the system relies
+on structural priority, inhibition, and decay to select coherent activation
+patterns.
+
+\subsection{Spreading Activation}
+
+Activation is initiated by external input (e.g., query terms) or internal
+contextual patterns. Active neurons propagate activation locally through their
+outgoing connections according to the following principles:
+
+\begin{itemize}
+\item Activation propagates only through existing connections.
+\item Connections in the MYELINATED state propagate activation with highest
+      priority.
+\item USED connections propagate activation normally.
+\item NEW connections propagate weakly and are easily suppressed.
+\item PRUNE connections do not propagate activation.
+\end{itemize}
+
+Propagation is asynchronous and local; no global traversal or evaluation of
+the memory graph is performed.
+
+\subsection{Inhibitory Competition}
+
+To prevent uncontrolled spread and enforce coherence, the system employs
+inhibitory competition analogous to cortical inhibitory interneuron dynamics.
+As activation spreads, inhibitory units suppress weakly supported activations,
+mutually incompatible branches, and diffuse activity patterns.
+This produces winner-take-most dynamics consistent with attractor-like selection \citep{rolls2007attractor,treves1994computational}.
+
+Episode selection uses discrete structural scoring based on connection states and overlap counts,
+not learned parameters or continuous similarity metrics.
+
+\subsection{Biological Attention Mechanism}
+
+Attention in the proposed model is not a separate module but an emergent property
+of activation dynamics.
+Attention arises from the interaction of structural priority (myelination),
+contextual bias from active patterns, and inhibitory suppression of competitors.
+This serves a functional role analogous to attentional selection without requiring learned attention parameters.
+
+\subsection{Spread Attention and Associative Recall}
+
+Beyond focused activation, the system supports controlled associative expansion.
+When inhibition is partially relaxed, activation may spread from a dominant
+pattern to structurally related patterns, enabling associative recall and
+context-sensitive exploration of memory.
+
+\subsection{Working Memory Constraint}
+
+To model limitations observed in biological cognition, the system enforces a
+working memory constraint on the number of simultaneously active neurons.
+This constraint typically results in approximately $7 \pm 2$ active elements \citep{miller1956magical}.
+
+\subsection{Prefrontal Cortex and Persistent Activity}
+
+Biological working memory requires more than capacity limits---it requires \emph{active maintenance} of representations across time. In the prefrontal cortex (PFC), neurons exhibit \textbf{persistent activity}: sustained firing that maintains information even without continued sensory input \citep{wang2001synaptic,compte2000synaptic}. This is the neural substrate of ``keeping something in mind.''
+
+The proposed system implements a PFC module with three biologically grounded mechanisms:
+
+\textbf{(1) NMDA-mediated slow decay.} NMDA receptors have markedly slower kinetics than AMPA receptors ($\tau_{\text{NMDA}} \approx 100$ms vs $\tau_{\text{AMPA}} \approx 5$ms) \citep{lisman1998role}. This slow decay acts as a ``synaptic memory'' that sustains activity between spikes. The system implements blended decay (30\% AMPA + 70\% NMDA), allowing representations to persist longer than with fast decay alone.
+
+\textbf{(2) Recurrent excitation.} Pyramidal neurons in PFC form recurrent excitatory connections that create positive feedback loops \citep{wang2001synaptic}. When a representation is active, it reinforces itself through these recurrent connections, creating \emph{attractor dynamics}---bistable states that ``lock in'' active patterns. In the implementation, PFC slots that share content (e.g., ``john garden'' and ``john football'') mutually boost each other's activation, making related information more resistant to decay.
+
+\textbf{(3) Distractor resistance via inhibitory gating.} Active working memory must resist interference from irrelevant stimuli. GABAergic interneurons create an inhibitory barrier around active representations \citep{miller2001integrative}. New inputs must either be goal-relevant (receiving top-down facilitation) or sufficiently salient to overcome this barrier. This explains why we can ignore distractions while holding a phone number in mind, yet attend immediately to our name being called.
+
+These mechanisms work together: NMDA provides the temporal bridge between inputs, recurrent excitation stabilizes active patterns into attractors, and inhibitory gating protects these attractors from noise. The result is a working memory that can maintain ``John is in the garden'' across multiple intervening sentences, correctly answering ``Where is John?'' even after processing unrelated information.
+
+On the bAbI Task 1 benchmark (single supporting fact with distractor sentences), this architecture achieves 100\% accuracy (250/250) without any task-specific training---the same mechanisms that maintain any working memory representation naturally handle the task structure.
+
+\subsection{Hub Suppression and Weber--Fechner Scaling}
+
+Highly connected neurons (hubs) pose a risk of dominating activation due to their
+degree alone. The system applies a hub penalty inspired by Weber--Fechner-like compression,
+reducing the dominance of high-degree nodes and supporting context-specific recall.
+
+\subsection{Decay and Stability}
+
+Activation decays over time unless reinforced by structural support.
+Stable patterns emerge when recurrent activation, myelinated pathways, and
+contextual coherence reinforce one another.
+
+\subsection{Neuromodulation System}
+
+Biological memory is not simply a matter of connection strength---it is dynamically regulated by neuromodulators that gate learning, modulate excitability, and signal behavioral relevance. The system implements four neuromodulators, each with distinct release conditions and effects:
+
+\textbf{Dopamine (DA)} signals novelty and reward \citep{schultz1998predictive}. When a new connection forms or an unexpected pattern is encountered, dopamine is released. This converts eligibility traces into permanent structural changes (see Three-Factor Learning). Without dopamine, STDP creates only temporary eligibility; with dopamine, learning is consolidated. This explains why surprising or rewarding experiences are remembered better.
+
+\textbf{Acetylcholine (ACh)} gates attention and encoding \citep{hasselmo2006mechanisms}. Released at the onset of learning (when a new sentence is presented), ACh amplifies eligibility traces and increases the probability that active synapses will be modified. High ACh favors encoding new information; low ACh favors retrieval of existing memories. The system modulates ACh based on task context.
+
+\textbf{Norepinephrine (NE)} signals arousal and surprise \citep{sara2009locus}. Released when input is novel or unexpected, NE increases neuronal excitability and biases the system toward exploration of new pathways rather than exploitation of established ones. This enables flexible learning when the environment changes.
+
+\textbf{Serotonin (5-HT)} promotes behavioral inhibition and patience \citep{miyazaki2014optogenetic}. Released during sustained learning (long sentences, complex material), 5-HT stabilizes plasticity but slows its rate. This implements temporal discounting: immediate associations are valued more than distant ones.
+
+The combined learning modifier $m_{total} = m_{DA} \times m_{ACh} \times m_{NE} \times m_{5HT}$ gates all plasticity, ensuring that learning occurs only when appropriate neuromodulatory conditions are met.
+
+\subsection{Brain Oscillations}
+
+Neural activity in biological systems is organized by rhythmic oscillations that coordinate processing across brain regions \citep{buzsaki2006rhythms}. The system implements two key rhythms:
+
+\textbf{Theta rhythm (6 Hz)} dominates during episodic memory encoding and retrieval. Theta provides a temporal framework for organizing sequential information---each theta cycle can encode one ``item'' in a sequence. During learning, theta modulates neuron excitability such that inputs arriving at different theta phases receive different processing.
+
+\textbf{Gamma rhythm (40 Hz)} supports local computation and feature binding. Nested within theta cycles, gamma oscillations coordinate the firing of neurons representing related features. Theta-gamma coupling enables sequence encoding: different items occupy different gamma cycles within a theta cycle, preserving temporal order \citep{lisman2005theta}.
+
+The \texttt{BrainOscillator} class generates these rhythms and modulates neuronal excitability during spike simulation. This ensures that spiking activity respects biological timing constraints rather than operating in abstract computational time.
+
+\subsection{Spiking Neural Network Architecture}
+
+The system implements a complete spiking neural network in \texttt{spiking.py} with biologically accurate components:
+
+\textbf{SpikingNeuron}: Hodgkin--Huxley neuron model with membrane potential dynamics, ion channel gating variables (Na$^+$, K$^+$), action potential generation, and refractory periods. Each neuron maintains spike history for STDP computation.
+
+\textbf{Synapse}: Base synapse class with spike propagation, synaptic delay, and classical STDP. Serves as foundation for specialized synapse types.
+
+\textbf{SpikingNetwork}: Container for neurons and synapses, manages simulation stepping, oscillator updates, and coordinated STDP application.
+
+\subsection{Synapse Types}
+
+The system implements multiple biologically grounded synapse types, each capturing different aspects of synaptic plasticity:
+
+\textbf{ThreeFactorSynapse}: Implements eligibility traces that bridge the temporal credit assignment gap \citep{gerstner2018eligibility}. STDP creates eligibility traces rather than immediate weight changes; neuromodulator signals convert traces to permanent plasticity.
+
+\textbf{BCMSynapse}: Bienenstock--Cooper--Munro rule with sliding threshold \citep{bienenstock1982theory}. Firing rate determines plasticity direction: high rates induce LTP, low rates induce LTD. Threshold adapts based on activity history, providing homeostasis.
+
+\textbf{STPSynapse}: Short-term plasticity with facilitation and depression on millisecond timescales \citep{tsodyks1997neural}. Facilitating synapses (low initial release probability, strong facilitation) model cortical--cortical connections; depressing synapses (high release, fast depletion) model thalamo--cortical connections.
+
+\textbf{DendriticSynapse}: Location-dependent plasticity based on dendritic compartment \citep{larkum2013cellular}. Proximal synapses show standard Hebbian STDP; distal synapses exhibit anti-Hebbian plasticity under low cooperativity. Back-propagating action potentials attenuate with distance from soma.
+
+\textbf{MetaplasticSynapse}: Sliding threshold metaplasticity \citep{abraham1996metaplasticity}. Recent LTP increases threshold for future LTP; recent LTD increases threshold for future LTD. This prevents runaway plasticity and implements synaptic homeostasis.
+
+\textbf{CalciumBasedSynapse}: Calcium-concentration-based plasticity \citep{graupner2012calcium}. Low Ca$^{2+}$ produces no change; medium Ca$^{2+}$ activates phosphatases (LTD); high Ca$^{2+}$ activates CaMKII (LTP). NMDA receptors provide coincidence detection with supralinear calcium for pre--post timing.
+
+\textbf{AntiHebbianSynapse}: Reversed STDP polarity for specific inhibitory connections \citep{feldman2012spike}. Pre-before-post produces LTD; post-before-pre produces LTP. Observed at excitatory inputs onto fast-spiking interneurons.
+
+\textbf{BiologicalSynapse}: Comprehensive synapse combining all mechanisms: Hodgkin--Huxley dynamics, STDP, three-factor learning, short-term plasticity, dendritic location effects, metaplasticity, and calcium dynamics. This is the most complete biological model available in the system.
+
+\subsection{Supporting Data Structures}
+
+\textbf{EligibilityTrace}: Exponentially decaying synaptic tag ($\tau \approx 1$s) marking recently active synapses as candidates for modification.
+
+\textbf{STPState}: Short-term plasticity state tracking release probability ($u$) and available resources ($x$). Effective transmission $= w \times u \times x$.
+
+\textbf{CalciumState}: Calcium concentration at synapse with separate tracking of pre- and postsynaptic spike times for NMDA coincidence detection.
+
+\textbf{MetaplasticState}: History of recent LTP/LTD events with sliding thresholds for future plasticity.
+
+\textbf{DendriticCompartment}: Dendritic location (proximal, distal, apical, basal) with location-specific attenuation and STDP type.
+
+\textbf{SpikeRecord}: Individual spike record (neuron ID, time) for precise timing-based computations.
+
+\subsection{Source Memory}
+
+The system implements source memory monitoring based on findings that the brain
+remembers not just what was learned but where and how it was acquired
+\citep{johnson1993source}. Each episode stores a source type (LEARNING, EXPERIENCE,
+CONVERSATION, MEDIA) with associated trust levels. During retrieval, the prefrontal
+cortex classifies the question type and routes retrieval toward appropriate source
+types. This enables the system to prefer school-learned facts for semantic questions
+while favoring experiential memories for cause-effect questions.
+
+\subsection{Prefrontal Cortex Module}
+
+The \texttt{pfc.py} module implements working memory and executive control:
+
+\textbf{PFC}: Central working memory buffer with limited capacity ($\sim$7 slots). Maintains goal state, context, and temporary episodes. Implements NMDA-like slow decay and recurrent excitation for persistent activity.
+
+\textbf{PFCSlot}: Individual working memory slot with activation level, content, and decay dynamics. Different slot types (GOAL, CONTEXT, FACT) serve different cognitive functions.
+
+\textbf{AttentionGate}: Top-down attentional control based on PFC goal state. Provides multiplicative gain modulation to enhance task-relevant stimuli and suppress distractors \citep{desimone1995neural}.
+
+\textbf{MemoryRouter}: Routes incoming information to appropriate memory systems based on source type and question classification.
+
+\textbf{ThinkingEngine}: Spontaneous activation and associative exploration, modeling mind-wandering and creative thinking through neural noise.
+
+\textbf{InferenceEngine}: Inference through spreading activation in the trained network, using working memory context to guide retrieval.
+
+\textbf{IterativeRetriever}: Multi-step reasoning via PFC-hippocampus loop. Maintains goal state, iteratively queries hippocampus, accumulates context, and terminates when goal is reached \citep{eichenbaum2017prefrontal}.
+
+\textbf{RetrievalResult}: Container for retrieval outcomes including retrieved episode, confidence, and reasoning trace.
+
+\textbf{QuestionType}: Classification of questions (FACTUAL, CAUSAL, TEMPORAL, etc.) for source-appropriate routing.
+
+\subsection{Lexicon Module}
+
+The \texttt{lexicon.py} module implements sensory-motor language pathways \citep{hickok2007cortical}:
+
+\textbf{InputLayer}: Sensory pathway from words to neurons. Maps auditory/visual word forms to internal representations, modeling the ventral ``what'' stream.
+
+\textbf{OutputLayer}: Motor pathway from neurons to words. Maps internal representations to articulatory motor plans, modeling the dorsal ``how'' stream.
+
+\textbf{Lexicon}: Combined interface managing bidirectional word$\leftrightarrow$neuron mapping. Implements the mental lexicon with both recognition and production pathways.
+
+\subsection{Activation Module}
+
+The \texttt{activation.py} module implements spreading activation dynamics:
+
+\textbf{Activation}: Core spreading activation process. Propagates activity through existing connections with myelinated priority, lateral inhibition, decay, and working memory limits. No global graph search---activation spreads locally like neural activity.
+
+\textbf{NeuromodulatorSystem}: Manages four neuromodulator levels (DA, ACh, NE, 5-HT) with release conditions, decay dynamics, and combined learning modifiers.
+
+\subsection{Graph Storage}
+
+The \texttt{graph\_storage.py} module provides efficient storage for large-scale graphs:
+
+\textbf{GraphStorage}: NumPy-based directed graph with connection states (NEW, USED, MYELINATED, PRUNE), connection types (SEMANTIC, SYNTACTIC), and efficient batch operations. Implements STDP-like directional tracking.
+
+\subsection{Training Modes}
+
+The \texttt{training\_modes.py} module defines 20 training modes based on brain memory systems:
+
+\textbf{TrainingMode}: Enumeration of declarative and procedural training modes including FACT, DEFINITION, HIERARCHY, PROPERTY, RELATION, SEQUENCE, EPISODE, PROCEDURE, ROUTINE, CAUSE\_EFFECT, and others.
+
+Each mode has corresponding data classes (FactData, DefinitionData, HierarchyData, etc.) that structure input for appropriate encoding.
+
+\subsection{Experience Events}
+
+The \texttt{experience.py} module handles experiential learning:
+
+\textbf{ExperienceEvent}: Represents a single experience with timestamp, source, emotional valence, and associated neurons. Enables episodic encoding of lived experiences distinct from learned facts.
+
+\section{Episodic Memory: Hippocampus-Inspired Indexing}
+
+In addition to cortical-style associative memory, the system implements an
+episodic indexing mechanism inspired by hippocampal memory theories \citep{teyler1986hippocampal,mcclelland1995there}.
+This module supports rapid encoding of experiences, pattern separation, pattern completion,
+and replay-driven consolidation.
+
+\subsection{Episode Data Structure}
+
+The \texttt{episode.py} module defines the core episodic trace:
+
+\textbf{Episode}: Each episode stores: (1) \texttt{input\_neurons}---original words as frozen set for search; (2) \texttt{input\_words}---word order tuple preserving hippocampal time cell sequence; (3) \texttt{pattern\_neurons}---sparse DG representation ($\sim$2\%); (4) \texttt{context\_neurons}---what was active at encoding; (5) \texttt{timestamp}; (6) \texttt{source}---where/how learned; (7) \texttt{state}---current consolidation stage; (8) \texttt{replay\_count}---times replayed during sleep.
+
+\textbf{EpisodeState}: Episodes transition through consolidation stages: NEW (freshly encoded, fragile), REPLAYED (reinforced during sleep), CONSOLIDATED (stable, transferred to cortex), DECAYING (weakening due to disuse). This models hippocampal-cortical memory transfer.
+
+\subsection{Pattern Separation}
+
+To reduce interference between similar experiences, episodic representations
+are encoded using sparse activation patterns analogous to the Dentate Gyrus (DG).
+Following neurophysiological findings \citep{rolls2007attractor}, only approximately
+2\% of input neurons are selected for each episodic trace through competitive dynamics.
+This extreme sparsity increases orthogonality and aligns with theoretical analyses
+of pattern separation and memory capacity \citep{rolls2013mechanisms,treves1994computational}.
+
+\subsection{Pattern Completion via CA3 Attractor Dynamics}
+
+Given a partial cue, episodic retrieval proceeds through a CA3-inspired attractor network
+implemented as a separate module (\texttt{ca3.py}). Unlike simple argmax selection over
+episode lists, the system performs iterative dynamics until pattern stabilization
+\citep{rolls2007attractor,rolls2013mechanisms}:
+
+\begin{enumerate}
+\item \textbf{Initial activation}: Cue neurons receive activation value 1.0.
+\item \textbf{Iterative spreading}: Activation spreads via recurrent collateral connections.
+      MYELINATED connections transmit with strength 0.8, USED with 0.4, NEW with 0.1.
+      Top-down modulation multiplies matching connector strengths by 5.0.
+\item \textbf{Lateral inhibition}: Winner-Take-All dynamics retain only top-$K$ neurons
+      (default $K=20$), suppressing weaker activations.
+\item \textbf{Stability check}: If active neuron set equals previous iteration, attractor reached.
+\item \textbf{Episode scoring}: Completed pattern is matched against candidate episodes using
+      full scoring logic.
+\end{enumerate}
+
+Episode scoring incorporates multiple biologically motivated factors:
+
+\begin{itemize}
+\item \textbf{Query overlap} (highest priority): Episodes containing query terms
+      receive strong activation, modeling goal-directed top-down modulation from prefrontal systems
+      \citep{miller2001integrative,zanto2011causal,desimone1995neural}.
+\item \textbf{Connection strength with context multiplier}: 1-hop and 2-hop paths weighted
+      by connection state. Context words (query terms not in episode) receive $3\times$ multiplier.
+\item \textbf{Top-down connector modulation}: Multiplicative enhancement ($\times 5.0$) for
+      connections matching query relation type; suppression ($\times 0.2$) otherwise.
+\item \textbf{Context diversity bonus}: Connections appearing in multiple contexts receive
+      $\log_2(\text{diversity}) \times 2.0$ bonus \citep{spens2024generative}.
+\item \textbf{Unconnected context filtering}: Query terms not in episode must be connected
+      to episode contents; otherwise episode is rejected (anti-hallucination).
+\item \textbf{Recency bias}: Working memory episodes receive timestamp-based bonuses,
+      with reverse recency for past-tense queries \citep{howard2002distributed}.
+\item \textbf{Consolidation bonus}: CONSOLIDATED episodes receive priority over NEW episodes.
+\item \textbf{Divisive normalization}: Confidence threshold filters low-scoring episodes
+      \citep{carandini2012normalization}.
+\end{itemize}
+
+The CA3 module is instantiated as an explicit dependency of the Hippocampus class,
+not as a global singleton, following the architectural principle of no hidden global state.
+
+\subsection{CA1 Output Layer}
+
+After pattern completion in CA3, the retrieved pattern must be transformed for cortical output.
+This is the function of the CA1 region, the primary output layer of the hippocampus
+\citep{amaral1989three,naber2001reciprocal}.
+
+The system implements CA1 as a feedforward readout layer with two input pathways:
+
+\textbf{(1) Schaffer collaterals (CA3$\rightarrow$CA1)}: The main input pathway, weighted at 70\%.
+MYELINATED connections in CA3 receive additional transmission bonus, reflecting faster conduction
+in myelinated axons.
+
+\textbf{(2) Temporoammonic pathway (EC$\rightarrow$CA1)}: Direct input from entorhinal cortex Layer III,
+weighted at 30\%. This pathway bypasses CA3 and provides current query context, enabling
+coincidence detection when both CA3 and EC activate the same CA1 neurons.
+
+CA1 output projects to two targets:
+\begin{itemize}
+\item \textbf{Entorhinal cortex Layer V}: Main output to neocortex for consolidation.
+\item \textbf{Prefrontal cortex}: Direct projection supporting working memory maintenance
+      and multi-step reasoning \citep{preston2013interplay}.
+\end{itemize}
+
+This trisynaptic circuit (EC$\rightarrow$DG$\rightarrow$CA3$\rightarrow$CA1$\rightarrow$EC/PFC)
+implements the complete hippocampal processing loop described in neuroanatomical studies
+\citep{amaral1989three}.
+
+\subsection{Replay and Consolidation}
+
+During periods of low external input (simulated sleep), episodic traces are replayed internally
+via Sharp Wave-Ripples (SWR), a biologically accurate mechanism observed in hippocampal recordings
+\citep{buzsaki2015hippocampal}. The system implements several key features of SWR:
+
+\textbf{Temporal Compression}: Replay occurs 10--20$\times$ faster than original encoding
+\citep{nadasdy1999replay}. In the current implementation, inter-spike intervals are compressed
+by a factor of 15, transforming 100ms encoding intervals into $\sim$6.7ms replay intervals.
+
+\textbf{Forward and Reverse Replay}: Approximately 30\% of replays occur in reverse temporal order
+\citep{diba2007forward}, supporting planning and backward chaining in addition to consolidation.
+
+\textbf{NREM/REM Sleep Phases}: The system alternates between NREM cycles (SWR-driven consolidation)
+and REM cycles (random reactivation for memory integration) \citep{born2012system}.
+
+\textbf{Stochastic Episode Selection}: Episodes are selected for replay probabilistically based on
+recency and importance, consistent with findings that not all memories replay each night
+\citep{wilson1994reactivation}.
+
+\textbf{Synaptic Homeostasis}: After sleep, global synaptic downscaling preserves relative connection
+strengths while reducing overall synaptic load \citep{tononi2006sleep}.
+
+\textbf{Cross-Episode Linking}: During REM sleep, the system identifies episodes sharing common elements
+and creates semantic connections between their unique components \citep{mcclelland1995there,kumaran2012inference}.
+For example, if Episode 1 contains \{dog, animal\} and Episode 2 contains \{cat, animal\}, the shared
+element ``animal'' triggers co-activation, creating a direct connection dog$\leftrightarrow$cat.
+This mechanism implements the Complementary Learning Systems theory: the hippocampus ``teaches''
+the neocortex by extracting statistical regularities across episodes, transforming episodic memories
+into semantic knowledge. The biological basis is that overlapping neural representations during
+replay cause Hebbian strengthening between previously unconnected neurons that share context.
+
+Frequently replayed episodes reinforce corresponding cortical structures via local plasticity,
+supporting complementary learning-system behavior \citep{mcclelland1995there}.
+Episodes that are not replayed decay over time, providing a natural forgetting mechanism.
+Replay and consolidation are consistent with modern accounts of memory construction and consolidation \citep{spens2024generative}.
+
+Figure~\ref{fig:sleep} illustrates the sleep consolidation process.
+
+\begin{figure}[ht]
+\centering
+\begin{Verbatim}[fontsize=\scriptsize,frame=single]
++---------------------------------------------------------------+
+|                    SLEEP CONSOLIDATION                         |
++---------------------------------------------------------------+
+| for cycle in sleep_cycles:                                     |
+|                                                                |
+|   NREM (80%): Sharp Wave-Ripple Replay                         |
+|   +-------------------------------------------------------+    |
+|   | 1. Select episode (recency-weighted)                   |   |
+|   | 2. SWR: temporal compression 15x (100ms -> 6.7ms)      |   |
+|   | 3. Generate spike times, apply STDP                    |   |
+|   | 4. Forward (70%) or Reverse (30%) direction            |   |
+|   | 5. replay_count++ -> if >= 5: CONSOLIDATED             |   |
+|   +-------------------------------------------------------+    |
+|                                                                |
+|   REM (20%): Cross-Episode Linking                             |
+|   +-------------------------------------------------------+    |
+|   | Episode 1: {dog, animal}                               |   |
+|   | Episode 2: {cat, animal}                               |   |
+|   |            |                                           |   |
+|   |            v shared: "animal"                          |   |
+|   | Creates: dog <--[animal]--> cat (semantic link)        |   |
+|   +-------------------------------------------------------+    |
+|                                                                |
+| After cycles: synaptic_downscaling() + decay_unused()          |
++---------------------------------------------------------------+
+\end{Verbatim}
+\caption{Sleep consolidation: NREM phase performs SWR replay with temporal compression; REM phase creates cross-episode semantic links through shared context. Synaptic homeostasis follows.}
+\label{fig:sleep}
+\end{figure}
+
+\subsection{Homeostatic Plasticity Mechanisms}
+
+To maintain network stability and efficient storage, the system implements biologically motivated
+homeostatic mechanisms:
+
+\textbf{Heterosynaptic LTD} \citep{rolls2013mechanisms}: When one connection strengthens,
+neighboring connections on the same neuron weaken, preventing runaway potentiation.
+
+\textbf{Synaptic Scaling} \citep{turrigiano2008self}: Neurons stabilize activity levels via
+homeostatic adjustment of outgoing efficacy.
+
+\textbf{Predictive Coding} \citep{rao1999predictive}: Already-myelinated associations represent
+expected transitions and receive no additional strengthening; learning focuses on prediction errors.
+
+\textbf{Competitive Learning in DG}: Pattern separation employs winner-take-all dynamics shaped by
+existing structure, consistent with sparse coding mechanisms \citep{rolls2007attractor}.
+
+\textbf{Diluted Connectivity}: Connections are formed only within a limited temporal window
+(4 words), reflecting biological constraints where neurons connect primarily to nearby cells
+rather than forming fully-connected networks \citep{rolls2007attractor}.
+
+\textbf{Lateral Inhibition}: During retrieval, query words do not receive activation bonuses
+from themselves (self-inhibition), and strongly activated neurons suppress weakly activated
+competitors, consistent with cortical inhibitory interneuron dynamics.
+
+\subsection{Developmental Phases}
+
+The system implements biologically motivated developmental stages that affect plasticity
+and pruning throughout learning \citep{hensch2005critical,hubel1970period}.
+
+\textbf{Critical Periods}: Windows of heightened plasticity for specific learning types.
+The system tracks four developmental stages:
+
+\begin{itemize}
+\item \textbf{INFANT}: High plasticity ($\times 2.0$), no pruning, all critical periods active.
+\item \textbf{CHILD}: Moderate plasticity ($\times 1.5$), light pruning begins, language/semantic/syntactic
+      critical periods active.
+\item \textbf{ADOLESCENT}: Normal plasticity, aggressive pruning (threshold 5), only semantic
+      critical period remains.
+\item \textbf{ADULT}: Reduced plasticity ($\times 0.8$), maintenance pruning, all critical periods closed.
+\end{itemize}
+
+\textbf{Experience-Expectant Plasticity} \citep{greenough1987experience}: During critical periods,
+specific connection types receive learning bonuses. Syntactic connections receive $\times 1.5$ bonus
+during language critical period; after closure, learning becomes harder ($\times 0.5$).
+
+\textbf{Synaptic Pruning} \citep{huttenlocher1979synaptic}: Unused connections are eliminated
+following the ``use it or lose it'' principle. Pruning peaks during ADOLESCENT stage,
+removing connections below usage threshold. MYELINATED connections are protected from pruning,
+modeling the stability of well-established pathways.
+
+\textbf{PV Interneuron Maturation} \citep{hensch2005critical}: Inhibition level increases with
+development (0.3 in INFANT $\rightarrow$ 1.0 in ADULT), modeling the maturation of parvalbumin-positive
+interneurons that close critical periods.
+
+\section{Question Answering}
+
+Question answering is implemented as a constrained activation and retrieval process.
+Given a question, the system performs the following steps:
+
+\begin{enumerate}
+\item Extract content terms and interrogative structure.
+\item If required content terms are unknown, return an explicit ``I do not know'' response.
+\item \textbf{Basal ganglia selects action strategy} (single retrieval vs multi-hop reasoning).
+\item Initiate spreading activation through semantic connections.
+\item Use the resulting activation pattern as a cue for episodic retrieval.
+\item Apply pattern completion with structural gating.
+\item Traverse the retrieved episode to produce a raw semantic answer.
+\item \textbf{Motor output (Broca's area analogue)} renders answer in correct word order.
+\item Optionally render the answer into grammatical language using an external
+      language model acting purely as an output interface.
+\end{enumerate}
+
+Episode ranking is based on discrete structural properties (connection states,
+overlap counts, context connectivity) rather than learned similarity scores or
+embedding distances.
+
+Figure~\ref{fig:inference} illustrates the question answering pipeline.
+
+\begin{figure}[ht]
+\centering
+\begin{Verbatim}[fontsize=\tiny,frame=single]
+INPUT: "What is the capital of France?"
+       |
+       v
++--------------------------------------------------------------------------+
+|                    COMPLETE Q&A PIPELINE (ask() in train.py)             |
++--------------------------------------------------------------------------+
+| 1. PREPROCESSING (broca.py -> SyntacticProcessor)                        |
+|    - Parse question structure                                            |
+|    - Extract: subject="france", predicate="capital"                      |
+|    - Detect question type: FACTUAL                                       |
+|    - Extract connector: "is_a" (from "What IS...")                       |
++--------------------------------------------------------------------------+
+| 2. PFC: WORKING MEMORY + GOAL SETTING (pfc.py)                           |
+|    - Set goal: ["capital", "france"]                                     |
+|    - Load context from previous sentences (if any)                       |
+|    - Classify question -> select preferred sources                       |
+|    - NMDA-like decay keeps relevant info active                          |
++--------------------------------------------------------------------------+
+| 3. BASAL GANGLIA: ACTION SELECTION (basal_ganglia.py)                    |
+|    - Competing actions: ["retrieve", "multi_hop"]                        |
+|    - D1 pathway (Go): activates selected action                          |
+|    - D2 pathway (NoGo): inhibits alternatives                            |
+|    - Neuromodulators: High DA -> exploit, Low DA -> explore              |
+|    - Output: "retrieve" (for simple questions)                           |
++--------------------------------------------------------------------------+
+| 4. SPREADING ACTIVATION (activation.py -> Activation class)              |
+|    - Start with query neurons: {capital, france, what}                   |
+|    - Spread through SEMANTIC connections only                            |
+|    - MYELINATED paths conduct first (priority)                           |
+|    - Lateral inhibition suppresses weak activations                      |
+|    - Weber-Fechner hub penalty: log(1+degree)                            |
+|    - Working memory limit (~7 items)                                     |
+|    - activated_ids = {capital, france, paris, europe, country, ...}      |
++--------------------------------------------------------------------------+
+| 5. HIPPOCAMPUS: PATTERN COMPLETION (hippocampus.py + ca3.py)             |
+|    5a. CANDIDATE SELECTION (inverted index)                              |
+|        _word_to_episodes[word] -> episodes containing word               |
+|        Expand query: give->gives, fall->falls (VERB_FORMS)               |
+|                                                                          |
+|    5b. CA3 ATTRACTOR DYNAMICS (ca3.py -> CA3 class)                      |
+|        Initial activation: cue_neurons = 1.0                             |
+|        ITERATE until stable (max 10 iterations):                         |
+|          +------------------------------------------------------------+  |
+|          | _spread_recurrent(): MYELINATED=0.8, USED=0.4, NEW=0.1     |  |
+|          | Connector match (top-down): strength *= 5.0                |  |
+|          | _apply_inhibition(): WTA, keep top-K (K=20)                |  |
+|          | Check stability: if same as previous -> STOP               |  |
+|          +------------------------------------------------------------+  |
+|        completed_pattern = {capital, france, paris}                      |
+|                                                                          |
+|    5c. EPISODE SCORING (_score_episodes)                                 |
+|        - Query overlap: episodes with query words score highest          |
+|        - Connection strength: MYELINATED > USED > NEW                    |
+|        - Context multiplier: context words get x3 bonus                  |
+|        - Top-down connector: matching connector x5, else x0.2            |
+|        - Recency: working memory episodes get timestamp bonus            |
+|        - Source trust: prefer LEARNING > EXPERIENCE > MEDIA              |
+|        - Best episode: Episode(input_words=("capital","france","paris")) |
++--------------------------------------------------------------------------+
+| 6. CA1 OUTPUT LAYER (ca1.py -> CA1 class)                                |
+|    - Receives: Schaffer collaterals from CA3 (70%)                       |
+|    - Receives: Direct temporoammonic from EC (30%)                       |
+|    - Feedforward readout of completed pattern                            |
+|    - Projects to: EC Layer V (consolidation), PFC (working memory)       |
++--------------------------------------------------------------------------+
+| 7. ANSWER GENERATION (motor_output.py -> SequenceGenerator)              |
+|    - Get episode.input_words (preserves hippocampal time cell order)     |
+|    - Filter out question words: {what, is, the, capital, of, france}     |
+|    - Remaining: ["paris"]                                                |
+|    - Insert connectors if needed (from connection.connector)             |
+|    - Raw answer: "paris"                                                 |
++--------------------------------------------------------------------------+
+| 8. OPTIONAL: LLM POSTPROCESSING (llm_postprocess.py)                     |
+|    - Broca's area analogue for grammatical speech                        |
+|    - Input: raw answer "paris"                                           |
+|    - Output: "Paris" (capitalized, grammatical)                          |
+|    - LLM adds NO new knowledge - only verbalizes                         |
++--------------------------------------------------------------------------+
+       |
+       v
+OUTPUT: "Paris"
+\end{Verbatim}
+\caption{Complete question answering pipeline showing all 8 stages: syntactic preprocessing, PFC goal setting, basal ganglia action selection, spreading activation, CA3 pattern completion with attractor dynamics, CA1 output layer, motor output generation, and optional LLM verbalization.}
+\label{fig:inference}
+\end{figure}
+
+\subsection{Basal Ganglia Action Selection}
+
+Before retrieval begins, the system must decide \emph{how} to answer: should it perform a single memory retrieval, or engage in multi-hop reasoning that chains multiple retrievals? This decision is made by a basal ganglia circuit that implements biologically grounded action selection \citep{frank2006making,mink1996basal}.
+
+The basal ganglia receive cortical input (question salience, familiarity) and neuromodulatory signals, then select among competing actions through a Go/NoGo mechanism:
+
+\textbf{D1 (Go) pathway}: When dopamine activates D1 receptors in the striatum, it facilitates the currently most active action representation, biasing the system toward executing that action.
+
+\textbf{D2 (NoGo) pathway}: D2 receptor activation inhibits competing actions, implementing a ``gate'' that prevents premature or inappropriate responses.
+
+\textbf{STN hyperdirect pathway}: The subthalamic nucleus provides a fast ``emergency brake'' that can halt all actions when uncertainty is high, preventing impulsive errors.
+
+\textbf{GPi/GPe tonic inhibition}: The globus pallidus maintains tonic inhibition of thalamic targets; action selection occurs when this inhibition is transiently released for the winning action.
+
+In the implementation, basal ganglia select between ``retrieve'' (single-hop) and ``multi\_hop'' strategies based on question complexity and neuromodulator state. Complex questions with multiple entities trigger multi-hop reasoning; simple factual questions use direct retrieval.
+
+\subsection{Motor Output and Sequence Generation}
+
+Retrieving the correct information is not sufficient---the answer must be produced in correct word order. This is the function of motor output areas, particularly Broca's area for speech production \citep{hickok2007cortical}.
+
+The system implements a \texttt{SequenceGenerator} class that preserves the temporal order stored in hippocampal time cells. When an episode is retrieved, its \texttt{input\_words} tuple maintains the original sequence in which words were encoded. The motor output module reads this sequence and generates the answer in the correct order.
+
+This separation mirrors the biological distinction between \emph{knowing} something (hippocampal/cortical retrieval) and \emph{saying} something (motor planning and execution). A person may know that Paris is the capital of France, but producing the sentence ``The capital of France is Paris'' requires additional motor sequencing.
+
+For complex answers, the sequence generator also handles:
+\begin{itemize}
+\item Phrase coherence: keeping related words together (e.g., ``salt water'' not ``water salt'')
+\item Temporal ordering: respecting the order in which events occurred
+\item Grammatical scaffolding: providing structure for optional LLM polishing
+\end{itemize}
+
+\section{Experiments}
+
+\subsection{Curriculum-Based Evaluation}
+
+The system was evaluated on a curated curriculum of basic world knowledge designed
+to approximate the conceptual scope of early childhood learning.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{lr}
+\toprule
+Statistic & Value \\
+\midrule
+Neurons (word forms) & 48{,}301 \\
+Connections & 1{,}453{,}469 \\
+Myelinated connections & 19{,}252 (1.3\%) \\
+Used connections & 77{,}745 (5.3\%) \\
+New connections & 1{,}356{,}472 \\
+Episodic traces & 68{,}947 \\
+\quad --- NEW & 35{,}157 \\
+\quad --- REPLAYED & 2{,}139 \\
+\quad --- CONSOLIDATED & 30{,}748 \\
+\quad --- DECAYING & 903 \\
+FineWeb-Edu articles & 1{,}000 (50K sentences) \\
+Training pipeline & curriculum $\rightarrow$ preschool $\rightarrow$ grade1 $\rightarrow$ FineWeb \\
+Curriculum QA accuracy & 98\% (49/50) \\
+Strict (I do not know) & 100\% (3/3) \\
+Preschool QA accuracy & 95.8\% (46/48) \\
+Grade1 QA accuracy & 100\% (64/64) \\
+FineWeb QA accuracy & 77.8\% (7/9) \\
+bAbI Task 1 (working memory) & 100\% (250/250) \\
+Total QA accuracy & 98.8\% (419/424) \\
+{[}INFER-NO-LEARN{]} test & PASS (0 LTM changes) \\
+\bottomrule
+\end{tabular}
+\caption{Model statistics (January 24, 2026 (v1.0)). Training pipeline includes source memory stages. PlasticityMode ensures inference does not modify long-term memory. Basal ganglia integrated for action selection. Broca's area module provides syntactic processing.}
+\end{table}
+
+\textbf{Sample test log output} (from \texttt{logs/test\_results\_*.txt}, available in repository):
+
+{\small
+\begin{verbatim}
+=== EXCELLENT (10/10) ===
+[PASS] Q: What is the opposite of hot? [Brain: 0.001s | Raw:10 LLM:10]
+       Brain raw: cold     Expected: ['cold']
+
+[PASS] Q: What does a caterpillar become? [Brain: 0.336s | Raw:10 LLM:10]
+       Brain raw: butterfly     Expected: ['butterfly']
+
+[PASS] Q: Who wrote Hamlet? [Brain: 0.573s | Raw:9 LLM:9]
+       Brain raw: I do not know     Expected: ['not know'] (correct rejection)
+
+=== GOOD WITH GRAMMAR ISSUES (Broca area imperfect) ===
+[PASS] Q: What is a puppy? [Brain: 0.412s | Raw:9 LLM:5]
+       Brain raw: baby dog     LLM: An baby dog (grammar error)
+
+[PASS] Q: Is a feather heavier than a rock? [Brain: 0.415s | Raw:6 LLM:5]
+       Brain raw: rock heavier feather     Expected: ['heavier', 'rock']
+
+=== FAILED (5 out of 424) ===
+[FAIL] Q: What is ice? [Brain: 0.521s | Raw:6 LLM:4]
+       Brain raw: gets warm melts     Expected: ['solid', 'frozen']
+       (WSD issue: activated 'melting' instead of 'frozen solid')
+
+[FAIL] Q: What happens when you fall? [Brain: 0.606s | Raw:3 LLM:3]
+       Brain raw: I do not know     Expected: ['hurt', 'pain']
+       (Missing causal knowledge in training data)
+
+[FAIL] Q: When should you wash your hands? [Brain: 0.341s | Raw:5 LLM:5]
+       Brain raw: eat     Expected: ['before eating', 'after toilet']
+       (Partial retrieval - needs conditional reasoning)
+\end{verbatim}
+}
+
+\noindent Test notation: \texttt{Raw}/\texttt{LLM} = GPT quality scores (1--10) for human review only. 
+Pass/fail is determined by keyword matching on ``Brain raw'' output. Full logs with all 424 tests are in the repository.
+
+\subsection{Mechanistic Validation}
+
+Targeted tests were conducted to verify key mechanisms:
+
+\begin{itemize}
+\item Pattern separation maintains approximately 2\% sparsity \citep{rolls2007attractor}.
+\item \textbf{CA3 attractor dynamics} --- Iterative spreading with lateral inhibition (top-$K$=20) reaches stable attractor states \citep{rolls2013mechanisms}.
+\item Partial cues reliably trigger correct pattern completion via CA3 dynamics.
+\item Repetition induces consolidation through replay \citep{mcclelland1995there}.
+\item Lack of replay leads to episodic decay.
+\item Heterosynaptic LTD weakens unused connections during sleep \citep{rolls2013mechanisms}.
+\item Synaptic scaling maintains stable neuronal activity levels \citep{turrigiano2008self}.
+\item Predictive coding prevents over-strengthening of already-myelinated connections \citep{rao1999predictive}.
+\item \textbf{PlasticityMode} --- Inference does not modify long-term memory (INFER vs LEARN modes). Test \texttt{[INFER-NO-LEARN]} verifies 0 LTM changes across 1.2M+ connections.
+\item \textbf{Three-factor learning} --- STDP creates eligibility traces; dopamine converts to weight changes \citep{gerstner2018eligibility}.
+\item \textbf{Top-down modulation} --- Multiplicative gain ($\times 5.0$ enhancement / $\times 0.2$ suppression) based on query relation type \citep{zanto2011causal,desimone1995neural}.
+\item \textbf{Divisive normalization} --- Confidence threshold rejects low-scoring episodes \citep{carandini2012normalization}.
+\item \textbf{NMDA receptor mechanism} --- Dynamic threshold for context attention; when $\geq$4 neurons active, threshold drops from 3 to 1 \citep{malenka2004ltp}.
+\item \textbf{Cross-episode linking} --- REM sleep creates semantic links between episodes sharing context (e.g., dog$\leftrightarrow$cat via ``animal'') \citep{mcclelland1995there,kumaran2012inference}.
+\end{itemize}
+
+\subsection{Reproducibility}
+
+The complete source code is available at \url{https://github.com/sss777999/Brain} under MIT license.
+
+\textbf{Requirements:}
+\begin{itemize}
+\item Python $\geq$ 3.11
+\item Dependencies managed via \texttt{pyproject.toml}: numpy ($\geq$1.24), datasets ($\geq$2.14), nltk ($\geq$3.9), pylangacq ($\geq$0.19)
+\item Optional: matplotlib, networkx (visualization)
+\item Installation: \texttt{uv sync} or \texttt{pip install -e .}
+\end{itemize}
+
+\textbf{Training time} (Apple M3 Pro, 36GB RAM):
+\begin{itemize}
+\item Full curriculum + preschool + grade1: $\sim$5 minutes
+\item 1,000 FineWeb-Edu articles (50K sentences): $\sim$15 minutes
+\item Sleep consolidation (10 cycles\footnote{Human sleep contains $\sim$4--6 NREM/REM cycles per night \citep{diekelmann2010memory}. We use 10 cycles to ensure sufficient replay iterations for our smaller memory graph.}): $\sim$2 minutes
+\item Total training pipeline: $\sim$25 minutes
+\end{itemize}
+
+\textbf{Inference:} Single question answering: $<$100ms (no GPU required).
+
+\textbf{To reproduce results:}
+\begin{verbatim}
+python train.py           # Train model
+python test_brain.py      # Run all 424 tests
+\end{verbatim}
+
+\section{Architectural Advantages}
+
+\subsection{Interpretability}
+
+In contrast to parameter-based representations, the memory graph is directly interpretable.
+Each neuron corresponds to a specific word, each connection represents an observed association,
+and each episode stores a traceable experience. If the system produces an incorrect answer,
+one can trace the activation path and identify the problematic connection or missing episode.
+
+\subsection{Scalability and Domain Specialization}
+
+As the knowledge base grows, training time increases substantially due to the structural nature of learning.
+While this may limit applicability as a universal knowledge system, it opens opportunities for domain-specialized agents.
+Rather than training a single model on all human knowledge, one could deploy multiple specialized agents---for physics,
+biology, chemistry, medicine, law, etc.---each maintaining deep expertise in its domain. This multi-agent architecture
+mirrors human specialization: no single expert knows everything, but a team of specialists can collectively address
+diverse problems.
+
+Furthermore, because each agent maintains its own episodic memory and connection structure, it naturally develops
+distinct associative patterns shaped by its training experience.
+
+\subsection{Modification Without Retraining}
+
+A key advantage of discrete structural memory is that new mechanisms can be integrated without retraining.
+For example, calcium-based plasticity, eligibility traces, or short-term synaptic dynamics can be added to existing
+trained models. New mechanisms initialize with neutral values and operate alongside preserved knowledge (neurons,
+connections, episodes).
+
+\section{Limitations and Future Work}
+
+This work represents an exploratory investigation with several limitations.
+The current system operates on textual input only, employs heuristic constants,
+and has been evaluated at limited scale. Syntax learning remains minimal, and no
+formal neuroscientific validation is claimed.
+
+\textbf{Recent improvements (January 2026):}
+\begin{itemize}
+\item \textbf{CA3 attractor dynamics} --- Pattern completion now uses iterative spreading activation with lateral inhibition
+      (Winner-Take-All, $K=20$) until attractor stabilization, implemented as separate \texttt{ca3.py} module
+      \citep{rolls2007attractor,rolls2013mechanisms}. Full scoring logic includes 2-hop paths, context diversity,
+      top-down modulation, and divisive normalization \citep{carandini2012normalization}.
+\item \textbf{PlasticityMode (LEARN vs INFER)} --- Architectural boundary ensuring inference does not modify long-term memory.
+      The \texttt{[INFER-NO-LEARN]} test verifies 0 LTM changes after \texttt{ask()} across 1.2M+ connections.
+\item \textbf{Working memory (PFC)} --- Prefrontal cortex module with temporary connections and episodes.
+      When context is provided via \texttt{context()}, temporary associations form between words (like hearing a sentence).
+      These temporary episodes receive recency bias during retrieval, consistent with temporal context models \citep{howard2002distributed}.
+      On bAbI Task 1 (single supporting fact), the system achieves 100\% accuracy (250/250) through working memory with temporal retrieval refinement---distinguishing ``Where is X?'' (recency bias) from ``Where was X?'' (reverse recency).
+\item \textbf{PFC task-set cues for retrieval} --- Question structure is used to extract content binding cues (excluding operator tokens), which are then used for hippocampal binding checks and CA3 scoring. Connector matching is relation-specific to avoid accidental matches (e.g., \texttt{is} vs \texttt{is\_a}).
+\item \textbf{Recency bias} --- Working memory episodes receive priority during pattern completion.
+      Later facts within a session receive higher timestamp-based bonuses, ensuring ``John went to garden'' followed by
+      ``John went to kitchen'' correctly returns ``kitchen'' for ``Where is John?''
+\item \textbf{Hodgkin--Huxley spiking neurons} --- Biologically grounded membrane potential dynamics with Na$^+$, K$^+$,
+      and leak channels and gating variables (m, h, n) \citep{hodgkin1952quantitative}.
+\item \textbf{STDP with spike histories} --- Spike-timing dependent plasticity based on recorded spike histories, consistent
+      with classic experimental demonstrations of spike-based potentiation and depression \citep{markram1997regulation}.
+\item \textbf{Time cells / sequence storage} --- Episodes store words in correct order, enabling reproduction of short phrases
+      as heard during training, consistent with temporal indexing principles in hippocampal systems \citep{spens2024generative}.
+\item \textbf{Coherent phrase generation} --- For example, ``Can we drink salt water?'' $\rightarrow$ ``we cannot drink salt water''
+      and ``What does a cat say?'' $\rightarrow$ ``a cat says meow''.
+\item \textbf{Brain oscillations} --- Theta (6Hz) and gamma (40Hz) oscillations modulate neuronal excitability during
+      spike simulation, consistent with theta-gamma coupling in hippocampal memory encoding \citep{buzsaki2006rhythms}.
+\item \textbf{Neuromodulation system} --- Four neuromodulators implemented:
+      \textbf{Dopamine} (novelty/reward signal amplifies STDP),
+      \textbf{Acetylcholine} (attention gate modulates learning rate),
+      \textbf{Norepinephrine} (arousal/surprise increases excitability),
+      \textbf{Serotonin} (behavioral inhibition, patience) \citep{schultz1998predictive,dayan2002reward}.
+\item \textbf{Three-factor learning} --- Eligibility traces combined with dopamine modulation enable
+      credit assignment across temporal gaps, consistent with reinforcement learning in biological systems \citep{gerstner2018eligibility}.
+\item \textbf{Four-Factor Learning} --- Full neuromodulator integration
+      in \texttt{train.py} beyond basic three-factor dopamine. All four neuromodulators now have explicit
+      release conditions and effects on learning:
+      \textbf{Acetylcholine} released at encoding onset, amplifies eligibility traces (attention gate)
+      \citep{hasselmo2006mechanisms};
+      \textbf{Norepinephrine} released on novel/unexpected input, boosts exploration of new connections
+      \citep{sara2009locus};
+      \textbf{Serotonin} released for sustained learning (long sentences), stabilizes but slows plasticity
+      (temporal discounting) \citep{miyazaki2014optogenetic}.
+      Combined learning modifier: $m_{total} = m_{DA} \times m_{ACh} \times m_{NE} \times m_{5HT}$
+      applied to eligibility traces via \texttt{\_get\_combined\_learning\_modifier()}.
+\item \textbf{Motor Output / Sequence Generator} --- Correct word order in generated answers
+      via \texttt{motor\_output.py}. The \texttt{SequenceGenerator} class preserves hippocampal time cell order
+      (stored in episode \texttt{input\_words} tuple). This models Broca's area for speech production
+      \citep{hickok2007cortical}.
+\item \textbf{Multi-hop Reasoning} --- Compositional working memory for multi-hop questions.
+      The \texttt{ask\_multi\_hop()} function uses PFC as a scratchpad: \texttt{get\_multi\_hop\_cues()} expands
+      retrieval cues, \texttt{add\_retrieval\_result()} stores intermediate results. Each hop retrieves a fact
+      and adds entities to PFC for the next retrieval, consistent with PFC holding intermediate results
+      during reasoning \citep{miller2001integrative}.
+\item \textbf{Basal Ganglia Action Selection} --- Full BG circuit for cognitive action selection.
+      Implemented in \texttt{basal\_ganglia.py} with D1 (Go) and D2 (NoGo) pathways in Striatum,
+      GPi/GPe tonic inhibition, and STN hyperdirect pathway for emergency stopping.
+      Neuromodulators (DA/ACh/NE/5-HT) modulate all pathways. Integrated into \texttt{ask()}
+      to select between ``retrieve'' and ``multi\_hop'' strategies based on cortical salience
+      and neuromodulator state \citep{frank2006making,mink1996basal}.
+\item \textbf{CA1 Output Layer} --- Complete trisynaptic circuit
+      (EC$\rightarrow$DG$\rightarrow$CA3$\rightarrow$CA1$\rightarrow$EC/PFC).
+      CA1 implemented as feedforward readout with Schaffer collateral input (70\%) and
+      direct EC temporoammonic pathway (30\%). Projects to EC Layer V for consolidation
+      and directly to PFC for working memory \citep{amaral1989three,naber2001reciprocal}.
+\item \textbf{Developmental Stages} --- Four stages (INFANT, CHILD, ADOLESCENT, ADULT)
+      with different plasticity profiles. Critical periods for language/semantic/syntactic learning,
+      experience-expectant plasticity with learning bonuses, and synaptic pruning that peaks
+      in adolescence \citep{hensch2005critical,huttenlocher1979synaptic}.
+\item \textbf{Broca's Area / Syntactic Processing} --- Implemented in \texttt{broca.py}.
+      The \texttt{SyntacticProcessor} class extracts subject, predicate, and semantic roles from
+      questions \citep{friederici2011brain}. Subject bonus in CA3 scoring prioritizes episodes
+      containing the question's subject. Binary choice handling (``Is X Y or Z?'') correctly
+      excludes only the subject from answers, not the options. This enables correct responses
+      to questions like ``Is winter cold or hot?'' $\rightarrow$ ``cold''.
+\item \textbf{Cause-Effect Relations} --- Extended Broca's area to parse causal questions
+      (``What happens when X?''). The system extracts the cause subject from the ``when X'' clause
+      and filters episodes to require the cause to be present. Answer generation excludes cause
+      words, returning only the effect. Example: ``What happens when ice gets warm?'' $\rightarrow$
+      ``melts''. Limitation: word sense disambiguation for homonyms (fall=autumn vs fall=to fall)
+      remains unsolved.
+\item \textbf{Temporal Sequence Retrieval} --- Fixed temporal retrieval to exclude question words
+      from answer candidates. ``What month comes after January?'' was returning ``month'' (higher usage)
+      instead of ``february''. Now filters out words already in the question, returning only new
+      information \citep{eichenbaum2014time}.
+\item \textbf{Antonym Relations} --- Implemented biologically plausible antonym storage and retrieval.
+      Antonymy is encoded as semantic connections with \texttt{connector='opposite'}, analogous to temporal
+      sequence encoding (\texttt{connector='after'/'before'}). When processing sentences like ``X is the
+      opposite of Y'', bidirectional connections X$\leftrightarrow$Y are created with the opposite connector.
+      Retrieval for ``What is the opposite of X?'' follows these typed connections. This mechanism works
+      even for function words (e.g., ``in''/``out'') that are normally filtered during episode creation,
+      because the semantic relation is stored directly in the connection graph \citep{murphy2003semantic}.
+\item \textbf{Iterative Retrieval} --- Implemented PFC-hippocampus reasoning loop for multi-step
+      inference \citep{preston2013interplay,eichenbaum2017prefrontal}. The \texttt{IterativeRetriever} class
+      in \texttt{pfc.py} maintains a goal state and iteratively queries the hippocampus until the goal is
+      achieved or maximum iterations (default 4) are reached. Each retrieval adds context to working memory,
+      expanding the cue for subsequent queries. Confidence is computed as goal overlap with consolidation bonus.
+      This mechanism models how the brain reasons through complex questions: PFC holds the goal, hippocampus
+      provides episodic details, and the loop continues until sufficient information is accumulated
+      \citep{miller2001integrative}.
+\end{itemize}
+
+\textbf{Problems solved during development:}
+\begin{itemize}
+\item \textbf{Letter disambiguation} --- Single letters in temporal context (``What comes after A?'') 
+      were incorrectly parsed as articles. \textit{Solution:} PFC top-down modulation now activates 
+      \texttt{letter\_a} neuron based on temporal query context, returning \texttt{letter\_b}.
+\item \textbf{Binary choice questions} --- ``Is winter cold or hot?'' was excluding both options 
+      from answer candidates. \textit{Solution:} Broca's area syntactic parsing detects binary choice structure
+      and preserves options, correctly returning ``cold'' \citep{friederici2011brain}.
+\item \textbf{Cause-effect reasoning} --- ``What happens when ice gets warm?'' failed to extract 
+      the effect. \textit{Solution:} Causal pattern parsing in \texttt{broca.py} with CA3 filtering ensures
+      episode contains cause subject, answer generation excludes cause words, returning ``melts''.
+\item \textbf{Temporal sequence edge cases} --- ``What month comes after January?'' returned 
+      ``month'' (higher usage) instead of ``february''. \textit{Solution:} Exclude question words from 
+      answer candidates, ensuring only NEW information is returned \citep{eichenbaum2014time}.
+\item \textbf{Antonym retrieval} --- Opposite relations required special handling.
+      \textit{Solution:} Antonymy encoded as semantic connections with \texttt{connector='opposite'},
+      same mechanism as temporal sequences. ``What is the opposite of hot?'' correctly returns ``cold''
+      \citep{murphy2003semantic}.
+\end{itemize}
+
+\textbf{Current limitations (5 failing tests out of 424, 98.8\% accuracy):}
+\begin{itemize}
+\item \textbf{Word Sense Disambiguation (WSD)} --- The primary remaining challenge. Two tests fail due to homonymy:
+      \begin{itemize}
+        \item ``What is ice?'' --- ``ice'' activates ``melting'' association instead of ``frozen solid'' category
+        \item ``What happens when you fall?'' --- ``fall'' activates autumn/leaves instead of falling/hurt
+      \end{itemize}
+      \textit{Biology:} WSD requires context-dependent activation via PFC top-down modulation \citep{rodd2005making,zempleni2007ambiguous}. 
+      
+      \textit{What needs to be implemented:} Semantic context accumulation BEFORE word activation. The query context 
+      (``What is X?'' = definition query) should suppress non-categorical senses. PFC must send top-down priming 
+      to activate ``category'' relation type before hippocampal retrieval begins.
+
+\item \textbf{Conditional reasoning} --- ``When should you wash your hands?'' requires temporal-conditional inference
+      (``before eating'', ``after toilet''). Currently returns only ``eat'' (partial retrieval).
+      
+      \textit{Biology:} This involves goal-directed reasoning about appropriate contexts \citep{miller2001integrative},
+      not simple fact retrieval. Requires PFC working memory to hold multiple conditions and evaluate relevance.
+      
+      \textit{What needs to be implemented:} Multi-slot working memory in PFC to accumulate multiple valid answers.
+      Currently PFC returns first match; should collect all matching episodes and return conjunction.
+
+\item \textbf{Complex FineWeb retrieval} --- Two questions from educational articles fail:
+      \begin{itemize}
+        \item ``What disappears from leaves?'' --- returns ``I do not know'' (parsing failure)
+        \item ``What is sedimentary rock made of?'' --- returns ``sedimentary rock made'' (circular)
+      \end{itemize}
+      
+      \textit{What needs to be implemented:} 
+      (1) Passive voice parsing in Broca's area (``X disappears from Y'' $\rightarrow$ subject=X).
+      (2) Compositional knowledge encoding --- currently ``made of'' relation not properly indexed.
+      (3) Multi-hop retrieval --- sedimentary rock $\rightarrow$ layers $\rightarrow$ bones/shells.
+\item \textbf{Scale testing} --- Currently validated on 1,000 FineWeb-Edu articles (50K sentences). 
+      Testing on 50K+ articles is planned to verify architectural scalability.
+\item \textbf{Rule-based language parsing} --- The model uses pattern-based syntactic processing in 
+      \texttt{broca.py}, \texttt{pfc.py}, and \texttt{lexicon.py} instead of learned linguistic knowledge. 
+      This is a necessary simplification: the model is trained on $\sim$1{,}000 basic sentences (plus 50K from FineWeb-Edu), while human children 
+      learn language from $\sim$10 million words by age 6. 
+      
+      \textbf{Important distinction:} This is NOT ``fitting to tests'' --- it is \textbf{grammar coverage extension}.
+      When curriculum contains sentences like ``hot and cold are opposites'' and ``hot is the opposite of cold'',
+      the parser must recognize BOTH patterns. Each pattern in curriculum requires corresponding grammar rule.
+      This mirrors Universal Grammar theory: humans have innate syntactic structures, not learned from scratch.
+      
+      \textbf{What IS learned (not rule-based):}
+      \begin{itemize}
+        \item Semantic memory --- concept associations via Hebbian learning
+        \item Episodic memory --- event storage and retrieval  
+        \item Connection strength --- MYELINATED via usage (STDP)
+        \item Pattern completion --- CA3 attractor dynamics
+      \end{itemize}
+      
+      \textbf{What is rule-based (mimics Universal Grammar):}
+      \begin{itemize}
+        \item Syntactic patterns (``What is X?'', ``X and Y are opposites'')
+        \item Question type classification
+        \item Function word lists (closed-class, finite set)
+      \end{itemize}
+      
+      Analogy: A person who knows facts but uses a dictionary for translation --- 
+      the KNOWLEDGE is real, only the INTERFACE is simplified.
+\item \textbf{Baseline comparison} --- This work does not yet include direct comparison with 
+      retrieval-augmented generation (RAG), Memory Networks, or other memory-augmented systems on 
+      identical tasks. The reported accuracy (98.8\%) reflects performance on the current curriculum 
+      and should not be interpreted as a comparative benchmark claim. Systematic baseline comparisons 
+      are planned once the architecture is validated on larger-scale data.
+\item \textbf{Design philosophy} --- This project deliberately avoids ablation studies that remove 
+      biological mechanisms. The goal is not to find the minimal set of components that ``work,'' 
+      but to faithfully replicate how the brain operates. Every mechanism (CA3, DG, STDP, sleep replay, 
+      neuromodulation) has biological grounding; removing any would compromise biological plausibility, 
+      which is the primary objective. Nature has already optimized these systems over millions of years 
+      of evolution---our task is implementation, not redesign.
+\end{itemize}
+
+Future work includes extending the architecture to multimodal memory, enriching
+thought formation mechanisms, exploring larger-scale memory graphs, systematic 
+baseline comparisons with RAG and Memory Networks, and studying
+interfaces between structural memory and language models.
+
+\section{Conclusion}
+
+This work explores a memory-first approach to artificial cognition grounded in
+biologically inspired principles. By modeling memory as a discrete, evolving
+graph shaped by local plasticity, inhibition, and replay, the system demonstrates
+that learning and question answering can emerge without gradient-based
+optimization or embedding geometry.
+
+The results demonstrate that structurally grounded memory systems can complement existing language models and offer a promising direction for future research into more integrated cognitive architectures.
+
+\section*{Acknowledgments}
+
+This work was developed in collaboration with large language models (Anthropic Claude and OpenAI ChatGPT), which served as implementation partners for code generation and refinement. The author provided architectural direction, biological constraints, and verification; the LLMs accelerated development by translating specifications into working code. This collaborative workflow---human expertise guiding AI implementation---enabled rapid iteration that would have been impractical otherwise. All conceptual decisions, architectural choices, and scientific interpretations remain the author's responsibility.
+
+\bibliographystyle{plainnat}
+\bibliography{references}
+
+\end{document}

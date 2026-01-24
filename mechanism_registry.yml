@@ -1,0 +1,631 @@
+# CHUNK_META:
+#   Purpose: Registry of implemented neurocognitive mechanisms (code-grounded audit index)
+#   Dependencies: None (static registry)
+#   API: N/A (data file)
+
+mechanisms:
+  - id: connection_states_discrete
+    description: "Discrete synaptic connection states (NEW/USED/MYELINATED/PRUNE) replace continuous weights."
+    code:
+      - file: connection.py
+        symbol: ConnectionState
+        anchor: "ANCHOR: CONNECTION_STATE_ENUM"
+      - file: graph_storage.py
+        symbol: ConnectionState
+        anchor: "ANCHOR: CONNECTION_STATE"
+    tests:
+      - type: unit
+        file: tests/test_memory_model.py
+        symbol: TestConnection.test_connection_state_transitions
+        anchor: "ANCHOR: TEST_CONNECTION"
+    logs_metrics:
+      - "Network.get_stats() exposes counts for NEW/USED/MYELINATED/PRUNE"
+      - "train.get_statistics() exposes counts for NEW/USED/MYELINATED (GraphStorage has NEW/USED/MYELINATED/PRUNE)"
+    neuromodulators:
+      DA:
+        enters: []
+        changes: []
+      ACh:
+        enters: []
+        changes: []
+      NE:
+        enters: []
+        changes: []
+      "5HT":
+        enters: []
+        changes: []
+
+  - id: synaptic_pruning_discrete
+    description: "Connections and episodes decay toward deletion when unused; PRUNE marks synapses for removal."
+    code:
+      - file: connection.py
+        symbol: Connection.mark_unused_cycle
+        anchor: "ANCHOR: CONNECTION_CLASS"
+      - file: graph_storage.py
+        symbol: GraphStorage.prune_unused_connections
+        anchor: "ANCHOR: PRUNE_CONNECTIONS"
+      - file: episode.py
+        symbol: Episode.apply_decay
+        anchor: "ANCHOR: EPISODE_CLASS"
+    tests:
+      - type: unit
+        file: tests/test_memory_model.py
+        symbol: TestConnection.test_connection_pruning
+        anchor: "ANCHOR: TEST_CONNECTION"
+    logs_metrics:
+      - "GraphStorage.prune_unused_connections() returns {marked, deleted, kept, candidates}"
+      - "Hippocampus.get_stats() reports EpisodeState counts including DECAYING"
+    neuromodulators:
+      DA:
+        enters: []
+        changes: []
+      ACh:
+        enters: []
+        changes: []
+      NE:
+        enters: []
+        changes: []
+      "5HT":
+        enters: []
+        changes: []
+
+  - id: lateral_inhibition_myelinated_wins
+    description: "Biased competition / lateral inhibition: MYELINATED pathways suppress USED pathways during activation spread."
+    code:
+      - file: activation.py
+        symbol: "Activation.step (lateral_inhibition chunk)"
+        anchor: "CHUNK_START: lateral_inhibition"
+    tests:
+      - type: unit
+        file: tests/test_memory_model.py
+        symbol: TestActivation.test_activation_myelinated_priority
+        anchor: "ANCHOR: TEST_ACTIVATION"
+    logs_metrics:
+      - "Activation.history can be inspected for step-by-step active sets"
+    neuromodulators:
+      DA:
+        enters: []
+        changes: []
+      ACh:
+        enters: []
+        changes: []
+      NE:
+        enters: []
+        changes: []
+      "5HT":
+        enters: []
+        changes: []
+
+  - id: inhibitory_neurons_competition
+    description: "Explicit inhibitory neurons suppress candidate excitatory activations unless protected by myelinated support."
+    code:
+      - file: activation.py
+        symbol: Activation._apply_inhibition
+        anchor: "API_PRIVATE"
+      - file: neuron.py
+        symbol: NeuronType.INHIBITORY
+        anchor: "ANCHOR: NEURON_TYPE_ENUM"
+    tests:
+      - type: unit
+        file: tests/test_memory_model.py
+        symbol: TestNetwork.test_network_initialization
+        anchor: "ANCHOR: TEST_NETWORK"
+    logs_metrics:
+      - "Activation.inhibited_neurons tracks which neurons were suppressed"
+    neuromodulators:
+      DA:
+        enters: []
+        changes: []
+      ACh:
+        enters: []
+        changes: []
+      NE:
+        enters: []
+        changes: []
+      "5HT":
+        enters: []
+        changes: []
+
+  - id: working_memory_capacity_wta
+    description: "Working memory capacity limit (7±2) implemented as Winner-Take-All over supported active neurons."
+    code:
+      - file: activation.py
+        symbol: WORKING_MEMORY_LIMIT
+        anchor: "WORKING_MEMORY_LIMIT"
+      - file: activation.py
+        symbol: "Activation.step (working_memory_limit chunk)"
+        anchor: "CHUNK_START: working_memory_limit"
+    tests:
+      - type: unit
+        file: tests/test_memory_model.py
+        symbol: TestActivation.test_activation_start
+        anchor: "ANCHOR: TEST_ACTIVATION"
+    logs_metrics:
+      - "Activation.active_neurons size should never exceed WORKING_MEMORY_LIMIT after a step"
+    neuromodulators:
+      DA:
+        enters: []
+        changes: []
+      ACh:
+        enters: []
+        changes: []
+      NE:
+        enters: []
+        changes: []
+      "5HT":
+        enters: []
+        changes: []
+
+  - id: hippocampus_encode_retrieve_replay
+    description: "Hippocampus supports episodic encoding (DG), retrieval (CA3 completion), and SWR replay during sleep for consolidation."
+    code:
+      - file: hippocampus.py
+        symbol: Hippocampus.encode
+        anchor: "API_PUBLIC"
+      - file: hippocampus.py
+        symbol: Hippocampus.retrieve
+        anchor: "API_PUBLIC"
+      - file: hippocampus.py
+        symbol: Hippocampus.sleep
+        anchor: "ANCHOR: SWR_REPLAY"
+      - file: episode.py
+        symbol: EpisodeState
+        anchor: "ANCHOR: EPISODE_STATE_ENUM"
+    tests:
+      - type: unit
+        file: tests/test_memory_model.py
+        symbol: TestMemory.test_hippocampus_consolidation
+        anchor: "ANCHOR: TEST_CORTEX_HIPPOCAMPUS"
+    logs_metrics:
+      - "Hippocampus.get_stats() returns episode counts (new/replayed/consolidating/consolidated/decaying)"
+      - "train.sleep_consolidation() returns replay statistics"
+    neuromodulators:
+      DA:
+        enters: []
+        changes: []
+      ACh:
+        enters: []
+        changes: []
+      NE:
+        enters: []
+        changes: []
+      "5HT":
+        enters: []
+        changes: []
+
+  - id: neuromodulators_three_factor
+    description: "Neuromodulators (DA/ACh/NE/5HT) modulate learning rate and excitability (three-factor learning)."
+    code:
+      - file: activation.py
+        symbol: NeuromodulatorSystem
+        anchor: "ANCHOR: NEUROMODULATOR_SYSTEM"
+      - file: connection.py
+        symbol: Connection.apply_neuromodulation
+        anchor: "API_PUBLIC"
+      - file: train.py
+        symbol: _simulate_spike_pair
+        anchor: "ANCHOR: DOPAMINE_SYSTEM"
+      - file: spiking.py
+        symbol: "Synapse.apply_stdp"
+        anchor: "apply_stdp"
+    tests:
+      - type: unit
+        file: tests/test_memory_model.py
+        symbol: TestConnection.test_connection_state_transitions
+        anchor: "ANCHOR: TEST_CONNECTION"
+    logs_metrics:
+      - "brain_audit.py prints a real influence matrix (where signals enter and what variables they change)"
+    neuromodulators:
+      DA:
+        enters:
+          - "Activation.release_neuromodulator(DOPAMINE)"
+          - "train._release_dopamine() during spike-pair novelty"
+        changes:
+          - "Activation.run_spike_simulation(): scales eligibility traces via learning_rate_modifier"
+          - "train._simulate_spike_pair(): scales eligibility via dopamine modifier"
+      ACh:
+        enters:
+          - "Activation.release_neuromodulator(ACETYLCHOLINE)"
+        changes:
+          - "NeuromodulatorSystem.get_learning_rate_modifier(): gates/boosts learning"
+      NE:
+        enters:
+          - "Activation.release_neuromodulator(NOREPINEPHRINE)"
+        changes:
+          - "NeuromodulatorSystem.get_excitability_modifier(): increases excitability"
+      "5HT":
+        enters:
+          - "Activation.release_neuromodulator(SEROTONIN)"
+        changes:
+          - "NeuromodulatorSystem.get_learning_rate_modifier(): inhibits learning"
+          - "NeuromodulatorSystem.get_excitability_modifier(): inhibits excitability"
+
+  - id: stdp_spike_timing
+    description: "Spike-timing dependent plasticity (STDP) exists both in spiking synapses and in discrete connection counters." 
+    code:
+      - file: connection.py
+        symbol: Connection.apply_stdp
+        anchor: "apply_stdp"
+      - file: spiking.py
+        symbol: "Synapse.apply_stdp"
+        anchor: "apply_stdp"
+      - file: connection.py
+        symbol: "forward_usage/backward_usage (discrete counters)"
+        anchor: "ANCHOR: CONNECTION_CLASS"
+    tests:
+      - type: unit
+        file: tests/test_memory_model.py
+        symbol: TestConnection.test_connection_state_transitions
+        anchor: "ANCHOR: TEST_CONNECTION"
+    logs_metrics:
+      - "Connection.usage_count and forward_usage/backward_usage provide observable counters"
+    neuromodulators:
+      DA:
+        enters:
+          - "Activation.NeuromodulatorSystem (learning modifier)"
+          - "train._simulate_spike_pair (dopamine modifier)"
+        changes:
+          - "Eligibility trace scaling (three-factor learning)"
+      ACh:
+        enters:
+          - "Activation.NeuromodulatorSystem"
+        changes:
+          - "Learning rate modifier"
+      NE:
+        enters:
+          - "Activation.NeuromodulatorSystem"
+        changes:
+          - "Excitability modifier (indirectly affects spiking and thus timing)"
+      "5HT":
+        enters:
+          - "Activation.NeuromodulatorSystem"
+        changes:
+          - "Learning and excitability inhibition"
+
+  - id: connector_processing_is_a_vs_property
+    description: "Connector processing preserves 'a/an' as IS-A taxonomy markers and removes 'the' as semantically weak, aligning with closed-class handling."
+    code:
+      - file: train.py
+        symbol: normalize_connector
+        anchor: "ANCHOR: CONNECTOR_PROCESSING"
+    tests: []
+    logs_metrics:
+      - "train.normalize_connector() preserves 'is_a' semantics for category learning"
+    neuromodulators:
+      DA: {enters: [], changes: []}
+      ACh: {enters: [], changes: []}
+      NE: {enters: [], changes: []}
+      "5HT": {enters: [], changes: []}
+
+  - id: chunking_frequent_sequences
+    description: "Chunking merges frequently co-occurring sequences into a single cell-assembly-like representation when dominant myelinated transitions emerge."
+    code:
+      - file: train.py
+        symbol: check_and_create_chunk
+        anchor: "ANCHOR: CHUNKING"
+      - file: train.py
+        symbol: process_chunks_after_batch
+        anchor: "ANCHOR: CHUNKING"
+    tests: []
+    logs_metrics:
+      - "train.STATS['chunks_created'] tracks emergent chunk formation"
+    neuromodulators:
+      DA: {enters: [], changes: []}
+      ACh: {enters: [], changes: []}
+      NE: {enters: [], changes: []}
+      "5HT": {enters: [], changes: []}
+
+  - id: context_attention_boost_training
+    description: "Context-aware training boost (soft attention analogue) increases usage counters for context-consistent semantic transitions."
+    code:
+      - file: train.py
+        symbol: compute_attention_boost_fast
+        anchor: "ANCHOR: CONTEXT_ATTENTION"
+    tests: []
+    logs_metrics:
+      - "compute_attention_boost_fast() is applied only for SEMANTIC connections during training"
+    neuromodulators:
+      DA: {enters: [], changes: []}
+      ACh: {enters: [], changes: []}
+      NE: {enters: [], changes: []}
+      "5HT": {enters: [], changes: []}
+
+  - id: sleep_consolidation_swr_with_homeostasis
+    description: "Sleep consolidation triggers hippocampal SWR replay and couples it with heterosynaptic LTD and synaptic scaling homeostasis."
+    code:
+      - file: train.py
+        symbol: sleep_consolidation
+      - file: train.py
+        symbol: _apply_heterosynaptic_ltd
+      - file: train.py
+        symbol: _apply_synaptic_scaling
+    tests: []
+    logs_metrics:
+      - "train.sleep_consolidation() returns replay stats including ltd_applied and scaled"
+    neuromodulators:
+      DA: {enters: [], changes: []}
+      ACh: {enters: [], changes: []}
+      NE: {enters: [], changes: []}
+      "5HT": {enters: [], changes: []}
+
+  - id: weber_fechner_hub_penalty
+    description: "Weber–Fechner-like hub penalty increases activation requirements for high-degree hub neurons to prevent dominance of frequent function-like concepts."
+    code:
+      - file: activation.py
+        symbol: WEBER_FECHNER_ENABLED
+        anchor: "ANCHOR: BIOLOGICAL_CONSTANTS"
+    tests: []
+    logs_metrics:
+      - "activation.WEBER_FECHNER_ENABLED gates hub-related min_sources_required adjustments"
+    neuromodulators:
+      DA: {enters: [], changes: []}
+      ACh: {enters: [], changes: []}
+      NE: {enters: [], changes: []}
+      "5HT": {enters: [], changes: []}
+
+  - id: basal_ganglia_thalamus_gating
+    description: "Basal ganglia / thalamus action gating stub with explicit neuromodulator modulation points and an inspectable decision trace." 
+    code:
+      - file: basal_ganglia.py
+        symbol: BasalGangliaThalamusGating.select_action
+        anchor: "ANCHOR: BG_SELECT_ACTION"
+      - file: basal_ganglia.py
+        symbol: ActionSelectionDecision
+        anchor: "ANCHOR: BG_DECISION_DATACLASS"
+    tests: []
+    logs_metrics:
+      - "brain_audit.py calls select_action() and prints the decision trace (scores, threshold, selected_action)."
+    neuromodulators:
+      DA:
+        enters:
+          - "BasalGangliaThalamusGating.select_action(neuromodulators={\"DA\": ...})"
+        changes:
+          - "Lowers effective Go/NoGo threshold (facilitates Go gating)."
+      ACh:
+        enters:
+          - "BasalGangliaThalamusGating.select_action(neuromodulators={\"ACh\": ...})"
+        changes:
+          - "Sharpens candidate score selectivity (attention-like competition sharpening)."
+      NE:
+        enters:
+          - "BasalGangliaThalamusGating.select_action(neuromodulators={\"NE\": ...})"
+        changes:
+          - "Slightly lowers threshold and increases scores (arousal gain)."
+      "5HT":
+        enters:
+          - "BasalGangliaThalamusGating.select_action(neuromodulators={\"5HT\": ...})"
+        changes:
+          - "Raises effective Go/NoGo threshold (behavioral inhibition / NoGo bias)."
+
+  - id: top_down_modulation_query_connector
+    description: "Top-down modulation: question-derived query_connector biases semantic spreading activation and hippocampal retrieval (biased competition / PFC task set)."
+    code:
+      - file: train.py
+        symbol: ask
+        anchor: "ANCHOR: QA_SYSTEM"
+      - file: activation.py
+        symbol: Activation
+        anchor: "ANCHOR: ACTIVATION_CLASS"
+      - file: activation.py
+        symbol: "Activation.step (lateral_inhibition chunk)"
+        anchor: "CHUNK_START: lateral_inhibition"
+      - file: hippocampus.py
+        symbol: Hippocampus.pattern_complete
+        anchor: "ANCHOR: CA3_PATTERN_COMPLETION"
+    tests: []
+    logs_metrics:
+      - "train.ask() derives query_connector and passes connector_filter into Activation"
+      - "Hippocampus.pattern_complete() applies connector-based multiplicative modulation during scoring"
+    neuromodulators:
+      DA: {enters: [], changes: []}
+      ACh: {enters: [], changes: []}
+      NE: {enters: [], changes: []}
+      "5HT": {enters: [], changes: []}
+
+  - id: temporal_connectors_after_before
+    description: "Temporal connectors (after/before) act as task constraints (hippocampal time-cell compatible retrieval) and are carried as connectors through activation/retrieval."
+    code:
+      - file: train.py
+        symbol: ask
+        anchor: "ANCHOR: QA_SYSTEM"
+      - file: hippocampus.py
+        symbol: Hippocampus.pattern_complete
+        anchor: "ANCHOR: CA3_PATTERN_COMPLETION"
+      - file: connection.py
+        symbol: Connection.has_connector
+        anchor: "API_PUBLIC"
+    tests: []
+    logs_metrics:
+      - "query_connector can be set to 'after'/'before' and passed into hippocampal retrieval"
+    neuromodulators:
+      DA: {enters: [], changes: []}
+      ACh: {enters: [], changes: []}
+      NE: {enters: [], changes: []}
+      "5HT": {enters: [], changes: []}
+
+  - id: hippocampal_time_cells_input_words
+    description: "Hippocampal time-cells analogue: Episode.input_words preserves word order for more biologically plausible sequence recall and answer generation."
+    code:
+      - file: episode.py
+        symbol: Episode
+        anchor: "ANCHOR: EPISODE_CLASS"
+      - file: hippocampus.py
+        symbol: Hippocampus.encode
+        anchor: "API_PUBLIC"
+      - file: train.py
+        symbol: generate_answer_from_episode
+        anchor: "ANCHOR: QA_SYSTEM"
+    tests: []
+    logs_metrics:
+      - "Episode.input_words is used as an ordered fallback during answer generation"
+    neuromodulators:
+      DA: {enters: [], changes: []}
+      ACh: {enters: [], changes: []}
+      NE: {enters: [], changes: []}
+      "5HT": {enters: [], changes: []}
+
+  - id: activation_decay_with_query_protection
+    description: "Activation decay prevents runaway spread while protecting initial query neurons from decay (stimulus-driven maintenance)."
+    code:
+      - file: activation.py
+        symbol: "Activation.step (decay chunk)"
+        anchor: "CHUNK_START: decay"
+      - file: activation.py
+        symbol: Activation.start
+        anchor: "API_PUBLIC"
+    tests: []
+    logs_metrics:
+      - "Activation._step_count and _initial_neurons enforce decay while keeping query neurons active"
+    neuromodulators:
+      DA: {enters: [], changes: []}
+      ACh: {enters: [], changes: []}
+      NE: {enters: [], changes: []}
+      "5HT": {enters: [], changes: []}
+
+  - id: function_word_connectors_and_prefix_matching
+    description: "Function-word connectors are stored on connections and support prefix matching (e.g., 'with' matches 'with_my') for syntactic/relational retrieval."
+    code:
+      - file: connection.py
+        symbol: Connection
+        anchor: "ANCHOR: CONNECTION_CLASS"
+      - file: connection.py
+        symbol: Connection.has_connector
+        anchor: "API_PUBLIC"
+      - file: train.py
+        symbol: normalize_connector
+        anchor: "ANCHOR: CONNECTOR_PROCESSING"
+    tests: []
+    logs_metrics:
+      - "Connection.connectors stores multiple observed connectors with counts"
+      - "Connection.has_connector() supports prefix match for connector families"
+    neuromodulators:
+      DA: {enters: [], changes: []}
+      ACh: {enters: [], changes: []}
+      NE: {enters: [], changes: []}
+      "5HT": {enters: [], changes: []}
+
+  - id: context_diversity_spens_burgess
+    description: "Context diversity: connections track how many distinct episodes/contexts they appear in (context_diversity), which biases retrieval toward broadly supported semantics."
+    code:
+      - file: connection.py
+        symbol: Connection.mark_context
+        anchor: "ANCHOR: CONNECTION_CLASS"
+      - file: train.py
+        symbol: train_sentence
+        anchor: "ANCHOR: EPISODIC_MEMORY"
+      - file: hippocampus.py
+        symbol: Hippocampus.pattern_complete
+        anchor: "ANCHOR: CA3_PATTERN_COMPLETION"
+    tests: []
+    logs_metrics:
+      - "Connection.context_diversity increments only when a new episode_hash is seen"
+      - "Hippocampus.pattern_complete() can apply a diversity bonus during retrieval scoring"
+    neuromodulators:
+      DA: {enters: [], changes: []}
+      ACh: {enters: [], changes: []}
+      NE: {enters: [], changes: []}
+      "5HT": {enters: [], changes: []}
+
+  - id: anti_hallucination_context_word_connectivity
+    description: "Anti-hallucination gating: hippocampal retrieval rejects episodes where content context words from the query are not connected to the episode (connectivity check)."
+    code:
+      - file: hippocampus.py
+        symbol: Hippocampus.pattern_complete
+        anchor: "ANCHOR: CA3_PATTERN_COMPLETION"
+    tests: []
+    logs_metrics:
+      - "pattern_complete() computes unconnected_context and skips episodes as irrelevant when it is non-empty"
+    neuromodulators:
+      DA: {enters: [], changes: []}
+      ACh: {enters: [], changes: []}
+      NE: {enters: [], changes: []}
+      "5HT": {enters: [], changes: []}
+
+  - id: interrogative_words_question_semantics
+    description: "Interrogative words are treated as a special semantic class: they participate in activation for question type but are excluded from certain retrieval bonuses."
+    code:
+      - file: train.py
+        symbol: is_interrogative_word
+        anchor: "ANCHOR: INTERROGATIVE_WORDS"
+      - file: hippocampus.py
+        symbol: Hippocampus.pattern_complete
+        anchor: "ANCHOR: CA3_PATTERN_COMPLETION"
+    tests: []
+    logs_metrics:
+      - "train.ask() optionally includes interrogatives in query_neurons without requiring them"
+      - "hippocampus pattern completion excludes interrogatives from context-word bonuses"
+    neuromodulators:
+      DA: {enters: [], changes: []}
+      ACh: {enters: [], changes: []}
+      NE: {enters: [], changes: []}
+      "5HT": {enters: [], changes: []}
+
+  - id: closed_class_function_words_handling
+    description: "Closed-class function words are handled as structural/syntactic elements and as connectors, rather than as semantic concepts."
+    code:
+      - file: train.py
+        symbol: is_function_word
+        anchor: "ANCHOR: FUNCTION_WORDS"
+      - file: train.py
+        symbol: normalize_connector
+        anchor: "ANCHOR: CONNECTOR_PROCESSING"
+      - file: connection.py
+        symbol: Connection.mark_used_forward
+        anchor: "API_PUBLIC"
+    tests: []
+    logs_metrics:
+      - "Training assigns ConnectionType.SYNTACTIC when either token is a function word"
+      - "Semantic connections can carry connector labels derived from intervening function words"
+    neuromodulators:
+      DA: {enters: [], changes: []}
+      ACh: {enters: [], changes: []}
+      NE: {enters: [], changes: []}
+      "5HT": {enters: [], changes: []}
+
+  - id: modifier_words_negation_chunking
+    description: "Modifier words (e.g., negation) modulate the meaning of the following word; training can form chunked assemblies for frequent modifier+content patterns."
+    code:
+      - file: train.py
+        symbol: is_modifier_word
+        anchor: "ANCHOR: MODIFIER_WORDS"
+      - file: train.py
+        symbol: check_and_create_chunk
+        anchor: "ANCHOR: CHUNKING"
+    tests: []
+    logs_metrics:
+      - "Modifier words are detected and can trigger chunk creation for stable assemblies"
+    neuromodulators:
+      DA: {enters: [], changes: []}
+      ACh: {enters: [], changes: []}
+      NE: {enters: [], changes: []}
+      "5HT": {enters: [], changes: []}
+
+  - id: dentate_gyrus_pattern_separation_wta
+    description: "Dentate gyrus pattern separation uses winner-take-all sparsification to reduce interference between similar episodes."
+    code:
+      - file: hippocampus.py
+        symbol: Hippocampus.pattern_separate
+        anchor: "ANCHOR: DG_PATTERN_SEPARATION"
+    tests: []
+    logs_metrics:
+      - "Hippocampus.encode() calls pattern_separate() before creating an Episode"
+    neuromodulators:
+      DA: {enters: [], changes: []}
+      ACh: {enters: [], changes: []}
+      NE: {enters: [], changes: []}
+      "5HT": {enters: [], changes: []}
+
+  - id: hippocampus_inverted_index_fast_candidate_search
+    description: "Hippocampal inverted index maps words to candidate episodes to avoid scanning all episodes during retrieval (associative parallelism analogue)."
+    code:
+      - file: hippocampus.py
+        symbol: Hippocampus
+        anchor: "ANCHOR: INVERTED_INDEX"
+    tests: []
+    logs_metrics:
+      - "Hippocampus._word_to_episodes narrows candidate_indices before scoring"
+    neuromodulators:
+      DA: {enters: [], changes: []}
+      ACh: {enters: [], changes: []}
+      NE: {enters: [], changes: []}
+      "5HT": {enters: [], changes: []}
