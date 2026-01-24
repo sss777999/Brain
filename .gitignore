@@ -1,0 +1,78 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+.venv/
+venv/
+ENV/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+
+# Trained models (large files)
+# Uncomment if you want to exclude from git:
+graph_*.npz
+graph_*.pkl
+# Trained models (large binary files)
+*.npz
+*.pkl
+
+# Or use Git LFS for these files
+
+# Testing
+.pytest_cache/
+.coverage
+
+# Logs
+*.log
+
+# LaTeX auxiliary files
+*.aux
+*.bbl
+*.blg
+*.out
+*.toc
+*.lof
+*.lot
+*.fls
+*.fdb_latexmk
+*.synctex.gz
+
+# Environment variables (API keys)
+.env
+
+# Large datasets
+*.tar.bz2
+*.tar.gz
+*.tar
+*.zip
+*.csv
+sentences.*
+
+data/fineweb_edu_sample.json
+
+# LaTeX build artifacts (keep source files)
+# docs/arxiv.tex, docs/arxiv.pdf, docs/references.bib are tracked
