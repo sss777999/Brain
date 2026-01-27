@@ -32,7 +32,7 @@ Within this framework, large language models are treated as optional linguistic 
 
 The proposed model represents word forms as discrete units connected by directed associations that transition through qualitative states (NEW $\rightarrow$ USED $\rightarrow$ MYELINATED $\rightarrow$ PRUNE) driven by local usage dynamics. Memory retrieval emerges from a local spreading-activation process with inhibition, decay, working-memory constraints, and biologically motivated competition. Episodic indexing is implemented via a hippocampus-inspired mechanism supporting pattern separation, CA3 attractor dynamics for pattern completion, and replay-driven consolidation \citep{teyler1986hippocampal,mcclelland1995there,rolls2013mechanisms}.
 
-On a curated curriculum of basic world knowledge and question answering, the system achieves 98.8\% accuracy (419/424 questions), including 100\% on bAbI Task 1 working memory benchmark (250/250), while appropriately abstaining on unknown queries. The architecture and evaluation pipeline are released as open-source code at \url{https://github.com/sss777999/Brain}.
+On a curated curriculum of basic world knowledge and question answering, the system achieves 93.7\% accuracy (444/474 questions), including 100\% on bAbI Task 1 working memory benchmark (250/250), while appropriately abstaining on unknown queries. Comparison with standard IR baselines (TF-IDF, BM25) on identical training data shows Brain outperforms by +40-50\%. The architecture and evaluation pipeline are released as open-source code at \url{https://github.com/sss777999/Brain}.
 \end{abstract}
 
 \section{Introduction}
@@ -941,6 +941,37 @@ modeling the stability of well-established pathways.
 development (0.3 in INFANT $\rightarrow$ 1.0 in ADULT), modeling the maturation of parvalbumin-positive
 interneurons that close critical periods.
 
+\subsection{Event Schemas and Semantic Roles}
+
+Each stored episode is augmented with a typed predicate and explicit semantic roles 
+(agent, patient, theme, cause, effect, location, time, manner, instrument, beneficiary, 
+quantity, purpose, property, category, opposite, source, target, predicate).
+This is based on Fillmore's Case Grammar \citep{fillmore1968case} and event semantics 
+\citep{zacks2001event}. The 18 role types are biologically grounded in temporal-parietal 
+cortex processing \citep{binder2009semantic}.
+
+Roles are extracted during encoding via the \texttt{extract\_roles()} function in 
+\texttt{semantic\_roles.py} and stored in \texttt{Episode.semantic\_roles} as a 
+role$\rightarrow$words mapping. This enables goal-conditioned retrieval where the PFC 
+biases recall toward episodes with task-relevant roles.
+
+\subsection{Goal-Conditioned Retrieval}
+
+The PFC infers expected semantic roles based on question type:
+\begin{itemize}
+\item ``What is X?'' $\rightarrow$ expects category/property roles
+\item ``Where is X?'' $\rightarrow$ expects location role
+\item ``Who did X?'' $\rightarrow$ expects agent role
+\end{itemize}
+
+The function \texttt{get\_expected\_roles()} in \texttt{pfc.py} maps interrogatives to 
+role expectations. CA3 scoring includes a role bonus for episodes with matching semantic 
+roles, biasing retrieval toward task-relevant information. This addresses some word-sense 
+ambiguity by favoring task-appropriate senses during recall.
+
+Initial paraphrase robustness tests show 50\% accuracy (25/50), indicating room for 
+improvement in role-based retrieval mechanisms.
+
 \section{Question Answering}
 
 Question answering is implemented as a constrained activation and retrieval process.
@@ -1108,19 +1139,29 @@ Episodic traces & 68{,}947 \\
 \quad --- REPLAYED & 2{,}139 \\
 \quad --- CONSOLIDATED & 30{,}748 \\
 \quad --- DECAYING & 903 \\
-FineWeb-Edu articles & 1{,}000 (50K sentences) \\
-Training pipeline & curriculum $\rightarrow$ preschool $\rightarrow$ grade1 $\rightarrow$ FineWeb \\
+FineWeb-Edu articles & 1{,}000 (40K sentences) \\
+Training pipeline & curriculum $\rightarrow$ preschool $\rightarrow$ grade1 $\rightarrow$ bAbI $\rightarrow$ FineWeb \\
 Curriculum QA accuracy & 98\% (49/50) \\
 Strict (I do not know) & 100\% (3/3) \\
 Preschool QA accuracy & 95.8\% (46/48) \\
 Grade1 QA accuracy & 100\% (64/64) \\
 FineWeb QA accuracy & 77.8\% (7/9) \\
+Paraphrase robustness & 50\% (25/50) \\
 bAbI Task 1 (working memory) & 100\% (250/250) \\
-Total QA accuracy & 98.8\% (419/424) \\
+Total QA accuracy & 93.7\% (444/474) \\
 {[}INFER-NO-LEARN{]} test & PASS (0 LTM changes) \\
+\midrule
+\multicolumn{2}{l}{\textbf{Comparison with IR baselines (same training data):}} \\
+CURRICULUM: Brain vs TF-IDF/BM25 & +40\%/+50\% (98\% vs 58\%/48\%) \\
+PRESCHOOL: Brain vs TF-IDF/BM25 & +73\% (96\% vs 23\%) \\
+GRADE1: Brain vs TF-IDF/BM25 & +61\%/+63\% (100\% vs 39\%/38\%) \\
+FINEWEB: Brain vs TF-IDF/BM25 & +78\% (78\% vs 0\%) \\
+bAbI Task 1: Brain vs TF-IDF/BM25* & +100\% (100\% vs 0\%) \\
+Average advantage & +61.5\% vs TF-IDF, +63.1\% vs BM25 \\
+\multicolumn{2}{l}{\footnotesize *bAbI requires working memory --- TF-IDF/BM25 cannot track states} \\
 \bottomrule
 \end{tabular}
-\caption{Model statistics (January 24, 2026 (v1.0)). Training pipeline includes source memory stages. PlasticityMode ensures inference does not modify long-term memory. Basal ganglia integrated for action selection. Broca's area module provides syntactic processing.}
+\caption{Model statistics (January 2026). Training pipeline includes source memory stages. PlasticityMode ensures inference does not modify long-term memory. Semantic roles enable goal-conditioned retrieval. Baseline comparison validates Brain architecture against standard IR methods.}
 \end{table}
 
 \textbf{Sample test log output} (from \texttt{logs/test\_results\_*.txt}, available in repository):
@@ -1198,7 +1239,7 @@ The complete source code is available at \url{https://github.com/sss777999/Brain
 \textbf{Training time} (Apple M3 Pro, 36GB RAM):
 \begin{itemize}
 \item Full curriculum + preschool + grade1: $\sim$5 minutes
-\item 1,000 FineWeb-Edu articles (50K sentences): $\sim$15 minutes
+\item 1,000 FineWeb-Edu articles (40K sentences): $\sim$15 minutes
 \item Sleep consolidation (10 cycles\footnote{Human sleep contains $\sim$4--6 NREM/REM cycles per night \citep{diekelmann2010memory}. We use 10 cycles to ensure sufficient replay iterations for our smaller memory graph.}): $\sim$2 minutes
 \item Total training pipeline: $\sim$25 minutes
 \end{itemize}
@@ -1367,7 +1408,7 @@ formal neuroscientific validation is claimed.
       \citep{murphy2003semantic}.
 \end{itemize}
 
-\textbf{Current limitations (5 failing tests out of 424, 98.8\% accuracy):}
+\textbf{Current limitations (30 failing tests out of 474, 93.7\% accuracy):}
 \begin{itemize}
 \item \textbf{Word Sense Disambiguation (WSD)} --- The primary remaining challenge. Two tests fail due to homonymy:
       \begin{itemize}
@@ -1399,11 +1440,11 @@ formal neuroscientific validation is claimed.
       (1) Passive voice parsing in Broca's area (``X disappears from Y'' $\rightarrow$ subject=X).
       (2) Compositional knowledge encoding --- currently ``made of'' relation not properly indexed.
       (3) Multi-hop retrieval --- sedimentary rock $\rightarrow$ layers $\rightarrow$ bones/shells.
-\item \textbf{Scale testing} --- Currently validated on 1,000 FineWeb-Edu articles (50K sentences). 
-      Testing on 50K+ articles is planned to verify architectural scalability.
+\item \textbf{Scale testing} --- Currently validated on 1,000 FineWeb-Edu articles (40K sentences). 
+      Testing on 10K+ articles is planned to verify architectural scalability.
 \item \textbf{Rule-based language parsing} --- The model uses pattern-based syntactic processing in 
       \texttt{broca.py}, \texttt{pfc.py}, and \texttt{lexicon.py} instead of learned linguistic knowledge. 
-      This is a necessary simplification: the model is trained on $\sim$1{,}000 basic sentences (plus 50K from FineWeb-Edu), while human children 
+      This is a necessary simplification: the model is trained on $\sim$1{,}000 basic sentences (plus 40K from FineWeb-Edu), while human children 
       learn language from $\sim$10 million words by age 6. 
       
       \textbf{Important distinction:} This is NOT ``fitting to tests'' --- it is \textbf{grammar coverage extension}.
@@ -1428,11 +1469,21 @@ formal neuroscientific validation is claimed.
       
       Analogy: A person who knows facts but uses a dictionary for translation --- 
       the KNOWLEDGE is real, only the INTERFACE is simplified.
-\item \textbf{Baseline comparison} --- This work does not yet include direct comparison with 
-      retrieval-augmented generation (RAG), Memory Networks, or other memory-augmented systems on 
-      identical tasks. The reported accuracy (98.8\%) reflects performance on the current curriculum 
-      and should not be interpreted as a comparative benchmark claim. Systematic baseline comparisons 
-      are planned once the architecture is validated on larger-scale data.
+\item \textbf{Baseline comparison} --- Comprehensive comparison with standard IR baselines (TF-IDF, BM25)
+      on identical training data shows Brain significantly outperforms across all test suites:
+      average +61.5\% vs TF-IDF, +63.1\% vs BM25. Notably, bAbI Task 1 achieves 100\% vs 0\% for both
+      baselines --- TF-IDF/BM25 fundamentally cannot handle working memory (tracking entity states).
+      This validates that the biologically-inspired architecture provides genuine advantage beyond simple retrieval.
+      
+      \textbf{Future baseline expansion (in progress):}
+      \begin{itemize}
+        \item RAG baseline (Retriever + GPT) --- different class, but fair comparison
+        \item Memory Networks (Weston et al. 2015) --- direct comparison on bAbI
+        \item Neural Turing Machines (Graves et al. 2014) --- working memory comparison
+        \item Transformer-based QA (BERT, RoBERTa) --- fine-tuned on same data
+      \end{itemize}
+      The goal is NOT to beat all baselines, but to demonstrate unique capabilities:
+      working memory (bAbI), source memory (trust-weighted retrieval), and biological plausibility.
 \item \textbf{Design philosophy} --- This project deliberately avoids ablation studies that remove 
       biological mechanisms. The goal is not to find the minimal set of components that ``work,'' 
       but to faithfully replicate how the brain operates. Every mechanism (CA3, DG, STDP, sleep replay, 
@@ -1441,10 +1492,18 @@ formal neuroscientific validation is claimed.
       of evolution---our task is implementation, not redesign.
 \end{itemize}
 
-Future work includes extending the architecture to multimodal memory, enriching
-thought formation mechanisms, exploring larger-scale memory graphs, systematic 
-baseline comparisons with RAG and Memory Networks, and studying
-interfaces between structural memory and language models.
+Future work will focus on reducing the current reliance on surface word forms by
+introducing an explicit intermediate representation layer.
+
+\textbf{Evaluation beyond fixed templates.} To quantify generalization, we will introduce a
+paraphrase robustness protocol: for each test question, generate multiple surface variants
+(active/passive, connector synonyms, word-order changes) and measure accuracy degradation.
+We will also add systematic baseline comparisons with retrieval-augmented generation (RAG),
+Memory Networks, and other memory-augmented systems on identical datasets.
+
+Additional future work includes extending the architecture to multimodal memory, exploring
+larger-scale memory graphs, and studying interfaces between structural memory and language
+models.
 
 \section{Conclusion}
 

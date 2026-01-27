@@ -1476,10 +1476,17 @@ def train_sentence_with_context(sentence: str, source: str = "unknown"):
         content_neuron_ids = {n.id for n in context_neurons}
         # BIOLOGY (Time Cells): preserve word order for correct generation
         content_words_ordered = tuple(w for _, w, is_closed in word_sequence if not is_closed)
+        
+        # BIOLOGY (Event Structure, Zacks & Tversky 2001):
+        # Extract semantic roles for role-based retrieval
+        from semantic_roles import extract_roles
+        roles = extract_roles(list(content_words_ordered))
+        
         # Pass WORD_TO_NEURON for Competitive Learning in DG
         episode = HIPPOCAMPUS.encode(content_neuron_ids, source=source, 
                                       word_to_neuron=WORD_TO_NEURON,
-                                      input_words=content_words_ordered)
+                                      input_words=content_words_ordered,
+                                      semantic_roles=roles)
         STATS["episodes_encoded"] += 1
         
         # Check consolidation
@@ -2446,6 +2453,12 @@ def save_model_numpy(filepath: str = "graph"):
     episodes_data = []
     state_to_int = {"NEW": 0, "REPLAYED": 1, "CONSOLIDATING": 2, "CONSOLIDATED": 3, "DECAYING": 4}
     for ep in HIPPOCAMPUS.episodes:
+        # Convert semantic_roles FrozenSets to lists for serialization
+        roles_serialized = {}
+        if hasattr(ep, 'semantic_roles') and ep.semantic_roles:
+            for role, words in ep.semantic_roles.items():
+                roles_serialized[role] = list(words)
+        
         episodes_data.append({
             "input_neurons": list(ep.input_neurons),
             # BIOLOGY (Hippocampal Time Cells): preserve word order
@@ -2456,6 +2469,8 @@ def save_model_numpy(filepath: str = "graph"):
             "replay_count": ep.replay_count,
             "timestamp": ep.timestamp,
             "source": ep.source,
+            # BIOLOGY (Event Structure): semantic roles for goal-conditioned retrieval
+            "semantic_roles": roles_serialized,
         })
     
     with open(f"{base}_episodes.pkl", 'wb') as f:
@@ -2572,13 +2587,22 @@ def load_model_numpy(filepath: str = "graph"):
             # Otherwise, fall back to input_neurons (old format)
             input_words = ep_data.get("input_words", ep_data["input_neurons"])
             
+            # Restore semantic roles (convert lists back to sets)
+            semantic_roles = None
+            if "semantic_roles" in ep_data and ep_data["semantic_roles"]:
+                semantic_roles = {
+                    role: set(words) 
+                    for role, words in ep_data["semantic_roles"].items()
+                }
+            
             # Create episode directly
             ep = Episode(
                 input_neurons=input_words,  # Pass as a list to preserve order
                 pattern_neurons=frozenset(ep_data["pattern_neurons"]),
                 context_neurons=set(ep_data["context_neurons"]),
                 timestamp=ep_data["timestamp"],
-                source=ep_data.get("source", "loaded")
+                source=ep_data.get("source", "loaded"),
+                semantic_roles=semantic_roles
             )
             ep.state = int_to_state[ep_data["state"]]
             ep.replay_count = ep_data["replay_count"]

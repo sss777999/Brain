@@ -163,79 +163,79 @@ If direct retrieval fails (no episode found), the system uses `IterativeRetrieve
 ╔══════════════════════════════════════════════════════════════════════════════╗
 ║              COMPLETE TRAINING FLOW (train_sentence_with_context)            ║
 ╠══════════════════════════════════════════════════════════════════════════════╣
-║                                                                               ║
+║                                                                              ║
 ║  INPUT: "The capital of France is Paris"                                     ║
-║         │                                                                     ║
-║         ▼                                                                     ║
+║         │                                                                    ║
+║         ▼                                                                    ║
 ║  ┌─────────────────────────────────────────────────────────────────────────┐ ║
-║  │ 1. TOKENIZATION                                                          │ ║
+║  │ 1. TOKENIZATION                                                         │ ║
 ║  │    words = ["the", "capital", "of", "france", "is", "paris"]            │ ║
 ║  │    content = [capital, france, paris]                                   │ ║
 ║  │    function = [the, of, is]                                             │ ║
 ║  └─────────────────────────────────────────────────────────────────────────┘ ║
-║         │                                                                     ║
-║         ▼                                                                     ║
+║         │                                                                    ║
+║         ▼                                                                    ║
 ║  ┌─────────────────────────────────────────────────────────────────────────┐ ║
-║  │ 2. NEURON CREATION (lexicon.py → Lexicon)                                │ ║
+║  │ 2. NEURON CREATION (lexicon.py → Lexicon)                               │ ║
 ║  │    For each new word: WORD_TO_NEURON[word] = Neuron(word)               │ ║
 ║  │    Neuron has: spike_history, connections_in, connections_out           │ ║
 ║  └─────────────────────────────────────────────────────────────────────────┘ ║
-║         │                                                                     ║
-║         ▼                                                                     ║
+║         │                                                                    ║
+║         ▼                                                                    ║
 ║  ┌─────────────────────────────────────────────────────────────────────────┐ ║
-║  │ 3. CONNECTION CREATION (connection.py → Connection)                      │ ║
+║  │ 3. CONNECTION CREATION (connection.py → Connection)                     │ ║
 ║  │    Hebbian window = 4 words (diluted connectivity)                      │ ║
-║  │                                                                          │ ║
+║  │                                                                         │ ║
 ║  │    For each pair (word_i, word_j) where j > i and j-i <= 4:             │ ║
 ║  │      ┌─────────────────────────────────────────────────────────────┐    │ ║
-║  │      │ CONNECTION TYPE (Dual Stream):                               │    │ ║
-║  │      │ • Both content words → SEMANTIC (ventral stream)             │    │ ║
-║  │      │   capital --[of]--> france --[is]--> paris                   │    │ ║
-║  │      │ • One function word → SYNTACTIC (dorsal stream)              │    │ ║
-║  │      │   capital --> of, france --> is                              │    │ ║
-║  │      │ • Both function words → SKIP                                 │    │ ║
+║  │      │ CONNECTION TYPE (Dual Stream):                               │   │ ║
+║  │      │ • Both content words → SEMANTIC (ventral stream)             │   │ ║
+║  │      │   capital --[of]--> france --[is]--> paris                   │   │ ║
+║  │      │ • One function word → SYNTACTIC (dorsal stream)              │   │ ║
+║  │      │   capital --> of, france --> is                              │   │ ║
+║  │      │ • Both function words → SKIP                                 │   │ ║
 ║  │      └─────────────────────────────────────────────────────────────┘    │ ║
-║  │                                                                          │ ║
+║  │                                                                         │ ║
 ║  │    Connection states: NEW --(5)--> USED --(50)--> MYELINATED            │ ║
 ║  └─────────────────────────────────────────────────────────────────────────┘ ║
-║         │                                                                     ║
-║         ▼                                                                     ║
+║         │                                                                    ║
+║         ▼                                                                    ║
 ║  ┌─────────────────────────────────────────────────────────────────────────┐ ║
-║  │ 4. SPIKE-BASED STDP (_simulate_spike_pair in train.py)                   │ ║
-║  │                                                                          │ ║
+║  │ 4. SPIKE-BASED STDP (_simulate_spike_pair in train.py)                  │ ║
+║  │                                                                         │ ║
 ║  │    For each connection:                                                 │ ║
 ║  │      • pre_spike_time = global_time                                     │ ║
 ║  │      • post_spike_time = global_time + 5ms                              │ ║
 ║  │      • dt = +5ms → LTP (exp(-5/20) ≈ 0.78)                              │ ║
-║  │                                                                          │ ║
+║  │                                                                         │ ║
 ║  │    FOUR-FACTOR LEARNING:                                                │ ║
 ║  │      ┌─────────────────────────────────────────────────────────────┐    │ ║
-║  │      │ 1. STDP creates eligibility trace (not immediate change)     │    │ ║
-║  │      │ 2. Neuromodulators modulate:                                 │    │ ║
-║  │      │    • DA (dopamine): novelty → converts eligibility to LTP    │    │ ║
-║  │      │    • ACh (acetylcholine): attention → amplifies traces       │    │ ║
-║  │      │    • NE (norepinephrine): surprise → boosts new connections  │    │ ║
-║  │      │    • 5-HT (serotonin): patience → stabilizes learning        │    │ ║
-║  │      │ 3. Combined: m_total = DA × ACh × NE × 5-HT                  │    │ ║
-║  │      │ 4. eligibility *= m_total → Final weight change              │    │ ║
+║  │      │ 1. STDP creates eligibility trace (not immediate change)     │   │ ║
+║  │      │ 2. Neuromodulators modulate:                                 │   │ ║
+║  │      │    • DA (dopamine): novelty → converts eligibility to LTP    │   │ ║
+║  │      │    • ACh (acetylcholine): attention → amplifies traces       │   │ ║
+║  │      │    • NE (norepinephrine): surprise → boosts new connections  │   │ ║
+║  │      │    • 5-HT (serotonin): patience → stabilizes learning        │   │ ║
+║  │      │ 3. Combined: m_total = DA × ACh × NE × 5-HT                  │   │ ║
+║  │      │ 4. eligibility *= m_total → Final weight change              │   │ ║
 ║  │      └─────────────────────────────────────────────────────────────┘    │ ║
-║  │                                                                          │ ║
+║  │                                                                         │ ║
 ║  │    Advanced plasticity (from spiking.py, used in Connection):           │ ║
 ║  │      • EligibilityTrace: τ ≈ 1000ms decay                               │ ║
 ║  │      • CalciumState: Ca²⁺ thresholds for LTP/LTD                        │ ║
 ║  │      • MetaplasticState: sliding threshold (BCM)                        │ ║
 ║  └─────────────────────────────────────────────────────────────────────────┘ ║
-║         │                                                                     ║
-║         ▼                                                                     ║
+║         │                                                                    ║
+║         ▼                                                                    ║
 ║  ┌─────────────────────────────────────────────────────────────────────────┐ ║
 ║  │ 5. EPISODIC ENCODING (hippocampus.py → Hippocampus.encode())            │ ║
-║  │                                                                          │ ║
+║  │                                                                         │ ║
 ║  │    5a. DENTATE GYRUS: Pattern Separation                                │ ║
 ║  │        • input_neurons = {capital, france, paris}                       │ ║
 ║  │        • sparse_neurons = pattern_separate(input_neurons)               │ ║
 ║  │        • ~2% active (Rolls et al., 2007)                                │ ║
 ║  │        • Similar inputs → different sparse codes (orthogonalization)    │ ║
-║  │                                                                          │ ║
+║  │                                                                         │ ║
 ║  │    5b. EPISODE CREATION                                                 │ ║
 ║  │        Episode(                                                         │ ║
 ║  │          input_neurons = frozenset({capital, france, paris}),           │ ║
@@ -246,15 +246,15 @@ If direct retrieval fails (no episode found), the system uses `IterativeRetrieve
 ║  │          source = "sentence",                                           │ ║
 ║  │          state = EpisodeState.NEW                                       │ ║
 ║  │        )                                                                │ ║
-║  │                                                                          │ ║
+║  │                                                                         │ ║
 ║  │    5c. SIMILAR EPISODE CHECK                                            │ ║
 ║  │        • If >70% overlap with existing → mark_replayed()                │ ║
 ║  │        • If replay_count >= 5 → CONSOLIDATED                            │ ║
 ║  └─────────────────────────────────────────────────────────────────────────┘ ║
-║         │                                                                     ║
-║         ▼                                                                     ║
-║  STORED: Episode in HIPPOCAMPUS.episodes, connections strengthened          ║
-║                                                                               ║
+║         │                                                                    ║
+║         ▼                                                                    ║
+║  STORED: Episode in HIPPOCAMPUS.episodes, connections strengthened           ║
+║                                                                              ║
 ╚══════════════════════════════════════════════════════════════════════════════╝
 ```
 
@@ -325,7 +325,7 @@ If direct retrieval fails (no episode found), the system uses `IterativeRetrieve
 linguistic knowledge. This is a necessary simplification:
 
 **Why rule-based parsing is needed:**
-- Model trained on ~1,000 basic sentences (plus 50K from FineWeb-Edu), not millions/billions like LLMs
+- Model trained on ~1,000 basic sentences (plus 40K from FineWeb-Edu), not millions/billions like LLMs
 - Human child learns from ~10M words by age 6 — we don't have that data
 - Full language learning would require CHILDES-scale corpus
 
@@ -390,32 +390,11 @@ the KNOWLEDGE is real, only the INTERFACE is simplified.
 
 ---
 
-## CURRENT RESULTS (23.01.2026)
+## Test Results
 
-```
-Unified model: brain_model
-Training pipeline: curriculum (80 epochs) → preschool (50 epochs) → grade1 (50 epochs) → FineWeb-Edu (1000 articles, 50K sentences)
-Neurons: 48,301
-Connections: 1,453,469
-MYELINATED: 19,252 (1.3%)
-USED: 77,745 (5.3%)
-NEW: 1,356,472
-Episodes: 68,947
-  - NEW: 35,157
-  - REPLAYED: 2,139
-  - CONSOLIDATED: 30,748
-  - DECAYING: 903
+**See [docs/RESULTS.md](RESULTS.md) for detailed test results** (auto-generated).
 
-Tests (all questions based on training data texts):
-  CURRICULUM: 49/50 (98.0%)
-  STRICT: 3/3 (100%)
-  PRESCHOOL: 46/48 (95.8%)
-  GRADE1: 64/64 (100%)
-  FINEWEB: 7/9 (77.8%)
-  bAbI Task 1: 250/250 (100%) — via working memory (no hardcoding!)
-  TOTAL: 419/424 (98.8%)
-  [INFER-NO-LEARN]: PASS — 0 LTM changes after ask()
-```
+---
 
 ### Key Improvements (January 2026)
 
@@ -552,7 +531,27 @@ Tests (all questions based on training data texts):
     - **Integrated into main `ask()`**: when direct retrieval fails, iterative loop activates
     - Also used by `ask_multi_hop()` for explicit multi-step reasoning
     - Biology: PFC-hippocampus interaction (Preston & Eichenbaum 2013, Eichenbaum 2017)
-    - Biology: PFC top-down modulation (Miller & Cohen 2001)
+
+19. **Semantic Roles (PHASE 16)** — event structure for goal-conditioned retrieval:
+    - `semantic_roles.py` with `extract_roles()` function
+    - `Episode.semantic_roles` attribute stores role→words mapping
+    - 18 role types: agent, patient, theme, cause, effect, location, time, manner, etc.
+    - Based on Fillmore's Case Grammar (1968) and event semantics (Zacks & Tversky 2001)
+    - `get_expected_roles()` in `pfc.py` — PFC determines expected roles from question type
+    - Goal-conditioned retrieval: "What is X?" → category/property roles, "Where is X?" → location
+    - Role bonus in CA3 scoring: episodes with matching roles get priority
+    - Roles serialized with model (save/load in train.py)
+    - Biology: Temporal-parietal cortex for event structure (Binder et al. 2009)
+
+20. **Baseline Comparison (PHASE 17)** — scientific evaluation:
+    - `baselines/tfidf_baseline.py` with TF-IDF and BM25 implementations
+    - Same training data: curriculum.py sentences + connections
+    - Automatic baseline table generation in test_brain.py
+    - Per-question baseline output: ✅/❌ Brain, TF-IDF, BM25
+    - `--no-llm` flag hides LLM fields for cleaner output
+    - RESULTS.md auto-generated from test results
+    - Future: RAG, Memory Networks, NTM, Transformers
+    - See [RESULTS.md](RESULTS.md) for actual numbers
 
 ---
 
@@ -560,94 +559,103 @@ Tests (all questions based on training data texts):
 
 ```
 ┌──────────────────────────────────────────────────────────────────────────────┐
-│                              BRAIN MODEL                                      │
-│                    (Biologically Plausible Memory System)                     │
+│                              BRAIN MODEL                                     │
+│                    (Biologically Plausible Memory System)                    │
 ├──────────────────────────────────────────────────────────────────────────────┤
-│                                                                               │
+│                                                                              │
 │  ┌─────────────────────────────────────────────────────────────────────────┐ │
-│  │                      NEUROMODULATION SYSTEM                              │ │
-│  │  ┌──────────────┐ ┌──────────────┐ ┌──────────────┐ ┌──────────────┐   │ │
-│  │  │  DOPAMINE    │ │ACETYLCHOLINE │ │NOREPINEPHRINE│ │  SEROTONIN   │   │ │
-│  │  │  (reward)    │ │ (attention)  │ │  (arousal)   │ │ (inhibition) │   │ │
-│  │  │  novelty→DA↑ │ │ learning gate│ │ surprise→NE↑ │ │  patience    │   │ │
-│  │  │  LTP boost   │ │  modulation  │ │ excitability │ │  patience    │   │ │
-│  │  └──────────────┘ └──────────────┘ └──────────────┘ └──────────────┘   │ │
+│  │                      NEUROMODULATION SYSTEM                             │ │
+│  │  ┌──────────────┐ ┌──────────────┐ ┌──────────────┐ ┌──────────────┐    │ │
+│  │  │  DOPAMINE    │ │ACETYLCHOLINE │ │NOREPINEPHRINE│ │  SEROTONIN   │    │ │
+│  │  │  (reward)    │ │ (attention)  │ │  (arousal)   │ │ (inhibition) │    │ │
+│  │  │  novelty→DA↑ │ │ learning gate│ │ surprise→NE↑ │ │  patience    │    │ │
+│  │  │  LTP boost   │ │  modulation  │ │ excitability │ │  patience    │    │ │
+│  │  └──────────────┘ └──────────────┘ └──────────────┘ └──────────────┘    │ │
 │  └─────────────────────────────────────────────────────────────────────────┘ │
 │         │ modulates learning and excitability                                │
 │         ▼                                                                    │
 │  ┌─────────────────────────────────────────────────────────────────────────┐ │
-│  │                        BRAIN OSCILLATOR                                  │ │
-│  │           Theta (6Hz) ←──────────────────→ Gamma (40Hz)                  │ │
-│  │           episodic memory                   local computation            │ │
-│  │           theta-gamma coupling: sequence encoding                        │ │
+│  │                        BRAIN OSCILLATOR                                 │ │
+│  │           Theta (6Hz) ←──────────────────→ Gamma (40Hz)                 │ │
+│  │           episodic memory                   local computation           │ │
+│  │           theta-gamma coupling: sequence encoding                       │ │
 │  └─────────────────────────────────────────────────────────────────────────┘ │
 │         │ modulates neuron excitability                                      │
 │         ▼                                                                    │
 │  ┌─────────────────────────────────────────────────────────────────────────┐ │
-│  │                    SPIKING NEURAL NETWORK                                │ │
-│  │  ┌──────────────────┐    ┌──────────────────┐    ┌──────────────────┐  │ │
-│  │  │      NEURON      │    │    CONNECTION    │    │   WORD_TO_NEURON │  │ │
-│  │  │  (Hodgkin-Huxley)│◄──►│   (with STDP)    │    │  {word: Neuron}  │  │ │
-│  │  │  - V (membrane)  │    │  - state         │    │                  │  │ │
-│  │  │  - m, h, n (ion) │    │  - forward_usage │    │                  │  │ │
-│  │  │  - spike_history │    │  - eligibility   │    │                  │  │ │
-│  │  │  - phase         │    │  - apply_stdp()  │    │                  │  │ │
-│  │  └──────────────────┘    └──────────────────┘    └──────────────────┘  │ │
+│  │                    SPIKING NEURAL NETWORK                               │ │
+│  │  ┌──────────────────┐    ┌──────────────────┐    ┌──────────────────┐   │ │
+│  │  │      NEURON      │    │    CONNECTION    │    │   WORD_TO_NEURON │   │ │
+│  │  │  (Hodgkin-Huxley)│◄──►│   (with STDP)    │    │  {word: Neuron}  │   │ │
+│  │  │  - V (membrane)  │    │  - state         │    │                  │   │ │
+│  │  │  - m, h, n (ion) │    │  - forward_usage │    │                  │   │ │
+│  │  │  - spike_history │    │  - eligibility   │    │                  │   │ │
+│  │  │  - phase         │    │  - apply_stdp()  │    │                  │   │ │
+│  │  └──────────────────┘    └──────────────────┘    └──────────────────┘   │ │
 │  └─────────────────────────────────────────────────────────────────────────┘ │
 │         │                                                                    │
 │         ▼ spike-based STDP during learning                                   │
 │  ┌─────────────────────────────────────────────────────────────────────────┐ │
-│  │                          ACTIVATION                                      │ │
-│  │  ┌──────────────────────────────────────────────────────────────────┐  │ │
-│  │  │  run_until_stable() → step_with_spikes() → run_spike_simulation()│  │ │
-│  │  │  - Hodgkin-Huxley dynamics each step                             │  │ │
-│  │  │  - Theta/Gamma modulate excitability                             │  │ │
-│  │  │  - Neuromodulators modulate learning                             │  │ │
-│  │  │  - STDP applied to active connections                            │  │ │
-│  │  └──────────────────────────────────────────────────────────────────┘  │ │
+│  │                          ACTIVATION                                     │ │
+│  │  ┌──────────────────────────────────────────────────────────────────┐   │ │
+│  │  │  run_until_stable() → step_with_spikes() → run_spike_simulation()│   │ │
+│  │  │  - Hodgkin-Huxley dynamics each step                             │   │ │
+│  │  │  - Theta/Gamma modulate excitability                             │   │ │
+│  │  │  - Neuromodulators modulate learning                             │   │ │
+│  │  │  - STDP applied to active connections                            │   │ │
+│  │  └──────────────────────────────────────────────────────────────────┘   │ │
 │  └─────────────────────────────────────────────────────────────────────────┘ │
 │         │                                                                    │
 │         ▼                                                                    │
 │  ┌─────────────────────────────────────────────────────────────────────────┐ │
 │  │                     PREFRONTAL CORTEX (PFC)                             │ │
 │  │                       (working memory)                                  │ │
-│  │  ┌───────────────┐  ┌───────────────┐  ┌─────────────────────────┐    │ │
-│  │  │   GOAL SLOT   │  │ CONTEXT SLOTS │  │  TEMPORARY EPISODES     │    │ │
-│  │  │  (current     │  │ (facts as     │  │  source="working_memory"│    │ │
-│  │  │   task)       │  │  word tuple)  │  │  + recency_bonus        │    │ │
-│  │  └───────────────┘  └───────────────┘  └─────────────────────────┘    │ │
+│  │  ┌───────────────┐  ┌───────────────┐  ┌─────────────────────────┐      │ │
+│  │  │   GOAL SLOT   │  │ CONTEXT SLOTS │  │  TEMPORARY EPISODES     │      │ │
+│  │  │  (current     │  │ (facts as     │  │  source="working_memory"│      │ │
+│  │  │   task)       │  │  word tuple)  │  │  + recency_bonus        │      │ │
+│  │  └───────────────┘  └───────────────┘  └─────────────────────────┘      │ │
 │  │                                                                         │ │
-│  │  PERSISTENT ACTIVITY (Wang 2001, Compte et al. 2000):                  │ │
-│  │  ┌─────────────────────────────────────────────────────────────────┐   │ │
-│  │  │ • NMDA slow decay (tau ~100ms) → sustained firing               │   │ │
-│  │  │ • Recurrent excitation → related slots boost each other         │   │ │
-│  │  │ • Distractor resistance → GABAergic inhibitory gating           │   │ │
-│  │  │ • Attractor dynamics → bistable states lock active patterns     │   │ │
-│  │  └─────────────────────────────────────────────────────────────────┘   │ │
+│  │  GOAL-CONDITIONED RETRIEVAL (Fillmore 1968, Binder 2009):               │ │
+│  │  ┌─────────────────────────────────────────────────────────────────┐    │ │
+│  │  │ • Question type → expected roles (category/location/agent...)   │    │ │
+│  │  │ • "What is X?" → category/property roles                        │    │ │
+│  │  │ • "Where is X?" → location role                                 │    │ │
+│  │  │ • get_expected_roles() → top-down bias for CA3 scoring          │    │ │
+│  │  └─────────────────────────────────────────────────────────────────┘    │ │
+│  │                                                                         │ │
+│  │  PERSISTENT ACTIVITY (Wang 2001, Compte et al. 2000):                   │ │
+│  │  ┌─────────────────────────────────────────────────────────────────┐    │ │
+│  │  │ • NMDA slow decay (tau ~100ms) → sustained firing               │    │ │
+│  │  │ • Recurrent excitation → related slots boost each other         │    │ │
+│  │  │ • Distractor resistance → GABAergic inhibitory gating           │    │ │
+│  │  │ • Attractor dynamics → bistable states lock active patterns     │    │ │
+│  │  └─────────────────────────────────────────────────────────────────┘    │ │
 │  └─────────────────────────────────────────────────────────────────────────┘ │
 │         │ context() → temporary connections/episodes                         │
 │         ▼                                                                    │
 │  ┌─────────────────────────────────────────────────────────────────────────┐ │
-│  │                          HIPPOCAMPUS                                     │ │
-│  │                     (episodic memory)                                    │ │
-│  │  ┌───────────┐  ┌─────────────────────────┐  ┌───────────────────┐   │ │
-│  │  │    DG     │  │    CA3 (ca3.py)         │  │     EPISODES      │   │ │
-│  │  │  Pattern  │  │  SHARED RECURRENT NET   │  │ [Episode, ...]    │   │ │
-│  │  │ Separation│→ │  - spread_recurrent()   │  │ input_words: Tuple│   │ │
-│  │  │    2%     │  │  - apply_inhibition()   │→ │ state: CONSOLIDATED│  │ │
-│  │  │   WTA     │  │  - score_episodes()     │  │ source: working_  │   │ │
-│  │  └───────────┘  │  Attractor dynamics     │  │        memory     │   │ │
-│  │                 └─────────────────────────┘  └───────────────────┘   │ │
+│  │                          HIPPOCAMPUS                                    │ │
+│  │                     (episodic memory)                                   │ │
+│  │  ┌───────────┐  ┌─────────────────────────┐  ┌───────────────────┐      │ │
+│  │  │    DG     │  │    CA3 (ca3.py)         │  │     EPISODES      │      │ │
+│  │  │  Pattern  │  │  SHARED RECURRENT NET   │  │ [Episode, ...]    │      │ │
+│  │  │ Separation│→ │  - spread_recurrent()   │  │ input_words: Tuple│      │ │
+│  │  │    2%     │  │  - apply_inhibition()   │→ │ state: CONSOLIDATED│     │ │
+│  │  │   WTA     │  │  - score_episodes()     │  │ semantic_roles:   │      │ │
+│  │  └───────────┘  │  + role_bonus           │  │  {agent, patient, │      │ │
+│  │                 │  Attractor dynamics     │  │   location, ...}  │      │ │
+│  │                 └─────────────────────────┘  └───────────────────┘      │ │
 │  └─────────────────────────────────────────────────────────────────────────┘ │
 │         │                                                                    │
 │         ▼ consolidation (SWR replay)                                         │
 │  ┌─────────────────────────────────────────────────────────────────────────┐ │
-│  │                            CORTEX                                        │ │
-│  │                     (semantic memory)                                    │ │
-│  │                      [Pattern, Pattern, ...]                             │ │
-│  │              MYELINATED connections = precise knowledge                  │ │
+│  │                            CORTEX                                       │ │
+│  │                     (semantic memory)                                   │ │
+│  │                      [Pattern, Pattern, ...]                            │ │
+│  │              MYELINATED connections = precise knowledge                 │ │
 │  └─────────────────────────────────────────────────────────────────────────┘ │
-│                                                                               │
+│                                                                              │
 └──────────────────────────────────────────────────────────────────────────────┘
 
 DOPAMINE FLOW (during learning):
@@ -664,29 +672,29 @@ DOPAMINE FLOW (during learning):
 
 FOUR-FACTOR LEARNING (PHASE 5 - Full Neuromodulator Integration):
 ┌─────────────────────────────────────────────────────────────────────────────┐
-│                        NEUROMODULATOR RELEASE CONDITIONS                     │
+│                        NEUROMODULATOR RELEASE CONDITIONS                    │
 ├─────────────────────────────────────────────────────────────────────────────┤
-│                                                                              │
+│                                                                             │
 │  DOPAMINE (DA) - Reward/Novelty (Schultz 1998)                              │
 │  ├─ Released when: is_novel=True (new connection)                           │
 │  ├─ Effect: Converts eligibility trace to LTP                               │
 │  └─ TAU: 500ms (moderate decay)                                             │
-│                                                                              │
+│                                                                             │
 │  ACETYLCHOLINE (ACh) - Attention/Encoding (Hasselmo 2006)                   │
 │  ├─ Released when: Start of learning (train_sentence_with_context)          │
 │  ├─ Effect: Amplifies eligibility traces during encoding                    │
 │  └─ TAU: 1000ms (slow decay - sustained attention)                          │
-│                                                                              │
+│                                                                             │
 │  NOREPINEPHRINE (NE) - Exploration/Surprise (Sara 2009)                     │
 │  ├─ Released when: is_novel=True OR is_unexpected=True                      │
 │  ├─ Effect: Boosts new/weak connections (exploration mode)                  │
 │  └─ TAU: 200ms (fast decay - quick response)                                │
-│                                                                              │
+│                                                                             │
 │  SEROTONIN (5-HT) - Patience/Stability (Miyazaki 2014)                      │
 │  ├─ Released when: Long sentences (>10 words)                               │
 │  ├─ Effect: Slows learning but stabilizes (temporal discounting)            │
 │  └─ TAU: 2000ms (very slow decay - stable mood)                             │
-│                                                                              │
+│                                                                             │
 └─────────────────────────────────────────────────────────────────────────────┘
 
 COMBINED LEARNING MODIFIER:

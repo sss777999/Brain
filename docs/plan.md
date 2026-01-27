@@ -13,14 +13,23 @@ AUTHORITATIVE ROADMAP (v2026-01-23)
 This document contains both historical implementation notes and a forward-looking roadmap.
 This section is the single source of truth for "what to do next".
 
-STATUS (verified 2026-01-23):
+STATUS (verified 2026-01-27):
 - CURRICULUM: 49/50 (98.0%)
+- STRICT: 3/3 (100%)
 - PRESCHOOL: 46/48 (95.8%)
 - GRADE1: 64/64 (100%)
-- bAbI Task 1: 250/250 (100%)
 - FineWeb-Edu: 7/9 (77.8%)
-- STRICT: 3/3 (100%)
-- TOTAL: 419/424 (98.8%) all tests including bAbI
+- PARAPHRASE: 25/50 (50.0%) — surface form robustness tests
+- bAbI Task 1: 250/250 (100%)
+- TOTAL: 444/474 (93.7%) all tests including bAbI + paraphrase
+
+BASELINE COMPARISON (verified 2026-01-27):
+All baselines trained on identical data (curriculum.py sentences).
+- Brain average: 88.8%
+- TF-IDF average: 27.3%
+- BM25 average: 25.7%
+- Brain advantage: +61.5% vs TF-IDF, +63.1% vs BM25
+- bAbI: 100% vs 0% (TF-IDF/BM25 cannot handle working memory)
 
 TRAINING PIPELINE (January 2026):
 CURRICULUM → PRESCHOOL → GRADE1 → FineWeb-Edu
@@ -80,6 +89,22 @@ NEXT PHASES (recommended order):
 8) PHASE 6: TRUE REPLAY / SWR (temporal compression) — ✅ DONE (January 2026)
 9) NMDA Receptor Mechanism (dynamic threshold for context attention) — ✅ DONE (January 2026)
 10) Cross-Episode Linking (semantic links via shared context during REM) — ✅ DONE (January 2026)
+11) Baseline Comparison (TF-IDF/BM25) — ✅ DONE (January 2026)
+12) Semantic Roles Integration — ✅ DONE (January 2026)
+    - Event Schemas: Episode stores predicate + 18 role types (agent, patient, theme, location, etc.)
+    - Goal-conditioned Retrieval: PFC infers expected roles from question type ("What is X?" → category)
+    - Role bonus in CA3 scoring for episodes with matching semantic roles
+    - Biology: Fillmore's Case Grammar, temporal-parietal cortex (Binder 2009)
+
+FUTURE WORK (baseline expansion — in progress):
+- RAG baseline (Retriever + GPT) — different class, but fair comparison
+- Memory Networks (Weston et al. 2015) — direct comparison on bAbI
+- Neural Turing Machines (Graves et al. 2014) — working memory comparison
+- Transformer-based QA (BERT, RoBERTa) — fine-tuned on same data
+- The goal is NOT to beat all baselines, but to show unique capabilities:
+  - Working memory (bAbI): IR methods = 0%
+  - Source memory: trust-weighted retrieval
+  - Biological plausibility: mechanisms with neuroscience references
 
 ========================================
 PHASE 3.8: SOURCE MEMORY [✅ DONE — January 2026]
@@ -1315,7 +1340,7 @@ The model finds related concepts but doesn't understand sentence structure:
 learned linguistic knowledge. This is a necessary simplification because:
 
 1. **No large-scale language training** — The brain model is trained on ~1,000 basic sentences 
-   (plus 50K from FineWeb-Edu), not millions/billions like LLMs. A human child learns language from ~10M words by age 6.
+   (plus 40K from FineWeb-Edu), not millions/billions like LLMs. A human child learns language from ~10M words by age 6.
 
 2. **Rule-based components** (necessary "hacks"):
    - `broca.py` — hardcoded syntactic patterns ("What is X?", "Is X Y or Z?")

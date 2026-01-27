@@ -234,6 +234,87 @@ def get_preferred_sources(question_type: QuestionType) -> Tuple[str, ...]:
     return tuple(sources)
 
 
+# ANCHOR: GET_EXPECTED_ROLES - goal-conditioned retrieval
+# BIOLOGY (Desimone & Duncan 1995, Miller & Cohen 2001):
+# PFC provides top-down bias for retrieval by specifying EXPECTED roles.
+# "What is X?" expects category/property roles
+# "Who did X?" expects agent role
+# "Where is X?" expects location role
+# This is task-set control: PFC primes relevant semantic dimensions.
+
+QUESTION_TO_ROLES = {
+    # "What is X?" → category, property
+    'what': ['category', 'property', 'theme'],
+    # "Who does X?" → agent
+    'who': ['agent'],
+    # "Where is X?" → location  
+    'where': ['location'],
+    # "When does X?" → time
+    'when': ['time'],
+    # "Why does X?" → cause
+    'why': ['cause'],
+    # "How does X?" → manner, instrument
+    'how': ['manner', 'instrument'],
+    # "Which X?" → category
+    'which': ['category'],
+}
+
+
+def get_expected_roles(question: str) -> List[str]:
+    """
+    Get expected semantic roles based on question word.
+    
+    BIOLOGY (Goal-conditioned Retrieval, Miller & Cohen 2001):
+    PFC analyzes question to determine WHAT KIND of information
+    is expected. This provides top-down modulation of retrieval:
+    - "What is X?" → look for category/property roles
+    - "Who did X?" → look for agent role
+    - "Where is X?" → look for location role
+    
+    This is how the brain handles paraphrases: the same goal
+    (e.g., find category of X) can be triggered by different
+    surface forms ("What is X?", "X is what kind of thing?").
+    
+    Args:
+        question: The question string.
+        
+    Returns:
+        List of expected role names.
+    """
+    if not question:
+        return []
+    
+    words = question.lower().split()
+    
+    # Find interrogative word
+    for word in words:
+        clean = word.strip('?.,!')
+        if clean in QUESTION_TO_ROLES:
+            return QUESTION_TO_ROLES[clean]
+    
+    # Special patterns without interrogative at start
+    words_set = set(w.strip('?.,!') for w in words)
+    
+    # "X is what kind of thing?" → category
+    if 'kind' in words_set or 'type' in words_set or 'category' in words_set:
+        return ['category']
+    
+    # "X is what color?" → property
+    if 'color' in words_set or 'colour' in words_set:
+        return ['property']
+    
+    # "Tell me X" → general theme
+    if words and words[0] == 'tell':
+        return ['theme', 'category', 'property']
+    
+    # "X is opposite of what?" → opposite
+    if 'opposite' in words_set:
+        return ['opposite', 'theme']
+    
+    # Default: look for theme/category
+    return ['theme', 'category']
+
+
 # ANCHOR: PFC_CLASS - prefrontal cortex buffer
 class PFC:
     """

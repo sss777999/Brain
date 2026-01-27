@@ -1071,7 +1071,8 @@ class Hippocampus:
     
     # API_PUBLIC
     def encode(self, input_neurons: Set[str], source: str = "unknown", 
-               word_to_neuron: dict = None, input_words: tuple = None) -> Episode:
+               word_to_neuron: dict = None, input_words: tuple = None,
+               semantic_roles: dict = None) -> Episode:
         """
         Encode a new episode.
         
@@ -1083,11 +1084,16 @@ class Hippocampus:
         BIOLOGY (Hippocampal Time Cells, Eichenbaum 2014):
         input_words stores WORD ORDER - like a child memorizing a phrase as a whole.
         
+        BIOLOGY (Event Structure, Zacks & Tversky 2001):
+        semantic_roles stores thematic roles (agent, patient, etc.) enabling
+        role-based retrieval rather than just surface-word matching.
+        
         Args:
             input_neurons: Input neurons (set).
             source: Episode source.
             word_to_neuron: Dictionary for Competitive Learning in DG.
             input_words: Ordered tuple of words (Time Cells).
+            semantic_roles: Dict mapping role names to word sets.
         
         Returns:
             Created episode.
@@ -1101,6 +1107,7 @@ class Hippocampus:
         # 2. Create episode with current context
         # BIOLOGY: store BOTH original neurons (for search) AND sparse (for separation)
         # BIOLOGY (Time Cells): input_words stores WORD ORDER
+        # BIOLOGY (Event Structure): semantic_roles stores thematic roles
         self._timestamp += 1
         episode = Episode(
             pattern_neurons=sparse_neurons,
@@ -1108,7 +1115,8 @@ class Hippocampus:
             timestamp=self._timestamp,
             source=source,
             input_neurons=input_neurons,  # Original words for search!
-            input_words=input_words  # WORD ORDER (Time Cells)
+            input_words=input_words,  # WORD ORDER (Time Cells)
+            semantic_roles=semantic_roles  # Thematic roles (Zacks & Tversky 2001)
         )
         
         # 3. Check if there is a similar episode (for replay counting)

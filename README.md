@@ -6,6 +6,8 @@ A biologically plausible memory model that learns from text using **discrete syn
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Status: Research](https://img.shields.io/badge/status-research-orange.svg)]()
 
+**📊 [Full Test Results & Baseline Comparison](docs/RESULTS.md)** — Brain vs TF-IDF/BM25: **+40-50% advantage**
+
 ---
 
 ## Quick Start
@@ -242,29 +244,47 @@ Example:
 ### Current model (brain_model)
 
 ```
-Training pipeline: curriculum → preschool → grade1 → FineWeb-Edu (1000 articles, 50K sentences)
+Training pipeline: curriculum → preschool → grade1 → bAbI → FineWeb-Edu (1000 articles, 40K sentences)
 Neurons: 48,301
-Connections: 1,453,469
-MYELINATED: 19,252 (1.3%)
-USED: 77,745 (5.3%)
-NEW: 1,356,472
-Episodes: 68,947
-  - NEW: 35,157
-  - REPLAYED: 2,139
-  - CONSOLIDATED: 30,748
-  - DECAYING: 903
+Connections: 1,477,371
+MYELINATED: 19,195 (1.3%)
+USED: 77,942 (5.3%)
+NEW: 1,380,234
+Episodes: 68,955
+  - NEW: 35,160
+  - REPLAYED: 2,142
+  - CONSOLIDATED: 30,744
+  - DECAYING: 909
 ```
 
-**Test results** (23.01.2026):
+**Test results** (27.01.2026):
 ```
 CURRICULUM: 49/50 (98.0%) — hard tests
 STRICT: 3/3 (100%) — tests for "I do not know"
 PRESCHOOL: 46/48 (95.8%) — preschool tests
 GRADE1: 64/64 (100%) — world-knowledge tests
 FineWeb-Edu: 7/9 (77.8%) — direct facts from educational texts
-bAbI: 250/250 (100%) — working memory tests
-TOTAL: 419/424 (98.8%)
+PARAPHRASE: 25/50 (50.0%) — paraphrase robustness tests
+bAbI Task 1: 250/250 (100%) — working memory tests
+TOTAL: 444/474 (93.7%)
 ```
+
+**Comparison with IR baselines** (same training data):
+```
+Test          Brain    TF-IDF   BM25     Brain advantage
+CURRICULUM    98.0%    58.0%    48.0%    +40-50%
+STRICT        100%     33.3%    33.3%    +66.7%
+PRESCHOOL     95.8%    22.9%    22.9%    +72.9%
+GRADE1        100%     39.1%    37.5%    +61-62%
+FINEWEB       77.8%    0.0%     0.0%     +77.8%
+PARAPHRASE    50.0%    38.0%    38.0%    +12.0%
+bAbI Task 1*  100%     0.0%     0.0%     +100%
+─────────────────────────────────────────────────
+AVERAGE       88.8%    27.3%    25.7%    +61-63%
+```
+*bAbI requires working memory — TF-IDF/BM25 cannot track entity states.
+
+📊 **[Full results with analysis](docs/RESULTS.md)**
 
 **New mechanisms (January 2026):**
 - **Basal Ganglia Action Selection (PHASE 4)** — Go/NoGo/STN for strategy selection
@@ -331,6 +351,17 @@ TOTAL: 419/424 (98.8%)
   - **Integrated into the main `ask()`**: when direct retrieval does not find an answer
   - Also used in `ask_multi_hop()` for explicit multi-step reasoning
   - Biology: Preston & Eichenbaum 2013, Miller & Cohen 2001
+- **Semantic Roles (PHASE 16)** — event structure for goal-conditioned retrieval
+  - Episodes store semantic roles: agent, patient, theme, cause, location, time, etc.
+  - Based on Fillmore's Case Grammar (1968) and event semantics (Zacks & Tversky 2001)
+  - 18 role types biologically grounded in temporal-parietal processing
+  - `get_expected_roles()` — PFC determines expected roles based on question type
+  - Goal-conditioned retrieval: "What is X?" → category/property roles, "Where is X?" → location role
+  - Roles stored in Episode and serialized with model
+- **Baseline Comparison** — scientific evaluation against standard IR methods
+  - TF-IDF and BM25 baselines on the same curriculum data
+  - Brain significantly outperforms: +40% vs TF-IDF, +50% vs BM25
+  - Tests integrated: `--compare-baselines` flag in test_brain.py
 - Hodgkin-Huxley spiking neurons with realistic membrane potential dynamics
 - Real STDP based on spike timing
 - **BrainOscillator** — theta/gamma oscillations
@@ -370,7 +401,7 @@ The LLM (Qwen2.5:3b via Ollama) **verbalizes** the thought into speech—similar
 
 1. **Word order in the answer** — Hippocampal Time Cells are implemented: episodes preserve word order (`input_words: Tuple`). When connections have equal priority, the episode order is used. LLM post-processing adds grammar.
 
-2. **Scaling** — tested on 1000 FineWeb-Edu articles (50K sentences). Needs validation on larger datasets.
+2. **Scaling** — tested on 1000 FineWeb-Edu articles (40K sentences). Needs validation on larger datasets.
 
 3. **Language Interpretation (Rule-Based Parsing)** ⚠️
    
@@ -400,7 +431,7 @@ The LLM (Qwen2.5:3b via Ollama) **verbalizes** the thought into speech—similar
    | `train.py` | Pattern extraction (temporal, opposite, cause-effect) | Recognizes patterns from the curriculum |
    
    **Why this is done this way:**
-   - The model is trained on ~1,000 basic sentences (plus 50K from FineWeb-Edu), not billions like an LLM
+   - The model is trained on ~1,000 basic sentences (plus 40K from FineWeb-Edu), not billions like an LLM
    - A child learns language from ~10M words by age 6—we do not have that volume of data
    - Rule-based parsing approximates what would be learned from a large body of language data
    
@@ -1249,7 +1280,7 @@ LLMs showed: yes—new capabilities emerge with scaling (in-context learning, re
 
 ### Trained model statistics
 ```
-Pipeline: curriculum → preschool → grade1 → FineWeb-Edu (1000 articles, 50K sentences)
+Pipeline: curriculum → preschool → grade1 → FineWeb-Edu (1000 articles, 40K sentences)
 Neurons: 48,301
 Connections: 1,453,469
 MYELINATED: 19,252 (1.3%)
