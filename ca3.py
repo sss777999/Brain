@@ -456,9 +456,22 @@ class CA3:
             # This prevents low-trust MEDIA from overriding high-trust LEARNING
             trust_multiplier = getattr(episode, 'trust', 1.0)
             
+            # SEMANTIC ROLE BONUS (Goal-conditioned Retrieval)
+            # BIOLOGY (Desimone & Duncan 1995, Miller & Cohen 2001):
+            # PFC provides top-down bias by specifying EXPECTED semantic roles.
+            # Episodes with matching roles get bonus.
+            role_bonus = 0
+            if question and hasattr(episode, 'semantic_roles') and episode.semantic_roles:
+                from pfc import get_expected_roles
+                expected_roles = get_expected_roles(question)
+                for role in expected_roles:
+                    if role in episode.semantic_roles and episode.semantic_roles[role]:
+                        role_bonus += w1 // 2  # Significant bonus for role match
+                        break  # One match is enough
+            
             # Final score with trust weighting
             # BROCA'S AREA: subject_bonus adds weight for episodes with question subject
-            base_score = (query_overlap + subject_bonus) * w1 + avg_strength * w2 + overlap * w3 + consolidation_bonus + recency_bonus
+            base_score = (query_overlap + subject_bonus) * w1 + avg_strength * w2 + overlap * w3 + consolidation_bonus + recency_bonus + role_bonus
             score = base_score * trust_multiplier
             
             if score >= best_score:

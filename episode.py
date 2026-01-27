@@ -20,7 +20,7 @@ Biological foundations:
 from __future__ import annotations
 
 from enum import Enum, auto
-from typing import FrozenSet, Set, Tuple, Sequence, Union
+from typing import FrozenSet, Set, Tuple, Sequence, Union, Dict, Optional
 
 
 # ANCHOR: EPISODE_STATE_ENUM - episode states
@@ -64,7 +64,42 @@ class Episode:
     Note:
         input_neurons: original words (for contextual search).
         pattern_neurons: sparse representation after DG pattern separation (~10%).
+        semantic_roles: thematic roles for event structure (Fillmore 1968, Binder 2009).
+    
+    BIOLOGY (Semantic Role Representation):
+        - Binder et al. (2009): Semantic memory distributed across cortex
+        - Patterson et al. (2007): Anterior temporal lobe as semantic hub
+        - Zacks & Tversky (2001): Event structure in perception and memory
+        
+        Thematic roles (agent, patient, etc.) are processed in:
+        - Left temporal cortex: semantic categories
+        - Angular gyrus: thematic role binding
+        - Inferior frontal gyrus: syntactic integration
     """
+    
+    # ANCHOR: SEMANTIC_ROLE_TYPES
+    # Standard thematic roles based on Fillmore's Case Grammar (1968)
+    # and modern event semantics (Kiefer & Pulvermüller 2012)
+    ROLE_TYPES = frozenset({
+        'predicate',   # Action/relation: is, has, causes, made_of
+        'agent',       # Who does the action: "John" in "John runs"
+        'patient',     # Who/what is affected: "ball" in "John kicks ball"
+        'theme',       # What moves/changes: "book" in "John gave book"
+        'source',      # Origin: "home" in "John went from home"
+        'target',      # Destination/goal: "school" in "John went to school"
+        'instrument',  # Tool: "hammer" in "John hit with hammer"
+        'location',    # Where: "kitchen" in "John is in kitchen"
+        'time',        # When: "morning" in "John wakes in morning"
+        'property',    # Attribute: "blue" in "sky is blue"
+        'category',    # Type: "animal" in "dog is animal"
+        'opposite',    # Antonym: "cold" in "hot opposite cold"
+        'manner',      # How: "quickly" in "runs quickly"
+        'cause',       # Why/cause: "rain" in "wet because rain"
+        'effect',      # Result: "wet" in "rain makes wet"
+        'beneficiary', # For whom: "children" in "teaches children"
+        'quantity',    # How many: "three" in "has three sides"
+        'purpose',     # For what: "learn" in "to learn"
+    })
     
     _id_counter: int = 0
     
@@ -76,7 +111,8 @@ class Episode:
         timestamp: int,
         source: str = "unknown",
         input_neurons: Union[Set[str], Sequence[str]] = None,
-        input_words: Tuple[str, ...] = None
+        input_words: Tuple[str, ...] = None,
+        semantic_roles: Optional[Dict[str, Set[str]]] = None
     ) -> None:
         """
         Create an episode.
@@ -138,6 +174,24 @@ class Episode:
         self.state: EpisodeState = EpisodeState.NEW
         self.replay_count: int = 0
         self._decay_counter: int = 0  # Counter of cycles without replay
+        
+        # ANCHOR: SEMANTIC_ROLES_INIT
+        # BIOLOGY (Event Structure, Zacks & Tversky 2001):
+        # Episodes store not just words but their thematic roles in the event.
+        # This enables retrieval by role (e.g., "who did X?" → agent role)
+        # rather than just by surface words.
+        #
+        # Angular gyrus binds concepts to their roles in events.
+        # Left temporal cortex stores category-role associations.
+        if semantic_roles is not None:
+            # Validate roles
+            for role in semantic_roles.keys():
+                assert role in self.ROLE_TYPES, f"Unknown role: {role}"
+            self.semantic_roles: Dict[str, FrozenSet[str]] = {
+                role: frozenset(words) for role, words in semantic_roles.items()
+            }
+        else:
+            self.semantic_roles: Dict[str, FrozenSet[str]] = {}
         
         # Postcondition
         assert len(self.pattern_neurons) > 0, "episode must contain neurons"
@@ -261,6 +315,89 @@ class Episode:
             return False
         
         return overlap >= min_size * 0.7
+    
+    # API_PUBLIC
+    def get_by_role(self, role: str) -> FrozenSet[str]:
+        """
+        Get words with specific semantic role.
+        
+        BIOLOGY (Angular Gyrus, Binder 2009):
+        Angular gyrus binds concepts to their roles in events.
+        This method retrieves words by their role, enabling
+        role-based retrieval (e.g., "who?" → agent, "what?" → patient).
+        
+        Args:
+            role: Semantic role (agent, patient, property, etc.)
+            
+        Returns:
+            Set of words with that role, or empty set.
+        """
+        assert role in self.ROLE_TYPES, f"Unknown role: {role}"
+        return self.semantic_roles.get(role, frozenset())
+    
+    # API_PUBLIC
+    def has_role(self, role: str) -> bool:
+        """
+        Check if episode has specific semantic role filled.
+        
+        Args:
+            role: Semantic role to check.
+            
+        Returns:
+            True if role is present and non-empty.
+        """
+        return role in self.semantic_roles and len(self.semantic_roles[role]) > 0
+    
+    # API_PUBLIC
+    def matches_role_cue(
+        self, 
+        role: str, 
+        cue_words: Set[str], 
+        threshold: float = 0.5
+    ) -> bool:
+        """
+        Check if episode's role matches cue words.
+        
+        BIOLOGY (Role-based Retrieval):
+        In the brain, retrieval can be guided by role expectations.
+        "What is X?" activates category/property roles.
+        "Who did Y?" activates agent role.
+        
+        Args:
+            role: Semantic role to match.
+            cue_words: Words to match against.
+            threshold: Minimum overlap fraction.
+            
+        Returns:
+            True if role content matches cue.
+        """
+        if role not in self.semantic_roles:
+            return False
+        
+        role_words = self.semantic_roles[role]
+        if not role_words or not cue_words:
+            return False
+        
+        overlap = len(role_words & cue_words)
+        return overlap >= len(cue_words) * threshold
+    
+    # API_PUBLIC  
+    def get_predicate(self) -> Optional[str]:
+        """
+        Get the predicate (relation type) of this episode.
+        
+        BIOLOGY (Event Semantics):
+        The predicate defines what kind of relation/action this episode encodes:
+        - 'is' → category membership
+        - 'has' → possession/property
+        - 'opposite' → antonym relation
+        - 'causes' → causal relation
+        
+        Returns:
+            Predicate string or None if not set.
+        """
+        preds = self.semantic_roles.get('predicate', frozenset())
+        return next(iter(preds), None) if preds else None
     
     # API_PRIVATE
     @staticmethod
