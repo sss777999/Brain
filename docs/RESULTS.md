@@ -1,6 +1,6 @@
 # Brain Model Test Results
 
-**Date:** January 28, 2026 (auto-generated)
+**Date:** February 04, 2026 (auto-generated)
 **Model:** brain_model
 **Training:** curriculum → preschool → grade1 → bAbI → FineWeb-Edu
 
@@ -50,14 +50,14 @@ All baselines trained on **identical data** (curriculum.py sentences + connectio
 | GRADE1 | **100.0%** | 39.1% | 37.5% | **+60.9%** | **+62.5%** |
 | FINEWEB | **77.8%** | 0.0% | 0.0% | **+77.8%** | **+77.8%** |
 | PARAPHRASE | **50.0%** | 38.0% | 38.0% | **+12.0%** | **+12.0%** |
-| bAbI* | **100.0%** | 0.0% | 0.0% | **+100.0%** | **+100.0%** |
-| **AVERAGE** | **88.8%** | **27.3%** | **25.7%** | **+61.5%** | **+63.1%** |
+| bAbI* | **100.0%** | N/A | N/A | MemNet: 100.0% | NTM: 88.4% |
+| **AVERAGE (QA)** | **86.9%** | **31.9%** | **30.0%** | **+55.0%** | **+57.0%** |
 
-*bAbI requires working memory — TF-IDF/BM25 cannot track entity movements across sentences.
+*bAbI requires working memory — TF-IDF/BM25 cannot track entity movements. MemNet/NTM are working memory baselines.
 
 ### Key Findings
 
-1. **Brain significantly outperforms simple IR methods** (+61-100%)
+1. **Brain significantly outperforms simple IR methods** (+55-77%)
 2. **Working memory (bAbI)** — Brain achieves 100%, baselines cannot handle context
 3. **Paraphrase robustness** — 50% accuracy indicates room for improvement
 4. **"I don't know" capability** — Brain correctly abstains on unknown queries
@@ -82,7 +82,7 @@ All baselines trained on **identical data** (curriculum.py sentences + connectio
 | Question | Brain Answer | Expected |
 |----------|--------------|----------|
 | What disappears from leaves? | I do not know | ['chlorophyll', 'green'] |
-| What is sedimentary rock made of? | sedimentary rock made | ['bones', 'shells', 'organic', 'sandstone'] |
+| What is sedimentary rock made of? | sedimentary rock made | ['bones', 'shells', 'organic', 'sandstone', 'limestone', 'shale'] |
 
 ### PARAPHRASE (25 failures)
 | Question | Brain Answer | Expected |

@@ -1,0 +1,3281 @@
+Log file: logs/test_results_04.02.2026_23-05-13.txt
+
+
+======================================================================
+TESTS CURRICULUM
+======================================================================
+✅ PASS | Q: What is a dog?
+         ✅ Brain  [0.486s]: animal
+         ❌ TF-IDF [0.013s]: what is question
+         ❌ BM25   [0.007s]: question what
+         Expected: ['animal', 'pet', 'mammal']
+
+✅ PASS | Q: What is a cat?
+         ✅ Brain  [0.517s]: animal
+         ❌ TF-IDF [0.013s]: what is question
+         ❌ BM25   [0.007s]: question what
+         Expected: ['animal', 'pet', 'mammal']
+
+✅ PASS | Q: What is a lion?
+         ✅ Brain  [0.625s]: animal
+         ❌ TF-IDF [0.013s]: what is question
+         ❌ BM25   [0.007s]: question what
+         Expected: ['animal', 'wild', 'predator']
+
+✅ PASS | Q: What is a whale?
+         ✅ Brain  [0.672s]: mammal
+         ❌ TF-IDF [0.013s]: what is question
+         ❌ BM25   [0.007s]: question what
+         Expected: ['animal', 'mammal', 'ocean']
+
+✅ PASS | Q: What is an apple?
+         ✅ Brain  [0.483s]: fruit
+         ✅ TF-IDF [0.014s]: an apple is a fruit
+         ❌ BM25   [0.010s]: i eat an apple
+         Expected: ['fruit']
+
+✅ PASS | Q: What is a carrot?
+         ✅ Brain  [0.456s]: vegetable
+         ✅ TF-IDF [0.013s]: a carrot is a vegetable
+         ❌ BM25   [0.007s]: question what
+         Expected: ['vegetable']
+
+✅ PASS | Q: What is a car?
+         ✅ Brain  [0.564s]: vehicle
+         ❌ TF-IDF [0.013s]: what is question
+         ❌ BM25   [0.007s]: question what
+         Expected: ['vehicle']
+
+✅ PASS | Q: What is a piano?
+         ✅ Brain  [0.366s]: instrument
+         ✅ TF-IDF [0.013s]: piano is instrument
+         ✅ BM25   [0.007s]: instrument piano
+         Expected: ['instrument']
+
+✅ PASS | Q: What color is the sky?
+         ✅ Brain  [0.662s]: blue
+         ✅ TF-IDF [0.015s]: blue is the color of the sky
+         ✅ BM25   [0.010s]: blue is the color of the sky
+         Expected: ['blue']
+
+✅ PASS | Q: What color is grass?
+         ✅ Brain  [0.614s]: green
+         ✅ TF-IDF [0.014s]: grass is green in color
+         ✅ BM25   [0.009s]: grass is green in color
+         Expected: ['green']
+
+✅ PASS | Q: What color is the sun?
+         ✅ Brain  [0.519s]: yellow
+         ✅ TF-IDF [0.015s]: yellow is the color of the sun
+         ✅ BM25   [0.010s]: yellow is the color of the sun
+         Expected: ['yellow']
+
+✅ PASS | Q: What color is snow?
+         ✅ Brain  [0.431s]: white
+         ❌ TF-IDF [0.014s]: what is question
+         ❌ BM25   [0.009s]: question what
+         Expected: ['white']
+
+✅ PASS | Q: What color is a banana?
+         ✅ Brain  [0.456s]: yellow
+         ❌ TF-IDF [0.014s]: a banana is a fruit
+         ❌ BM25   [0.009s]: question what
+         Expected: ['yellow']
+
+✅ PASS | Q: What color is an orange?
+         ✅ Brain  [0.432s]: orange color
+         ✅ TF-IDF [0.015s]: orange is color
+         ✅ BM25   [0.010s]: color orange
+         Expected: ['orange']
+
+✅ PASS | Q: What does a dog say?
+         ✅ Brain  [0.520s]: says woof woof
+         ✅ TF-IDF [0.015s]: a dog say woof
+         ✅ BM25   [0.008s]: a dog say woof
+         Expected: ['woof', 'bark']
+
+✅ PASS | Q: What does a cat say?
+         ✅ Brain  [0.473s]: says meow meow
+         ❌ TF-IDF [0.014s]: question what
+         ❌ BM25   [0.007s]: question what
+         Expected: ['meow', 'purr']
+
+✅ PASS | Q: What does a cow say?
+         ✅ Brain  [1.297s]: says moo
+         ❌ TF-IDF [0.014s]: question what
+         ❌ BM25   [0.007s]: question what
+         Expected: ['moo']
+
+✅ PASS | Q: What does a duck say?
+         ✅ Brain  [0.444s]: says quack quack
+         ❌ TF-IDF [0.014s]: question what
+         ❌ BM25   [0.007s]: question what
+         Expected: ['quack']
+
+✅ PASS | Q: What does a lion say?
+         ✅ Brain  [0.462s]: says roar
+         ❌ TF-IDF [0.013s]: question what
+         ❌ BM25   [0.007s]: question what
+         Expected: ['roar']
+
+✅ PASS | Q: What is the opposite of hot?
+         ✅ Brain  [0.000s]: cold
+         ✅ TF-IDF [0.016s]: hot is the opposite of cold
+         ✅ BM25   [0.011s]: hot is the opposite of cold
+         Expected: ['cold']
+
+✅ PASS | Q: What is the opposite of big?
+         ✅ Brain  [0.000s]: small
+         ✅ TF-IDF [0.016s]: big is the opposite of small
+         ✅ BM25   [0.011s]: big is the opposite of small
+         Expected: ['small', 'little']
+
+✅ PASS | Q: What is the opposite of fast?
+         ✅ Brain  [0.000s]: slow
+         ✅ TF-IDF [0.016s]: fast is the opposite of slow
+         ✅ BM25   [0.012s]: fast is the opposite of slow
+         Expected: ['slow']
+
+✅ PASS | Q: What is the opposite of up?
+         ✅ Brain  [0.000s]: down
+         ✅ TF-IDF [0.016s]: up is the opposite of down
+         ✅ BM25   [0.012s]: up is the opposite of down
+         Expected: ['down']
+
+✅ PASS | Q: What is the opposite of happy?
+         ✅ Brain  [0.000s]: sad
+         ✅ TF-IDF [0.016s]: happy is the opposite of sad
+         ✅ BM25   [0.012s]: happy is the opposite of sad
+         Expected: ['sad']
+
+✅ PASS | Q: What is the opposite of day?
+         ✅ Brain  [0.000s]: night
+         ✅ TF-IDF [0.017s]: day is the opposite of night
+         ✅ BM25   [0.012s]: day is the opposite of night
+         Expected: ['night']
+
+✅ PASS | Q: What is the capital of France?
+         ✅ Brain  [0.460s]: paris
+         ✅ TF-IDF [0.016s]: paris is the capital of france
+         ✅ BM25   [0.012s]: paris is the capital of france
+         Expected: ['paris']
+
+✅ PASS | Q: What is the capital of England?
+         ✅ Brain  [0.453s]: london
+         ✅ TF-IDF [0.016s]: london is the capital of england
+         ✅ BM25   [0.011s]: london is the capital of england
+         Expected: ['london']
+
+✅ PASS | Q: What is the capital of Japan?
+         ✅ Brain  [0.460s]: tokyo
+         ✅ TF-IDF [0.016s]: tokyo is the capital of japan
+         ✅ BM25   [0.012s]: tokyo is the capital of japan
+         Expected: ['tokyo']
+
+✅ PASS | Q: Where is Paris?
+         ✅ Brain  [0.443s]: capital france
+         ❌ TF-IDF [0.013s]: paris is capital
+         ❌ BM25   [0.007s]: capital paris
+         Expected: ['france']
+
+✅ PASS | Q: Where is London?
+         ✅ Brain  [0.483s]: capital england
+         ❌ TF-IDF [0.013s]: london is capital
+         ❌ BM25   [0.007s]: capital london
+         Expected: ['england', 'uk']
+
+✅ PASS | Q: What is the sun?
+         ✅ Brain  [0.534s]: star
+         ❌ TF-IDF [0.013s]: what is question
+         ❌ BM25   [0.009s]: question what
+         Expected: ['star']
+
+✅ PASS | Q: What is the Earth?
+         ✅ Brain  [0.603s]: planet
+         ✅ TF-IDF [0.013s]: the earth is a planet
+         ❌ BM25   [0.009s]: the moon orbits the earth
+         Expected: ['planet']
+
+✅ PASS | Q: What is the moon?
+         ✅ Brain  [0.506s]: stars appear sky night
+         ✅ TF-IDF [0.014s]: the moon is round
+         ❌ BM25   [0.009s]: the moon orbits the earth
+         Expected: ['satellite', 'round', 'night']
+
+✅ PASS | Q: What is water?
+         ✅ Brain  [0.698s]: liquid
+         ❌ TF-IDF [0.013s]: what is question
+         ❌ BM25   [0.007s]: question what
+         Expected: ['liquid', 'h2o', 'drink']
+
+❌ FAIL | Q: What is ice?
+         ❌ Brain  [0.701s]: melts gets warm
+         ❌ TF-IDF [0.013s]: what is question
+         ❌ BM25   [0.007s]: question what
+         Expected: ['solid', 'cold', 'frozen']
+
+✅ PASS | Q: What is a puppy?
+         ✅ Brain  [0.441s]: baby dog
+         ❌ TF-IDF [0.013s]: what is question
+         ❌ BM25   [0.007s]: question what
+         Expected: ['baby', 'dog']
+
+✅ PASS | Q: What is a kitten?
+         ✅ Brain  [0.493s]: baby cat
+         ❌ TF-IDF [0.013s]: what is question
+         ❌ BM25   [0.007s]: question what
+         Expected: ['baby', 'cat']
+
+✅ PASS | Q: What is a calf?
+         ✅ Brain  [0.464s]: baby cow
+         ❌ TF-IDF [0.013s]: what is question
+         ❌ BM25   [0.007s]: question what
+         Expected: ['baby', 'cow']
+
+✅ PASS | Q: What is a chick?
+         ✅ Brain  [0.661s]: baby chicken
+         ❌ TF-IDF [0.012s]: what is question
+         ❌ BM25   [0.007s]: question what
+         Expected: ['baby', 'chicken']
+
+✅ PASS | Q: What do we see with?
+         ✅ Brain  [0.891s]: eyes
+         ✅ TF-IDF [0.015s]: we see with our eyes
+         ✅ BM25   [0.010s]: we see with our eyes
+         Expected: ['eyes']
+
+✅ PASS | Q: What do we hear with?
+         ✅ Brain  [0.758s]: ears
+         ✅ TF-IDF [0.015s]: we hear with our ears
+         ✅ BM25   [0.010s]: we hear with our ears
+         Expected: ['ears']
+
+✅ PASS | Q: What do we smell with?
+         ✅ Brain  [0.608s]: nose
+         ✅ TF-IDF [0.015s]: we smell with our nose
+         ✅ BM25   [0.010s]: we smell with our nose
+         Expected: ['nose']
+
+✅ PASS | Q: When do we wake up?
+         ✅ Brain  [0.431s]: morning
+         ✅ TF-IDF [0.015s]: morning is when we wake up
+         ✅ BM25   [0.010s]: morning is when we wake up
+         Expected: ['morning']
+
+✅ PASS | Q: When do we sleep?
+         ✅ Brain  [0.457s]: night
+         ✅ TF-IDF [0.013s]: night is when we sleep
+         ❌ BM25   [0.009s]: when we sleep we feel rested
+         Expected: ['night']
+
+✅ PASS | Q: What comes after Monday?
+         ✅ Brain  [0.000s]: tuesday
+         ✅ TF-IDF [0.013s]: tuesday comes after monday
+         ✅ BM25   [0.009s]: tuesday comes after monday
+         Expected: ['tuesday']
+
+✅ PASS | Q: What shape is a ball?
+         ✅ Brain  [0.616s]: round
+         ✅ TF-IDF [0.014s]: the shape of a ball is round
+         ✅ BM25   [0.009s]: a ball has a round shape
+         Expected: ['round', 'circle', 'sphere']
+
+✅ PASS | Q: How many sides does a triangle have?
+         ✅ Brain  [0.702s]: three
+         ✅ TF-IDF [0.015s]: three sides triangle
+         ✅ BM25   [0.010s]: three sides triangle
+         Expected: ['three', '3']
+
+✅ PASS | Q: How many sides does a square have?
+         ✅ Brain  [0.715s]: four equal
+         ✅ TF-IDF [0.015s]: four sides square
+         ✅ BM25   [0.010s]: four sides square
+         Expected: ['four', '4']
+
+✅ PASS | Q: What comes after one?
+         ✅ Brain  [0.000s]: two
+         ✅ TF-IDF [0.013s]: two comes after one
+         ✅ BM25   [0.009s]: two comes after one
+         Expected: ['two', '2', 'after one comes two']
+
+✅ PASS | Q: What comes after five?
+         ✅ Brain  [0.000s]: six
+         ❌ TF-IDF [0.013s]: five comes after four
+         ❌ BM25   [0.009s]: five comes after four
+         Expected: ['six', '6', 'after five comes six']
+
+======================================================================
+RESULT CURRICULUM: 49/50 (98.0%) | Brain: 23.06s | GPT: 0.00s
+BASELINES: TFIDF: 58% (0.70s) | BM25: 48% (0.45s)
+======================================================================
+
+FAILED (CURRICULUM):
+  Q: What is ice?
+  Brain raw: melts gets warm
+  Broca's area (LLM): melts gets warm
+  Expected: ['solid', 'cold', 'frozen']
+
+
+======================================================================
+TESTS STRICT
+======================================================================
+✅ PASS | Q: What is the meaning of life?
+         ✅ Brain  [0.622s]: love
+         ✅ TF-IDF [0.016s]: the meaning of life is love
+         ✅ BM25   [0.012s]: the meaning of life is love
+         Expected: ['love', 'happiness']
+
+✅ PASS | Q: Who wrote Hamlet?
+         ✅ Brain  [0.646s]: I do not know
+         ❌ TF-IDF [0.013s]: person who
+         ❌ BM25   [0.005s]: question who
+         Expected: ['not know', "don't know", 'unknown']
+
+✅ PASS | Q: Who is the president of Mars?
+         ✅ Brain  [0.902s]: I do not know
+         ❌ TF-IDF [0.016s]: the president of a country is a leader
+         ❌ BM25   [0.012s]: the president of a country is a leader
+         Expected: ['not know', "don't know", 'unknown']
+
+======================================================================
+RESULT STRICT: 3/3 (100.0%) | Brain: 2.17s | GPT: 0.00s
+BASELINES: TFIDF: 33% (0.04s) | BM25: 33% (0.03s)
+======================================================================
+
+======================================================================
+TESTS - PRESCHOOL (preschool knowledge 3-6 years)
+======================================================================
+✅ Q: What is a puppy?
+   ✅ Brain  [0.452s]: baby dog
+   ❌ TF-IDF [0.012s]: what is question
+   ❌ BM25   [0.007s]: question what
+   Expected: ['baby dog', 'young dog', 'dog']
+
+✅ Q: What is a kitten?
+   ✅ Brain  [0.445s]: baby cat
+   ❌ TF-IDF [0.013s]: what is question
+   ❌ BM25   [0.007s]: question what
+   Expected: ['baby cat', 'young cat', 'cat']
+
+✅ Q: What is a calf?
+   ✅ Brain  [0.472s]: baby cow
+   ❌ TF-IDF [0.013s]: what is question
+   ❌ BM25   [0.007s]: question what
+   Expected: ['baby cow', 'young cow', 'cow']
+
+✅ Q: What does a tadpole become?
+   ✅ Brain  [0.519s]: frog
+   ❌ TF-IDF [0.013s]: question what
+   ❌ BM25   [0.006s]: question what
+   Expected: ['frog']
+
+✅ Q: What does a caterpillar become?
+   ✅ Brain  [0.435s]: butterfly
+   ❌ TF-IDF [0.013s]: question what
+   ❌ BM25   [0.006s]: question what
+   Expected: ['butterfly']
+
+✅ Q: What is a group of fish called?
+   ✅ Brain  [0.645s]: school
+   ❌ TF-IDF [0.016s]: what is question
+   ❌ BM25   [0.009s]: question what
+   Expected: ['school']
+
+✅ Q: What is a group of wolves called?
+   ✅ Brain  [0.615s]: pack
+   ❌ TF-IDF [0.015s]: what is question
+   ❌ BM25   [0.008s]: question what
+   Expected: ['pack']
+
+✅ Q: What is a group of birds called?
+   ✅ Brain  [0.728s]: flock
+   ❌ TF-IDF [0.016s]: what is question
+   ❌ BM25   [0.009s]: question what
+   Expected: ['flock']
+
+✅ Q: What is a group of lions called?
+   ✅ Brain  [0.610s]: pride
+   ❌ TF-IDF [0.016s]: what is question
+   ❌ BM25   [0.009s]: question what
+   Expected: ['pride']
+
+✅ Q: What is a table made of?
+   ✅ Brain  [0.686s]: wood
+   ❌ TF-IDF [0.015s]: make is made
+   ❌ BM25   [0.010s]: question what
+   Expected: ['wood']
+
+✅ Q: What is a window made of?
+   ✅ Brain  [0.501s]: glass
+   ❌ TF-IDF [0.016s]: window is house
+   ❌ BM25   [0.011s]: house window
+   Expected: ['glass']
+
+✅ Q: What is a tire made of?
+   ✅ Brain  [0.597s]: rubber
+   ❌ TF-IDF [0.014s]: make is made
+   ❌ BM25   [0.009s]: question what
+   Expected: ['rubber']
+
+✅ Q: What is a shirt made of?
+   ✅ Brain  [0.592s]: cotton
+   ❌ TF-IDF [0.015s]: make is made
+   ❌ BM25   [0.011s]: question what
+   Expected: ['cotton', 'fabric']
+
+✅ Q: What happens when you touch fire?
+   ✅ Brain  [0.845s]: burn hot things truck
+   ❌ TF-IDF [0.016s]: when you are sad you cry
+   ❌ BM25   [0.011s]: when you are happy you laugh
+   Expected: ['burn', 'hurt', 'pain']
+
+✅ Q: What happens when ice gets warm?
+   ✅ Brain  [1.157s]: melts melt out sun
+   ✅ TF-IDF [0.016s]: ice melts when it gets warm
+   ✅ BM25   [0.011s]: ice melts when it gets warm
+   Expected: ['melt', 'melts']
+
+❌ Q: What happens when you fall?
+   ❌ Brain  [0.759s]: I do not know
+   ❌ TF-IDF [0.014s]: when you are sad you cry
+   ❌ BM25   [0.010s]: when you are happy you laugh
+   Expected: ['hurt', 'pain']
+
+✅ Q: Is fire dangerous?
+   ✅ Brain  [0.542s]: hot
+   ✅ TF-IDF [0.013s]: fire is dangerous
+   ✅ BM25   [0.007s]: dangerous fire
+   Expected: ['yes', 'dangerous', 'hot']
+
+✅ Q: Is a knife sharp?
+   ✅ Brain  [0.496s]: cut
+   ✅ TF-IDF [0.012s]: knife is sharp
+   ✅ BM25   [0.007s]: sharp knife
+   Expected: ['yes', 'sharp', 'cut']
+
+❌ Q: When should you wash your hands?
+   ❌ Brain  [0.394s]: eat
+   ❌ TF-IDF [0.016s]: hands wash
+   ❌ BM25   [0.010s]: hands wash
+   Expected: ['before eating', 'after toilet', 'eating']
+
+✅ Q: When should you brush your teeth?
+   ✅ Brain  [0.392s]: day
+   ❌ TF-IDF [0.015s]: teeth brush
+   ❌ BM25   [0.010s]: teeth brush
+   Expected: ['morning', 'night', 'day', 'every']
+
+✅ Q: What do you use to wash hands?
+   ✅ Brain  [0.439s]: soap
+   ❌ TF-IDF [0.017s]: hands wash
+   ❌ BM25   [0.013s]: hands wash
+   Expected: ['soap', 'water']
+
+✅ Q: What do you say when you ask for something?
+   ✅ Brain  [0.416s]: please
+   ❌ TF-IDF [0.017s]: when you are sad you cry
+   ❌ BM25   [0.014s]: when you are happy you laugh
+   Expected: ['please']
+
+✅ Q: What do you say when you receive something?
+   ✅ Brain  [0.432s]: thank
+   ❌ TF-IDF [0.017s]: when you are sad you cry
+   ❌ BM25   [0.012s]: when you are happy you laugh
+   Expected: ['thank you', 'thank']
+
+✅ Q: What do you say when you make a mistake?
+   ✅ Brain  [0.457s]: good friends sorry
+   ❌ TF-IDF [0.017s]: when you are sad you cry
+   ❌ BM25   [0.014s]: when you are happy you laugh
+   Expected: ['sorry']
+
+✅ Q: What comes after A?
+   ✅ Brain  [0.000s]: letter_b
+   ❌ TF-IDF [0.012s]: three comes after two
+   ❌ BM25   [0.007s]: tuesday comes after monday
+   Expected: ['b', 'letter_b']
+
+✅ Q: What is the first letter?
+   ✅ Brain  [0.626s]: letter_a
+   ✅ TF-IDF [0.015s]: a is letter
+   ✅ BM25   [0.010s]: letter a
+   Expected: ['a', 'letter_a']
+
+✅ Q: What is the last letter?
+   ✅ Brain  [0.537s]: letter_z
+   ❌ TF-IDF [0.015s]: a is letter
+   ❌ BM25   [0.010s]: letter a
+   Expected: ['z', 'letter_z']
+
+✅ Q: What comes after ten?
+   ✅ Brain  [0.000s]: eleven
+   ❌ TF-IDF [0.013s]: ten comes after nine
+   ❌ BM25   [0.009s]: ten comes after nine
+   Expected: ['eleven']
+
+✅ Q: What comes after nineteen?
+   ✅ Brain  [0.000s]: twenty
+   ❌ TF-IDF [0.013s]: three comes after two
+   ❌ BM25   [0.009s]: tuesday comes after monday
+   Expected: ['twenty']
+
+✅ Q: Is an elephant bigger than a mouse?
+   ✅ Brain  [0.553s]: elephant bigger mouse
+   ❌ TF-IDF [0.016s]: an elephant is a big animal
+   ❌ BM25   [0.010s]: an elephant is a big animal
+   Expected: ['yes', 'bigger']
+
+✅ Q: Is a turtle faster than a rabbit?
+   ✅ Brain  [0.495s]: slower not
+   ❌ TF-IDF [0.015s]: rabbit is fast
+   ❌ BM25   [0.007s]: turtle sea turtle
+   Expected: ['no', 'slower']
+
+✅ Q: Is a feather heavier than a rock?
+   ✅ Brain  [0.496s]: rock heavier feather
+   ❌ TF-IDF [0.014s]: light is feather
+   ❌ BM25   [0.007s]: feather light
+   Expected: ['no', 'lighter', 'rock', 'heavier']
+
+✅ Q: What does a seed become?
+   ✅ Brain  [0.386s]: plant
+   ❌ TF-IDF [0.014s]: question what
+   ❌ BM25   [0.007s]: question what
+   Expected: ['plant', 'sprout']
+
+✅ Q: What is under the ground?
+   ✅ Brain  [0.542s]: root
+   ❌ TF-IDF [0.015s]: placemat is under
+   ❌ BM25   [0.010s]: under placemat
+   Expected: ['root', 'roots']
+
+✅ Q: What does an egg become?
+   ✅ Brain  [0.395s]: bird
+   ❌ TF-IDF [0.014s]: question what
+   ❌ BM25   [0.008s]: question what
+   Expected: ['chick', 'bird', 'animal']
+
+✅ Q: What comes from a cocoon?
+   ✅ Brain  [0.403s]: butterfly come
+   ❌ TF-IDF [0.013s]: question what
+   ❌ BM25   [0.007s]: question what
+   Expected: ['butterfly']
+
+✅ Q: What comes after Monday?
+   ✅ Brain  [0.000s]: tuesday
+   ✅ TF-IDF [0.013s]: tuesday comes after monday
+   ✅ BM25   [0.009s]: tuesday comes after monday
+   Expected: ['tuesday']
+
+✅ Q: What month comes after January?
+   ✅ Brain  [0.000s]: february
+   ❌ TF-IDF [0.015s]: month january
+   ❌ BM25   [0.010s]: month january
+   Expected: ['february']
+
+✅ Q: When does the sun rise?
+   ✅ Brain  [0.411s]: morning
+   ❌ TF-IDF [0.014s]: the sun is yellow
+   ❌ BM25   [0.008s]: the sun is round
+   Expected: ['morning']
+
+✅ Q: When do stars appear?
+   ✅ Brain  [0.382s]: moon sky night
+   ✅ TF-IDF [0.013s]: stars night
+   ✅ BM25   [0.007s]: stars night
+   Expected: ['night']
+
+✅ Q: What do we see with?
+   ✅ Brain  [0.711s]: eyes
+   ✅ TF-IDF [0.015s]: we see with our eyes
+   ✅ BM25   [0.010s]: we see with our eyes
+   Expected: ['eyes']
+
+✅ Q: What do we hear with?
+   ✅ Brain  [0.708s]: ears
+   ✅ TF-IDF [0.015s]: we hear with our ears
+   ✅ BM25   [0.010s]: we hear with our ears
+   Expected: ['ears']
+
+✅ Q: How many fingers on one hand?
+   ✅ Brain  [1.018s]: five
+   ❌ TF-IDF [0.016s]: fingers ten
+   ❌ BM25   [0.012s]: fingers ten
+   Expected: ['five', '5']
+
+✅ Q: What is the opposite of up?
+   ✅ Brain  [0.000s]: down
+   ✅ TF-IDF [0.016s]: up is the opposite of down
+   ✅ BM25   [0.012s]: up is the opposite of down
+   Expected: ['down']
+
+✅ Q: What is the opposite of in?
+   ✅ Brain  [0.001s]: out
+   ✅ TF-IDF [0.016s]: in is the opposite of out
+   ✅ BM25   [0.012s]: in is the opposite of out
+   Expected: ['out']
+
+✅ Q: What is the opposite of left?
+   ✅ Brain  [0.000s]: right
+   ✅ TF-IDF [0.016s]: left is the opposite of right
+   ✅ BM25   [0.012s]: left is the opposite of right
+   Expected: ['right']
+
+✅ Q: What sense uses the nose?
+   ✅ Brain  [0.416s]: smell
+   ❌ TF-IDF [0.014s]: question what
+   ❌ BM25   [0.007s]: question what
+   Expected: ['smell']
+
+✅ Q: What sense uses the tongue?
+   ✅ Brain  [0.385s]: taste
+   ❌ TF-IDF [0.014s]: question what
+   ❌ BM25   [0.007s]: question what
+   Expected: ['taste']
+
+======================================================================
+RESULT PRESCHOOL: 46/48 (95.8%) | Brain: 22.09s | GPT: 0.00s
+BASELINES: TF-IDF 11/48 (22.9%) | BM25 11/48 (22.9%)
+Brain advantage: vs TF-IDF +72.9% | vs BM25 +72.9%
+======================================================================
+Episodes: 68945
+
+======================================================================
+TESTS - GRADE 1 "WORLD AROUND"
+======================================================================
+✅ Q: Is a tree alive?
+   ✅ Brain  [0.502s]: grows
+   ✅ TF-IDF [0.012s]: animal is alive
+   ✅ BM25   [0.007s]: alive plant
+   Expected: ['alive', 'yes', 'grows']
+
+✅ Q: Is a stone alive?
+   ✅ Brain  [0.521s]: not not grow
+   ❌ TF-IDF [0.013s]: animal is alive
+   ❌ BM25   [0.007s]: stone marble
+   Expected: ['not alive', 'no']
+
+✅ Q: Is a bird alive?
+   ✅ Brain  [0.497s]: move eat baby birds
+   ✅ TF-IDF [0.012s]: animal is alive
+   ✅ BM25   [0.007s]: alive plant
+   Expected: ['alive', 'yes', 'move', 'eat', 'baby']
+
+✅ Q: When does snow fall?
+   ✅ Brain  [0.393s]: falls winter
+   ❌ TF-IDF [0.014s]: fall snow
+   ❌ BM25   [0.007s]: fall snow
+   Expected: ['winter']
+
+✅ Q: When do flowers bloom?
+   ✅ Brain  [0.402s]: spring
+   ✅ TF-IDF [0.013s]: flowers bloom spring
+   ✅ BM25   [0.009s]: flowers bloom spring
+   Expected: ['spring']
+
+✅ Q: When do leaves fall?
+   ✅ Brain  [0.435s]: autumn trees
+   ✅ TF-IDF [0.014s]: leaves fall
+   ✅ BM25   [0.009s]: leaves fall fall
+   Expected: ['autumn', 'fall']
+
+✅ Q: Is winter cold or hot?
+   ✅ Brain  [0.529s]: cold snow
+   ✅ TF-IDF [0.015s]: winter is cold
+   ✅ BM25   [0.010s]: cold winter
+   Expected: ['cold', 'snow']
+
+✅ Q: Is summer cold or hot?
+   ✅ Brain  [0.540s]: hot sunny
+   ✅ TF-IDF [0.015s]: summer is hot
+   ✅ BM25   [0.010s]: hot summer
+   Expected: ['hot', 'warm', 'opposite']
+
+✅ Q: What is a dog?
+   ✅ Brain  [0.496s]: animal
+   ❌ TF-IDF [0.012s]: what is question
+   ❌ BM25   [0.007s]: question what
+   Expected: ['pet', 'animal']
+
+✅ Q: What is a cow?
+   ✅ Brain  [0.505s]: animal
+   ❌ TF-IDF [0.012s]: what is question
+   ❌ BM25   [0.007s]: question what
+   Expected: ['farm animal', 'animal']
+
+✅ Q: What is a wolf?
+   ✅ Brain  [0.530s]: wild animal lives forest
+   ❌ TF-IDF [0.012s]: what is question
+   ❌ BM25   [0.007s]: question what
+   Expected: ['wild animal', 'animal']
+
+✅ Q: What does a cow eat?
+   ✅ Brain  [0.406s]: eats grass
+   ❌ TF-IDF [0.013s]: question what
+   ❌ BM25   [0.007s]: question what
+   Expected: ['grass']
+
+✅ Q: What does a rabbit eat?
+   ✅ Brain  [0.411s]: eats carrots vegetables
+   ❌ TF-IDF [0.013s]: question what
+   ❌ BM25   [0.007s]: question what
+   Expected: ['carrots', 'carrot']
+
+✅ Q: Where does a fish live?
+   ✅ Brain  [0.434s]: water
+   ✅ TF-IDF [0.013s]: fish live in water
+   ✅ BM25   [0.007s]: fish live in water
+   Expected: ['water']
+
+✅ Q: Where does a bear live?
+   ✅ Brain  [0.412s]: lives forest eats honey berries
+   ❌ TF-IDF [0.013s]: home is where we live and sleep
+   ❌ BM25   [0.007s]: question where
+   Expected: ['forest']
+
+✅ Q: What does a plant need?
+   ✅ Brain  [0.402s]: plants water grow
+   ❌ TF-IDF [0.013s]: question what
+   ❌ BM25   [0.008s]: question what
+   Expected: ['water', 'sunlight', 'soil']
+
+✅ Q: What does a tree have?
+   ✅ Brain  [0.526s]: roots trunk branches leaves
+   ❌ TF-IDF [0.013s]: question what
+   ❌ BM25   [0.007s]: question what
+   Expected: ['roots', 'trunk', 'branches', 'leaves']
+
+✅ Q: Where do apples grow?
+   ✅ Brain  [0.412s]: apple trees
+   ❌ TF-IDF [0.014s]: apples are red fruit
+   ❌ BM25   [0.009s]: question where
+   Expected: ['tree', 'apple tree']
+
+✅ Q: Is an apple a fruit?
+   ✅ Brain  [0.528s]: apple fruit
+   ✅ TF-IDF [0.014s]: an apple is a fruit
+   ✅ BM25   [0.009s]: an apple is a fruit
+   Expected: ['fruit', 'yes']
+
+✅ Q: Is a carrot a vegetable?
+   ✅ Brain  [0.531s]: carrot vegetable
+   ✅ TF-IDF [0.013s]: a carrot is a vegetable
+   ✅ BM25   [0.007s]: vegetable carrot
+   Expected: ['vegetable', 'yes']
+
+✅ Q: What color is grass?
+   ✅ Brain  [0.496s]: green
+   ✅ TF-IDF [0.013s]: grass is green in color
+   ✅ BM25   [0.009s]: grass is green in color
+   Expected: ['green']
+
+✅ Q: What color is the sky?
+   ✅ Brain  [0.497s]: blue
+   ✅ TF-IDF [0.015s]: blue is the color of the sky
+   ✅ BM25   [0.010s]: blue is the color of the sky
+   Expected: ['blue']
+
+✅ Q: What color is snow?
+   ✅ Brain  [0.518s]: white
+   ❌ TF-IDF [0.014s]: what is question
+   ❌ BM25   [0.009s]: question what
+   Expected: ['white']
+
+✅ Q: What color is the sun?
+   ✅ Brain  [0.504s]: yellow
+   ✅ TF-IDF [0.015s]: yellow is the color of the sun
+   ✅ BM25   [0.010s]: yellow is the color of the sun
+   Expected: ['yellow']
+
+✅ Q: What do we see with?
+   ✅ Brain  [0.667s]: eyes
+   ✅ TF-IDF [0.014s]: we see with our eyes
+   ✅ BM25   [0.010s]: we see with our eyes
+   Expected: ['eyes']
+
+✅ Q: What do we hear with?
+   ✅ Brain  [0.671s]: ears
+   ✅ TF-IDF [0.014s]: we hear with our ears
+   ✅ BM25   [0.010s]: we hear with our ears
+   Expected: ['ears']
+
+✅ Q: How many hands does a human have?
+   ✅ Brain  [0.828s]: two two legs
+   ❌ TF-IDF [0.015s]: alive human
+   ❌ BM25   [0.010s]: rainbows have many colors
+   Expected: ['two', '2']
+
+✅ Q: How many legs does a human have?
+   ✅ Brain  [0.836s]: two hands two
+   ❌ TF-IDF [0.016s]: alive human
+   ❌ BM25   [0.011s]: rainbows have many colors
+   Expected: ['two', '2']
+
+✅ Q: When does the sun shine?
+   ✅ Brain  [0.403s]: shines day
+   ❌ TF-IDF [0.014s]: shine sun
+   ❌ BM25   [0.009s]: shine sun
+   Expected: ['day']
+
+✅ Q: When do stars appear?
+   ✅ Brain  [0.400s]: moon sky night
+   ✅ TF-IDF [0.013s]: stars night
+   ✅ BM25   [0.007s]: stars night
+   Expected: ['night']
+
+✅ Q: When do people sleep?
+   ✅ Brain  [0.412s]: night
+   ✅ TF-IDF [0.014s]: night is when we sleep
+   ✅ BM25   [0.009s]: night is when we sleep
+   Expected: ['night']
+
+✅ Q: Where does a car drive?
+   ✅ Brain  [0.414s]: drives road take different places
+   ❌ TF-IDF [0.013s]: drive car
+   ❌ BM25   [0.007s]: drive car
+   Expected: ['road']
+
+✅ Q: Where does a train ride?
+   ✅ Brain  [0.413s]: trains tracks
+   ❌ TF-IDF [0.013s]: ride train
+   ❌ BM25   [0.007s]: ride train
+   Expected: ['rails', 'tracks']
+
+✅ Q: Where do airplanes fly?
+   ✅ Brain  [0.430s]: sky
+   ✅ TF-IDF [0.014s]: pilots fly airplanes
+   ✅ BM25   [0.009s]: pilots fly airplanes
+   Expected: ['sky', 'air']
+
+✅ Q: What does a cow give?
+   ✅ Brain  [0.436s]: farm animal gives milk
+   ❌ TF-IDF [0.013s]: question what
+   ❌ BM25   [0.008s]: question what
+   Expected: ['milk']
+
+✅ Q: What does a chicken lay?
+   ✅ Brain  [0.424s]: lays eggs
+   ❌ TF-IDF [0.013s]: question what
+   ❌ BM25   [0.006s]: question what
+   Expected: ['eggs']
+
+✅ Q: Where does a duck swim?
+   ✅ Brain  [0.419s]: pond
+   ❌ TF-IDF [0.014s]: swim duck
+   ❌ BM25   [0.007s]: swim duck
+   Expected: ['pond', 'water']
+
+✅ Q: Where do birds live?
+   ✅ Brain  [0.446s]: nests
+   ✅ TF-IDF [0.014s]: birds live in nests
+   ✅ BM25   [0.009s]: birds live in nests
+   Expected: ['nest', 'tree', 'nests']
+
+✅ Q: What covers the ground in winter?
+   ✅ Brain  [0.411s]: snow
+   ❌ TF-IDF [0.016s]: question what
+   ❌ BM25   [0.010s]: question what
+   Expected: ['snow', 'ice']
+
+✅ Q: What falls from clouds?
+   ✅ Brain  [0.408s]: cover sky rain
+   ❌ TF-IDF [0.013s]: question what
+   ❌ BM25   [0.009s]: question what
+   Expected: ['rain', 'snow']
+
+✅ Q: What makes trees move?
+   ✅ Brain  [0.454s]: wind
+   ❌ TF-IDF [0.013s]: question what
+   ❌ BM25   [0.009s]: question what
+   Expected: ['wind']
+
+✅ Q: What do we wear when it is cold?
+   ✅ Brain  [0.424s]: coats
+   ✅ TF-IDF [0.017s]: when it is cold we wear coats
+   ✅ BM25   [0.015s]: when it is cold we wear coats
+   Expected: ['coat', 'hat', 'coats']
+
+✅ Q: What do all living things need?
+   ✅ Brain  [0.427s]: water not alive water survive
+   ❌ TF-IDF [0.016s]: question what
+   ❌ BM25   [0.012s]: everything all
+   Expected: ['water']
+
+✅ Q: Where does water come from?
+   ✅ Brain  [0.472s]: comes rain snow
+   ❌ TF-IDF [0.014s]: plants grow from seeds
+   ❌ BM25   [0.009s]: question where
+   Expected: ['rain', 'clouds']
+
+✅ Q: Can we drink salt water?
+   ✅ Brain  [0.656s]: cannot
+   ✅ TF-IDF [0.015s]: we cannot drink salt water
+   ✅ BM25   [0.010s]: we cannot drink salt water
+   Expected: ['no']
+
+✅ Q: What is the Earth?
+   ✅ Brain  [0.559s]: planet
+   ✅ TF-IDF [0.013s]: the earth is a planet
+   ❌ BM25   [0.009s]: the moon orbits the earth
+   Expected: ['planet']
+
+✅ Q: What does the Earth go around?
+   ✅ Brain  [0.405s]: goes sun
+   ❌ TF-IDF [0.015s]: around fence
+   ❌ BM25   [0.010s]: around fence
+   Expected: ['sun']
+
+✅ Q: What orbits the Earth?
+   ✅ Brain  [0.411s]: moon
+   ✅ TF-IDF [0.013s]: the moon orbits the earth
+   ✅ BM25   [0.009s]: the moon orbits the earth
+   Expected: ['moon']
+
+✅ Q: When can we see the Moon?
+   ✅ Brain  [0.509s]: night
+   ❌ TF-IDF [0.015s]: the moon is round
+   ❌ BM25   [0.011s]: the moon orbits the earth
+   Expected: ['night']
+
+✅ Q: What do we need for strong bones?
+   ✅ Brain  [0.425s]: milk
+   ❌ TF-IDF [0.017s]: hard bones
+   ❌ BM25   [0.013s]: we do not touch fire
+   Expected: ['milk']
+
+✅ Q: What gives us energy?
+   ✅ Brain  [0.423s]: eating
+   ❌ TF-IDF [0.013s]: the sun gives us light and heat
+   ❌ BM25   [0.009s]: the sun gives us light and heat
+   Expected: ['bread', 'rice', 'food', 'eating']
+
+✅ Q: What is not good for teeth?
+   ✅ Brain  [0.976s]: sweets
+   ❌ TF-IDF [0.016s]: what is question
+   ❌ BM25   [0.012s]: question what
+   Expected: ['candy', 'sweets']
+
+✅ Q: What keeps our body healthy?
+   ✅ Brain  [0.416s]: exercise
+   ❌ TF-IDF [0.014s]: question what
+   ❌ BM25   [0.009s]: question what
+   Expected: ['exercise', 'sleep']
+
+✅ Q: When should we brush teeth?
+   ✅ Brain  [0.403s]: day
+   ❌ TF-IDF [0.014s]: teeth brush
+   ❌ BM25   [0.009s]: teeth brush
+   Expected: ['morning', 'night', 'day', 'every']
+
+✅ Q: When should we wash hands?
+   ✅ Brain  [0.399s]: eat
+   ❌ TF-IDF [0.014s]: hands wash
+   ❌ BM25   [0.009s]: hands wash
+   Expected: ['before eating', 'eat']
+
+✅ Q: Where can we borrow books?
+   ✅ Brain  [0.494s]: library
+   ❌ TF-IDF [0.014s]: school is where we learn
+   ❌ BM25   [0.009s]: school is where we learn
+   Expected: ['library']
+
+✅ Q: What can we learn from books?
+   ✅ Brain  [0.548s]: many things
+   ❌ TF-IDF [0.016s]: question what
+   ❌ BM25   [0.012s]: question what
+   Expected: ['many', 'things', 'stories']
+
+✅ Q: What should we say when we make a mistake?
+   ✅ Brain  [0.454s]: good friends sorry
+   ✅ TF-IDF [0.016s]: we say sorry when we make mistakes
+   ✅ BM25   [0.013s]: we say sorry when we make mistakes
+   Expected: ['sorry']
+
+✅ Q: Who helps us learn at school?
+   ✅ Brain  [0.722s]: teachers help
+   ❌ TF-IDF [0.016s]: i learn at school
+   ❌ BM25   [0.012s]: i learn at school
+   Expected: ['teacher']
+
+✅ Q: What do we learn in math class?
+   ✅ Brain  [0.399s]: numbers
+   ❌ TF-IDF [0.016s]: question what
+   ❌ BM25   [0.012s]: we do not touch fire
+   Expected: ['numbers']
+
+✅ Q: Is helping others good?
+   ✅ Brain  [0.528s]: makes feel
+   ✅ TF-IDF [0.013s]: happy is good
+   ✅ BM25   [0.006s]: bad good
+   Expected: ['yes', 'good', 'feel']
+
+✅ Q: What do we say when we ask for something?
+   ✅ Brain  [0.428s]: please
+   ❌ TF-IDF [0.017s]: we say sorry when we make mistakes
+   ❌ BM25   [0.014s]: we say sorry when we make mistakes
+   Expected: ['please']
+
+✅ Q: What do we say when someone gives us something?
+   ✅ Brain  [0.429s]: thank
+   ❌ TF-IDF [0.018s]: the sun gives us light and heat
+   ❌ BM25   [0.014s]: we say sorry when we make mistakes
+   Expected: ['thank', 'thank you']
+
+✅ Q: What do we say when we bump into someone?
+   ✅ Brain  [0.413s]: excuse
+   ✅ TF-IDF [0.017s]: we say sorry when we make mistakes
+   ✅ BM25   [0.013s]: we say sorry when we make mistakes
+   Expected: ['excuse', 'sorry']
+
+======================================================================
+RESULT GRADE1: 64/64 (100.0%) | Brain: 31.22s | GPT: 0.00s
+BASELINES: TF-IDF 25/64 (39.1%) | BM25 24/64 (37.5%)
+Brain advantage: vs TF-IDF +60.9% | vs BM25 +62.5%
+======================================================================
+Episodes: 68945
+
+======================================================================
+TESTS FineWeb-Edu (direct facts from texts)
+======================================================================
+✅ Q: Who shot Lincoln?
+   ✅ Brain  [0.426s]: president john wilkes booth 26 years old one nations famous actors
+   ❌ TF-IDF [0.012s]: person who
+   ❌ BM25   [0.005s]: question who
+   Expected: ['booth']
+
+✅ Q: How old was Booth?
+   ✅ Brain  [0.751s]: shot president lincoln john wilkes 26 years one nations famous actors
+   ❌ TF-IDF [0.013s]: question how
+   ❌ BM25   [0.006s]: question how
+   Expected: ['26', 'years']
+
+✅ Q: What was Booth?
+   ✅ Brain  [0.498s]: shot president lincoln john wilkes 26 years old one nations famous actors
+   ❌ TF-IDF [0.012s]: question what
+   ❌ BM25   [0.005s]: question what
+   Expected: ['actor', 'famous']
+
+✅ Q: What color is chlorophyll?
+   ✅ Brain  [0.483s]: green disappears leaves
+   ❌ TF-IDF [0.013s]: what is question
+   ❌ BM25   [0.007s]: question what
+   Expected: ['green']
+
+❌ Q: What disappears from leaves?
+   ❌ Brain  [0.768s]: I do not know
+   ❌ TF-IDF [0.013s]: question what
+   ❌ BM25   [0.007s]: question what
+   Expected: ['chlorophyll', 'green']
+
+❌ Q: What is sedimentary rock made of?
+   ❌ Brain  [0.520s]: sedimentary rock made
+   ❌ TF-IDF [0.015s]: make is made
+   ❌ BM25   [0.011s]: question what
+   Expected: ['bones', 'shells', 'organic', 'sandstone', 'limestone', 'shale']
+
+✅ Q: What is the origin of species?
+   ✅ Brain  [0.542s]: darwin first published ideas book entitled means natural selection 1859
+   ❌ TF-IDF [0.015s]: what is question
+   ❌ BM25   [0.009s]: question what
+   Expected: ['darwin', 'selection']
+
+✅ Q: Who invented the telephone?
+   ✅ Brain  [0.784s]: I do not know
+   ❌ TF-IDF [0.013s]: person who
+   ❌ BM25   [0.006s]: question who
+   Expected: ['not know']
+
+✅ Q: Who discovered America?
+   ✅ Brain  [0.805s]: I do not know
+   ❌ TF-IDF [0.012s]: person who
+   ❌ BM25   [0.006s]: question who
+   Expected: ['not know']
+
+======================================================================
+RESULT FineWeb-Edu: 7/9 (77.8%) | Brain: 5.58s | GPT: 0.00s
+BASELINES: TF-IDF 0/9 (0.0%) | BM25 0/9 (0.0%)
+Brain advantage: vs TF-IDF +77.8% | vs BM25 +77.8%
+======================================================================
+
+======================================================================
+PARAPHRASE ROBUSTNESS TESTS
+======================================================================
+Testing same knowledge with alternative phrasings...
+
+❌ Q: A dog is what kind of thing?
+   ❌ Brain  [0.538s]: things smell good smell bad
+   ❌ TF-IDF [0.016s]: what is thing
+   ❌ BM25   [0.011s]: thing what
+   Expected: ['animal', 'pet', 'mammal']
+
+❌ Q: Dogs belong to what category?
+   ❌ Brain  [0.771s]: I do not know
+   ❌ TF-IDF [0.014s]: belong whose
+   ❌ BM25   [0.009s]: belong whose
+   Expected: ['animal', 'pet', 'mammal']
+
+❌ Q: Tell me what a dog is
+   ❌ Brain  [0.842s]: I do not know
+   ❌ TF-IDF [0.015s]: what is question
+   ❌ BM25   [0.009s]: question what
+   Expected: ['animal', 'pet', 'mammal']
+
+❌ Q: What category does a dog belong to?
+   ❌ Brain  [0.745s]: I do not know
+   ❌ TF-IDF [0.015s]: belong whose
+   ❌ BM25   [0.009s]: belong whose
+   Expected: ['animal', 'pet', 'mammal']
+
+✅ Q: An apple is a type of what?
+   ✅ Brain  [0.850s]: fruit
+   ✅ TF-IDF [0.016s]: an apple is a fruit
+   ❌ BM25   [0.012s]: i eat an apple
+   Expected: ['fruit']
+
+❌ Q: Apples are classified as what?
+   ❌ Brain  [0.811s]: I do not know
+   ✅ TF-IDF [0.014s]: apples are red fruit
+   ✅ BM25   [0.008s]: apples are red fruit
+   Expected: ['fruit']
+
+❌ Q: What kind of food is an apple?
+   ❌ Brain  [0.755s]: I do not know
+   ✅ TF-IDF [0.017s]: an apple is a fruit
+   ❌ BM25   [0.013s]: i eat an apple
+   Expected: ['fruit']
+
+✅ Q: The sky is what color?
+   ✅ Brain  [0.497s]: blue
+   ✅ TF-IDF [0.015s]: blue is the color of the sky
+   ✅ BM25   [0.010s]: blue is the color of the sky
+   Expected: ['blue']
+
+✅ Q: What is the color of the sky?
+   ✅ Brain  [0.521s]: blue
+   ✅ TF-IDF [0.016s]: blue is the color of the sky
+   ✅ BM25   [0.013s]: blue is the color of the sky
+   Expected: ['blue']
+
+❌ Q: Tell me the sky's color
+   ❌ Brain  [0.000s]: I do not know
+   ✅ TF-IDF [0.015s]: blue is the color of the sky
+   ✅ BM25   [0.009s]: blue is the color of the sky
+   Expected: ['blue']
+
+✅ Q: The color of the sky is what?
+   ✅ Brain  [0.499s]: blue
+   ✅ TF-IDF [0.016s]: blue is the color of the sky
+   ✅ BM25   [0.013s]: blue is the color of the sky
+   Expected: ['blue']
+
+✅ Q: Grass is what color?
+   ✅ Brain  [0.519s]: green
+   ✅ TF-IDF [0.013s]: grass is green in color
+   ✅ BM25   [0.009s]: grass is green in color
+   Expected: ['green']
+
+✅ Q: What is the color of grass?
+   ✅ Brain  [0.521s]: green
+   ✅ TF-IDF [0.016s]: green is the color of grass
+   ✅ BM25   [0.012s]: green is the color of grass
+   Expected: ['green']
+
+✅ Q: Hot is the opposite of what?
+   ✅ Brain  [0.509s]: cold
+   ✅ TF-IDF [0.016s]: hot is the opposite of cold
+   ✅ BM25   [0.012s]: hot is the opposite of cold
+   Expected: ['cold']
+
+✅ Q: What word is opposite to hot?
+   ✅ Brain  [0.000s]: cold
+   ❌ TF-IDF [0.016s]: what is question
+   ❌ BM25   [0.010s]: question what
+   Expected: ['cold']
+
+✅ Q: The opposite of hot is what?
+   ✅ Brain  [0.000s]: cold
+   ✅ TF-IDF [0.016s]: hot is the opposite of cold
+   ✅ BM25   [0.012s]: hot is the opposite of cold
+   Expected: ['cold']
+
+❌ Q: What is hot's opposite?
+   ❌ Brain  [0.000s]: I do not know
+   ❌ TF-IDF [0.014s]: what is question
+   ❌ BM25   [0.009s]: question what
+   Expected: ['cold']
+
+✅ Q: Big is the opposite of what?
+   ✅ Brain  [0.528s]: small
+   ✅ TF-IDF [0.016s]: big is the opposite of small
+   ✅ BM25   [0.012s]: big is the opposite of small
+   Expected: ['small', 'little']
+
+✅ Q: What word means the opposite of big?
+   ✅ Brain  [0.000s]: small
+   ✅ TF-IDF [0.016s]: big is the opposite of small
+   ✅ BM25   [0.011s]: big is the opposite of small
+   Expected: ['small', 'little']
+
+✅ Q: France has what capital?
+   ✅ Brain  [0.492s]: paris
+   ✅ TF-IDF [0.013s]: paris is the capital of france
+   ❌ BM25   [0.009s]: question what
+   Expected: ['paris']
+
+✅ Q: The capital of France is what?
+   ✅ Brain  [0.518s]: paris
+   ✅ TF-IDF [0.016s]: paris is the capital of france
+   ✅ BM25   [0.012s]: paris is the capital of france
+   Expected: ['paris']
+
+✅ Q: Which city is the capital of France?
+   ✅ Brain  [0.888s]: paris
+   ✅ TF-IDF [0.017s]: paris is the capital of france
+   ✅ BM25   [0.013s]: paris is the capital of france
+   Expected: ['paris']
+
+❌ Q: Name the capital of France
+   ❌ Brain  [0.447s]: beijing china
+   ✅ TF-IDF [0.014s]: paris is the capital of france
+   ✅ BM25   [0.010s]: paris is the capital of france
+   Expected: ['paris']
+
+❌ Q: Paris is located where?
+   ❌ Brain  [0.837s]: I do not know
+   ❌ TF-IDF [0.014s]: paris is capital
+   ❌ BM25   [0.008s]: capital paris
+   Expected: ['france']
+
+✅ Q: In what country is Paris?
+   ✅ Brain  [0.880s]: capital france
+   ❌ TF-IDF [0.014s]: what is question
+   ❌ BM25   [0.010s]: question what
+   Expected: ['france']
+
+✅ Q: Paris is in what country?
+   ✅ Brain  [0.878s]: capital france
+   ❌ TF-IDF [0.015s]: what is question
+   ❌ BM25   [0.010s]: question what
+   Expected: ['france']
+
+❌ Q: The sun is a type of what?
+   ❌ Brain  [0.839s]: plants need water grow
+   ❌ TF-IDF [0.015s]: yellow is the color of the sun
+   ❌ BM25   [0.012s]: yellow is the color of the sun
+   Expected: ['star']
+
+❌ Q: What kind of celestial body is the sun?
+   ❌ Brain  [0.775s]: good day bright up
+   ❌ TF-IDF [0.017s]: yellow is the color of the sun
+   ❌ BM25   [0.014s]: yellow is the color of the sun
+   Expected: ['star']
+
+❌ Q: Tell me what the sun is
+   ❌ Brain  [0.834s]: I do not know
+   ❌ TF-IDF [0.016s]: what is question
+   ❌ BM25   [0.010s]: question what
+   Expected: ['star']
+
+❌ Q: Water is what state of matter?
+   ❌ Brain  [1.237s]: I do not know
+   ❌ TF-IDF [0.015s]: what is question
+   ❌ BM25   [0.009s]: question what
+   Expected: ['liquid']
+
+✅ Q: What kind of substance is water?
+   ✅ Brain  [0.810s]: not day drink wet
+   ❌ TF-IDF [0.015s]: what is question
+   ❌ BM25   [0.010s]: question what
+   Expected: ['liquid', 'drink']
+
+❌ Q: What sound does a dog make?
+   ❌ Brain  [0.813s]: up food say art
+   ❌ TF-IDF [0.014s]: question what
+   ❌ BM25   [0.009s]: question what
+   Expected: ['woof', 'bark']
+
+✅ Q: A dog says what?
+   ✅ Brain  [0.430s]: say woof
+   ❌ TF-IDF [0.012s]: question what
+   ✅ BM25   [0.007s]: a dog says woof woof
+   Expected: ['woof', 'bark']
+
+❌ Q: Dogs make what sound?
+   ❌ Brain  [0.849s]: say up art food
+   ❌ TF-IDF [0.013s]: question what
+   ❌ BM25   [0.009s]: question what
+   Expected: ['woof', 'bark']
+
+❌ Q: What sound does a cat make?
+   ❌ Brain  [0.804s]: food not up art
+   ❌ TF-IDF [0.014s]: question what
+   ❌ BM25   [0.009s]: question what
+   Expected: ['meow', 'purr']
+
+✅ Q: A cat says what?
+   ✅ Brain  [0.424s]: meow meow
+   ❌ TF-IDF [0.012s]: question what
+   ✅ BM25   [0.007s]: a cat says meow meow
+   Expected: ['meow', 'purr']
+
+✅ Q: A puppy is what kind of animal?
+   ✅ Brain  [0.940s]: baby bird dog sea
+   ❌ TF-IDF [0.016s]: what is question
+   ❌ BM25   [0.012s]: question what
+   Expected: ['baby', 'dog', 'young']
+
+✅ Q: What is a puppy called?
+   ✅ Brain  [0.908s]: baby dog
+   ❌ TF-IDF [0.013s]: what is question
+   ❌ BM25   [0.008s]: question what
+   Expected: ['baby', 'dog', 'young']
+
+✅ Q: We see using what?
+   ✅ Brain  [0.423s]: eyes
+   ❌ TF-IDF [0.013s]: question what
+   ❌ BM25   [0.007s]: question what
+   Expected: ['eyes']
+
+❌ Q: What body part do we use to see?
+   ❌ Brain  [0.451s]: shampoo wash hair
+   ❌ TF-IDF [0.018s]: we go to school to learn
+   ❌ BM25   [0.013s]: do not talk to strangers
+   Expected: ['eyes']
+
+❌ Q: Seeing is done with what?
+   ❌ Brain  [1.003s]: I do not know
+   ❌ TF-IDF [0.015s]: what is question
+   ❌ BM25   [0.009s]: question what
+   Expected: ['eyes']
+
+✅ Q: We hear using what?
+   ✅ Brain  [0.413s]: ears
+   ❌ TF-IDF [0.013s]: question what
+   ❌ BM25   [0.007s]: question what
+   Expected: ['ears']
+
+❌ Q: Hearing is done with what?
+   ❌ Brain  [0.674s]: people five senses sight smell taste touch
+   ❌ TF-IDF [0.014s]: what is question
+   ❌ BM25   [0.009s]: question what
+   Expected: ['ears']
+
+❌ Q: By what is sound heard?
+   ❌ Brain  [0.870s]: I do not know
+   ❌ TF-IDF [0.015s]: what is question
+   ❌ BM25   [0.009s]: question what
+   Expected: ['ears']
+
+❌ Q: By what organ do we smell?
+   ❌ Brain  [0.747s]: I do not know
+   ❌ TF-IDF [0.016s]: question what
+   ❌ BM25   [0.010s]: we do not touch fire
+   Expected: ['nose']
+
+✅ Q: We wake up at what time of day?
+   ✅ Brain  [0.462s]: morning
+   ❌ TF-IDF [0.017s]: time day
+   ❌ BM25   [0.015s]: time day
+   Expected: ['morning']
+
+✅ Q: What time of day do people wake up?
+   ✅ Brain  [0.474s]: morning
+   ❌ TF-IDF [0.017s]: time day
+   ❌ BM25   [0.015s]: time day
+   Expected: ['morning']
+
+❌ Q: After Monday comes what?
+   ❌ Brain  [0.000s]: six
+   ✅ TF-IDF [0.014s]: tuesday comes after monday
+   ✅ BM25   [0.009s]: tuesday comes after monday
+   Expected: ['tuesday']
+
+❌ Q: Monday is followed by what day?
+   ❌ Brain  [0.530s]: first week
+   ❌ TF-IDF [0.016s]: what is question
+   ✅ BM25   [0.010s]: tuesday monday
+   Expected: ['tuesday']
+
+❌ Q: The day after Monday is what?
+   ❌ Brain  [0.561s]: first week
+   ✅ TF-IDF [0.016s]: tuesday comes after monday
+   ✅ BM25   [0.012s]: tuesday comes after monday
+   Expected: ['tuesday']
+
+======================================================================
+RESULT PARAPHRASE: 25/50 (50.0%)
+Baseline (original questions): 98.8%
+Degradation: +48.8% (lower is better)
+Brain: 30.12s
+BASELINES: TF-IDF 19/50 (38.0%) | BM25 19/50 (38.0%)
+Brain advantage: vs TF-IDF +12.0% | vs BM25 +12.0%
+======================================================================
+
+FAILED PARAPHRASES (surface form sensitivity):
+   ❌ "A dog is what kind of thing?" -> got "things smell good smell bad", expected ['animal', 'pet', 'mammal']
+   ❌ "Dogs belong to what category?" -> got "I do not know", expected ['animal', 'pet', 'mammal']
+   ❌ "Tell me what a dog is" -> got "I do not know", expected ['animal', 'pet', 'mammal']
+   ❌ "What category does a dog belong to?" -> got "I do not know", expected ['animal', 'pet', 'mammal']
+   ❌ "Apples are classified as what?" -> got "I do not know", expected ['fruit']
+   ❌ "What kind of food is an apple?" -> got "I do not know", expected ['fruit']
+   ❌ "Tell me the sky's color" -> got "I do not know", expected ['blue']
+   ❌ "What is hot's opposite?" -> got "I do not know", expected ['cold']
+   ❌ "Name the capital of France" -> got "beijing china", expected ['paris']
+   ❌ "Paris is located where?" -> got "I do not know", expected ['france']
+   ❌ "The sun is a type of what?" -> got "plants need water grow", expected ['star']
+   ❌ "What kind of celestial body is the sun?" -> got "good day bright up", expected ['star']
+   ❌ "Tell me what the sun is" -> got "I do not know", expected ['star']
+   ❌ "Water is what state of matter?" -> got "I do not know", expected ['liquid']
+   ❌ "What sound does a dog make?" -> got "up food say art", expected ['woof', 'bark']
+   ❌ "Dogs make what sound?" -> got "say up art food", expected ['woof', 'bark']
+   ❌ "What sound does a cat make?" -> got "food not up art", expected ['meow', 'purr']
+   ❌ "What body part do we use to see?" -> got "shampoo wash hair", expected ['eyes']
+   ❌ "Seeing is done with what?" -> got "I do not know", expected ['eyes']
+   ❌ "Hearing is done with what?" -> got "people five senses sight smell taste touch", expected ['ears']
+   ❌ "By what is sound heard?" -> got "I do not know", expected ['ears']
+   ❌ "By what organ do we smell?" -> got "I do not know", expected ['nose']
+   ❌ "After Monday comes what?" -> got "six", expected ['tuesday']
+   ❌ "Monday is followed by what day?" -> got "first week", expected ['tuesday']
+   ❌ "The day after Monday is what?" -> got "first week", expected ['tuesday']
+
+======================================================================
+TESTS bAbI Task 1 (working memory)
+======================================================================
+Note: TF-IDF/BM25/RAG/Transformer = 0% (no working memory support)
+      MemNet/NTM support working memory via answer_with_context()
+
+✅ Q: Where is Mary? [Story 1]
+   Context: Mary moved to the bathroom. | John went to the hallway.
+   ✅ Brain  [0.492s]: moved to the bathroom.
+   ✅ MemNet [0.000s]: bathroom
+   ✅ NTM    [0.000s]: bathroom
+   Expected: bathroom
+
+✅ Q: Where is Daniel? [Story 1]
+   Context: Mary moved to the bathroom. | John went to the hallway. | Daniel went back to the hallway. | Sandra moved to the garden.
+   ✅ Brain  [0.345s]: went back to the hallway.
+   ✅ MemNet [0.000s]: hallway
+   ✅ NTM    [0.000s]: back hallway the
+   Expected: hallway
+
+✅ Q: Where is Daniel? [Story 1]
+   Context: Mary moved to the bathroom. | John went to the hallway. | Daniel went back to the hallway. | Sandra moved to the garden. | John moved to the office. | Sandra journeyed to the bathroom.
+   ✅ Brain  [0.387s]: went back to the hallway.
+   ✅ MemNet [0.000s]: hallway
+   ✅ NTM    [0.000s]: back hallway the
+   Expected: hallway
+
+✅ Q: Where is Daniel? [Story 1]
+   Context: Mary moved to the bathroom. | John went to the hallway. | Daniel went back to the hallway. | Sandra moved to the garden. | John moved to the office. | Sandra journeyed to the bathroom. | Mary moved to the hallway. | Daniel travelled to the office.
+   ✅ Brain  [0.436s]: travelled to the office.
+   ✅ MemNet [0.000s]: office
+   ✅ NTM    [0.000s]: office
+   Expected: office
+
+✅ Q: Where is Sandra? [Story 1]
+   Context: Mary moved to the bathroom. | John went to the hallway. | Daniel went back to the hallway. | Sandra moved to the garden. | John moved to the office. | Sandra journeyed to the bathroom. | Mary moved to the hallway. | Daniel travelled to the office. | John went back to the garden. | John moved to the bedroom.
+   ✅ Brain  [0.453s]: journeyed to the bathroom.
+   ✅ MemNet [0.000s]: bathroom
+   ✅ NTM    [0.000s]: bathroom
+   Expected: bathroom
+
+✅ Q: Where is Sandra? [Story 2]
+   Context: Sandra travelled to the office. | Sandra went to the bathroom.
+   ✅ Brain  [0.702s]: went to the bathroom.
+   ✅ MemNet [0.000s]: bathroom
+   ✅ NTM    [0.000s]: bathroom
+   Expected: bathroom
+
+✅ Q: Where is Sandra? [Story 2]
+   Context: Sandra travelled to the office. | Sandra went to the bathroom. | Mary went to the bedroom. | Daniel moved to the hallway.
+   ✅ Brain  [0.630s]: went to the bathroom.
+   ✅ MemNet [0.000s]: bathroom
+   ✅ NTM    [0.000s]: bathroom
+   Expected: bathroom
+
+✅ Q: Where is Sandra? [Story 2]
+   Context: Sandra travelled to the office. | Sandra went to the bathroom. | Mary went to the bedroom. | Daniel moved to the hallway. | John went to the garden. | John travelled to the office.
+   ✅ Brain  [0.550s]: went to the bathroom.
+   ✅ MemNet [0.000s]: bathroom
+   ✅ NTM    [0.000s]: bathroom
+   Expected: bathroom
+
+✅ Q: Where is John? [Story 2]
+   Context: Sandra travelled to the office. | Sandra went to the bathroom. | Mary went to the bedroom. | Daniel moved to the hallway. | John went to the garden. | John travelled to the office. | Daniel journeyed to the bedroom. | Daniel travelled to the hallway.
+   ✅ Brain  [0.429s]: travelled to the office.
+   ✅ MemNet [0.000s]: office
+   ✅ NTM    [0.000s]: office
+   Expected: office
+
+✅ Q: Where is Daniel? [Story 2]
+   Context: Sandra travelled to the office. | Sandra went to the bathroom. | Mary went to the bedroom. | Daniel moved to the hallway. | John went to the garden. | John travelled to the office. | Daniel journeyed to the bedroom. | Daniel travelled to the hallway. | John went to the bedroom. | John travelled to the office.
+   ✅ Brain  [0.446s]: travelled to the hallway.
+   ✅ MemNet [0.000s]: hallway
+   ✅ NTM    [0.000s]: hallway
+   Expected: hallway
+
+✅ Q: Where is John? [Story 3]
+   Context: Mary went to the bedroom. | John journeyed to the bathroom.
+   ✅ Brain  [0.763s]: journeyed to the bathroom.
+   ✅ MemNet [0.000s]: bathroom
+   ✅ NTM    [0.000s]: bathroom
+   Expected: bathroom
+
+✅ Q: Where is Mary? [Story 3]
+   Context: Mary went to the bedroom. | John journeyed to the bathroom. | Sandra journeyed to the hallway. | John journeyed to the garden.
+   ✅ Brain  [0.573s]: went to the bedroom.
+   ✅ MemNet [0.000s]: bedroom
+   ✅ NTM    [0.000s]: bedroom
+   Expected: bedroom
+
+✅ Q: Where is John? [Story 3]
+   Context: Mary went to the bedroom. | John journeyed to the bathroom. | Sandra journeyed to the hallway. | John journeyed to the garden. | John journeyed to the bathroom. | Sandra journeyed to the garden.
+   ✅ Brain  [0.615s]: journeyed to the bathroom.
+   ✅ MemNet [0.000s]: bathroom
+   ✅ NTM    [0.000s]: bathroom
+   Expected: bathroom
+
+✅ Q: Where is John? [Story 3]
+   Context: Mary went to the bedroom. | John journeyed to the bathroom. | Sandra journeyed to the hallway. | John journeyed to the garden. | John journeyed to the bathroom. | Sandra journeyed to the garden. | Sandra went back to the bedroom. | Daniel travelled to the bathroom.
+   ✅ Brain  [0.704s]: journeyed to the bathroom.
+   ✅ MemNet [0.000s]: bathroom
+   ✅ NTM    [0.000s]: bathroom
+   Expected: bathroom
+
+✅ Q: Where is Sandra? [Story 3]
+   Context: Mary went to the bedroom. | John journeyed to the bathroom. | Sandra journeyed to the hallway. | John journeyed to the garden. | John journeyed to the bathroom. | Sandra journeyed to the garden. | Sandra went back to the bedroom. | Daniel travelled to the bathroom. | John went to the office. | Mary moved to the office.
+   ✅ Brain  [0.466s]: went back to the bedroom.
+   ✅ MemNet [0.000s]: bedroom
+   ❌ NTM    [0.000s]: garden
+   Expected: bedroom
+
+✅ Q: Where is Daniel? [Story 4]
+   Context: Daniel journeyed to the kitchen. | Daniel journeyed to the bedroom.
+   ✅ Brain  [0.652s]: journeyed to the bedroom.
+   ✅ MemNet [0.000s]: bedroom
+   ✅ NTM    [0.000s]: bedroom
+   Expected: bedroom
+
+✅ Q: Where is Sandra? [Story 4]
+   Context: Daniel journeyed to the kitchen. | Daniel journeyed to the bedroom. | Sandra moved to the garden. | Sandra went back to the kitchen.
+   ✅ Brain  [0.636s]: went back to the kitchen.
+   ✅ MemNet [0.000s]: kitchen
+   ❌ NTM    [0.000s]: garden
+   Expected: kitchen
+
+✅ Q: Where is Sandra? [Story 4]
+   Context: Daniel journeyed to the kitchen. | Daniel journeyed to the bedroom. | Sandra moved to the garden. | Sandra went back to the kitchen. | Daniel travelled to the office. | Sandra went back to the hallway.
+   ✅ Brain  [0.782s]: went back to the hallway.
+   ✅ MemNet [0.000s]: hallway
+   ❌ NTM    [0.000s]: garden
+   Expected: hallway
+
+✅ Q: Where is Sandra? [Story 4]
+   Context: Daniel journeyed to the kitchen. | Daniel journeyed to the bedroom. | Sandra moved to the garden. | Sandra went back to the kitchen. | Daniel travelled to the office. | Sandra went back to the hallway. | Daniel journeyed to the hallway. | Daniel went to the bathroom.
+   ✅ Brain  [0.742s]: went back to the hallway.
+   ✅ MemNet [0.000s]: hallway
+   ❌ NTM    [0.000s]: garden
+   Expected: hallway
+
+✅ Q: Where is Daniel? [Story 4]
+   Context: Daniel journeyed to the kitchen. | Daniel journeyed to the bedroom. | Sandra moved to the garden. | Sandra went back to the kitchen. | Daniel travelled to the office. | Sandra went back to the hallway. | Daniel journeyed to the hallway. | Daniel went to the bathroom. | John travelled to the garden. | Daniel moved to the hallway.
+   ✅ Brain  [0.766s]: moved to the hallway.
+   ✅ MemNet [0.000s]: hallway
+   ✅ NTM    [0.000s]: hallway
+   Expected: hallway
+
+✅ Q: Where is John? [Story 5]
+   Context: Mary moved to the garden. | John journeyed to the bathroom.
+   ✅ Brain  [0.703s]: journeyed to the bathroom.
+   ✅ MemNet [0.000s]: bathroom
+   ✅ NTM    [0.000s]: bathroom
+   Expected: bathroom
+
+✅ Q: Where is Mary? [Story 5]
+   Context: Mary moved to the garden. | John journeyed to the bathroom. | Sandra moved to the office. | John moved to the kitchen.
+   ✅ Brain  [0.639s]: moved to the garden.
+   ✅ MemNet [0.000s]: garden
+   ✅ NTM    [0.000s]: garden
+   Expected: garden
+
+✅ Q: Where is John? [Story 5]
+   Context: Mary moved to the garden. | John journeyed to the bathroom. | Sandra moved to the office. | John moved to the kitchen. | Sandra went to the hallway. | Mary travelled to the bedroom.
+   ✅ Brain  [0.714s]: moved to the kitchen.
+   ✅ MemNet [0.000s]: kitchen
+   ✅ NTM    [0.000s]: kitchen
+   Expected: kitchen
+
+✅ Q: Where is Sandra? [Story 5]
+   Context: Mary moved to the garden. | John journeyed to the bathroom. | Sandra moved to the office. | John moved to the kitchen. | Sandra went to the hallway. | Mary travelled to the bedroom. | Mary moved to the office. | John moved to the garden.
+   ✅ Brain  [0.719s]: went to the hallway.
+   ✅ MemNet [0.000s]: hallway
+   ✅ NTM    [0.000s]: hallway
+   Expected: hallway
+
+✅ Q: Where is John? [Story 5]
+   Context: Mary moved to the garden. | John journeyed to the bathroom. | Sandra moved to the office. | John moved to the kitchen. | Sandra went to the hallway. | Mary travelled to the bedroom. | Mary moved to the office. | John moved to the garden. | John journeyed to the office. | Sandra went to the office.
+   ✅ Brain  [0.757s]: journeyed to the office.
+   ✅ MemNet [0.000s]: office
+   ✅ NTM    [0.000s]: office
+   Expected: office
+
+✅ Q: Where is Daniel? [Story 6]
+   Context: Mary moved to the garden. | Daniel journeyed to the bathroom.
+   ✅ Brain  [0.700s]: journeyed to the bathroom.
+   ✅ MemNet [0.000s]: bathroom
+   ✅ NTM    [0.000s]: bathroom
+   Expected: bathroom
+
+✅ Q: Where is John? [Story 6]
+   Context: Mary moved to the garden. | Daniel journeyed to the bathroom. | John travelled to the kitchen. | John went back to the bedroom.
+   ✅ Brain  [0.659s]: went back to the bedroom.
+   ✅ MemNet [0.000s]: bedroom
+   ❌ NTM    [0.000s]: kitchen
+   Expected: bedroom
+
+✅ Q: Where is Daniel? [Story 6]
+   Context: Mary moved to the garden. | Daniel journeyed to the bathroom. | John travelled to the kitchen. | John went back to the bedroom. | John moved to the office. | Daniel went back to the garden.
+   ✅ Brain  [0.705s]: went back to the garden.
+   ✅ MemNet [0.000s]: garden
+   ❌ NTM    [0.000s]: bathroom
+   Expected: garden
+
+✅ Q: Where is John? [Story 6]
+   Context: Mary moved to the garden. | Daniel journeyed to the bathroom. | John travelled to the kitchen. | John went back to the bedroom. | John moved to the office. | Daniel went back to the garden. | John went back to the hallway. | Mary went to the office.
+   ✅ Brain  [0.727s]: went back to the hallway.
+   ✅ MemNet [0.000s]: hallway
+   ❌ NTM    [0.000s]: office
+   Expected: hallway
+
+✅ Q: Where is Daniel? [Story 6]
+   Context: Mary moved to the garden. | Daniel journeyed to the bathroom. | John travelled to the kitchen. | John went back to the bedroom. | John moved to the office. | Daniel went back to the garden. | John went back to the hallway. | Mary went to the office. | Sandra travelled to the bedroom. | John travelled to the garden.
+   ✅ Brain  [0.446s]: went back to the garden.
+   ✅ MemNet [0.000s]: garden
+   ❌ NTM    [0.000s]: bathroom
+   Expected: garden
+
+✅ Q: Where is Mary? [Story 7]
+   Context: John moved to the bedroom. | Mary moved to the hallway.
+   ✅ Brain  [0.750s]: moved to the hallway.
+   ✅ MemNet [0.000s]: hallway
+   ✅ NTM    [0.000s]: hallway
+   Expected: hallway
+
+✅ Q: Where is Sandra? [Story 7]
+   Context: John moved to the bedroom. | Mary moved to the hallway. | Sandra moved to the bedroom. | Sandra travelled to the kitchen.
+   ✅ Brain  [0.582s]: travelled to the kitchen.
+   ✅ MemNet [0.000s]: kitchen
+   ✅ NTM    [0.000s]: kitchen
+   Expected: kitchen
+
+✅ Q: Where is Daniel? [Story 7]
+   Context: John moved to the bedroom. | Mary moved to the hallway. | Sandra moved to the bedroom. | Sandra travelled to the kitchen. | Daniel journeyed to the bathroom. | Sandra moved to the bathroom.
+   ✅ Brain  [0.607s]: journeyed to the bathroom.
+   ✅ MemNet [0.000s]: bathroom
+   ✅ NTM    [0.000s]: bathroom
+   Expected: bathroom
+
+✅ Q: Where is John? [Story 7]
+   Context: John moved to the bedroom. | Mary moved to the hallway. | Sandra moved to the bedroom. | Sandra travelled to the kitchen. | Daniel journeyed to the bathroom. | Sandra moved to the bathroom. | Daniel went back to the garden. | John moved to the kitchen.
+   ✅ Brain  [0.442s]: moved to the kitchen.
+   ✅ MemNet [0.000s]: kitchen
+   ✅ NTM    [0.000s]: kitchen
+   Expected: kitchen
+
+✅ Q: Where is Daniel? [Story 7]
+   Context: John moved to the bedroom. | Mary moved to the hallway. | Sandra moved to the bedroom. | Sandra travelled to the kitchen. | Daniel journeyed to the bathroom. | Sandra moved to the bathroom. | Daniel went back to the garden. | John moved to the kitchen. | Daniel journeyed to the kitchen. | Daniel journeyed to the garden.
+   ✅ Brain  [0.450s]: journeyed to the garden.
+   ✅ MemNet [0.000s]: garden
+   ✅ NTM    [0.000s]: garden
+   Expected: garden
+
+✅ Q: Where is Mary? [Story 8]
+   Context: Mary went to the kitchen. | John went back to the bedroom.
+   ✅ Brain  [0.743s]: went to the kitchen.
+   ✅ MemNet [0.000s]: kitchen
+   ✅ NTM    [0.000s]: kitchen
+   Expected: kitchen
+
+✅ Q: Where is John? [Story 8]
+   Context: Mary went to the kitchen. | John went back to the bedroom. | Mary went back to the bathroom. | Mary moved to the hallway.
+   ✅ Brain  [0.627s]: went back to the bedroom.
+   ✅ MemNet [0.000s]: bedroom
+   ✅ NTM    [0.000s]: back bedroom the
+   Expected: bedroom
+
+✅ Q: Where is Daniel? [Story 8]
+   Context: Mary went to the kitchen. | John went back to the bedroom. | Mary went back to the bathroom. | Mary moved to the hallway. | John went to the kitchen. | Daniel travelled to the bedroom.
+   ✅ Brain  [0.655s]: travelled to the bedroom.
+   ✅ MemNet [0.000s]: bedroom
+   ✅ NTM    [0.000s]: bedroom
+   Expected: bedroom
+
+✅ Q: Where is John? [Story 8]
+   Context: Mary went to the kitchen. | John went back to the bedroom. | Mary went back to the bathroom. | Mary moved to the hallway. | John went to the kitchen. | Daniel travelled to the bedroom. | Mary travelled to the office. | Sandra moved to the bedroom.
+   ✅ Brain  [0.451s]: went to the kitchen.
+   ✅ MemNet [0.000s]: kitchen
+   ✅ NTM    [0.000s]: kitchen
+   Expected: kitchen
+
+✅ Q: Where is Sandra? [Story 8]
+   Context: Mary went to the kitchen. | John went back to the bedroom. | Mary went back to the bathroom. | Mary moved to the hallway. | John went to the kitchen. | Daniel travelled to the bedroom. | Mary travelled to the office. | Sandra moved to the bedroom. | John moved to the bedroom. | Sandra journeyed to the kitchen.
+   ✅ Brain  [0.466s]: journeyed to the kitchen.
+   ✅ MemNet [0.000s]: kitchen
+   ✅ NTM    [0.000s]: kitchen
+   Expected: kitchen
+
+✅ Q: Where is Daniel? [Story 9]
+   Context: Daniel moved to the hallway. | Daniel travelled to the office.
+   ✅ Brain  [0.684s]: travelled to the office.
+   ✅ MemNet [0.000s]: office
+   ✅ NTM    [0.000s]: office
+   Expected: office
+
+✅ Q: Where is Daniel? [Story 9]
+   Context: Daniel moved to the hallway. | Daniel travelled to the office. | Daniel went to the bedroom. | Daniel journeyed to the office.
+   ✅ Brain  [0.619s]: journeyed to the office.
+   ✅ MemNet [0.000s]: office
+   ✅ NTM    [0.000s]: office
+   Expected: office
+
+✅ Q: Where is Daniel? [Story 9]
+   Context: Daniel moved to the hallway. | Daniel travelled to the office. | Daniel went to the bedroom. | Daniel journeyed to the office. | Sandra went back to the bathroom. | Sandra journeyed to the kitchen.
+   ✅ Brain  [0.640s]: journeyed to the office.
+   ✅ MemNet [0.000s]: office
+   ✅ NTM    [0.000s]: office
+   Expected: office
+
+✅ Q: Where is Sandra? [Story 9]
+   Context: Daniel moved to the hallway. | Daniel travelled to the office. | Daniel went to the bedroom. | Daniel journeyed to the office. | Sandra went back to the bathroom. | Sandra journeyed to the kitchen. | Daniel moved to the bedroom. | Daniel journeyed to the hallway.
+   ✅ Brain  [0.660s]: journeyed to the kitchen.
+   ✅ MemNet [0.000s]: kitchen
+   ✅ NTM    [0.000s]: kitchen
+   Expected: kitchen
+
+✅ Q: Where is Daniel? [Story 9]
+   Context: Daniel moved to the hallway. | Daniel travelled to the office. | Daniel went to the bedroom. | Daniel journeyed to the office. | Sandra went back to the bathroom. | Sandra journeyed to the kitchen. | Daniel moved to the bedroom. | Daniel journeyed to the hallway. | Sandra travelled to the garden. | Sandra went back to the bathroom.
+   ✅ Brain  [0.688s]: journeyed to the hallway.
+   ✅ MemNet [0.000s]: hallway
+   ✅ NTM    [0.000s]: hallway
+   Expected: hallway
+
+✅ Q: Where is Sandra? [Story 10]
+   Context: Sandra went to the garden. | Sandra journeyed to the bedroom.
+   ✅ Brain  [0.643s]: journeyed to the bedroom.
+   ✅ MemNet [0.000s]: bedroom
+   ✅ NTM    [0.000s]: bedroom
+   Expected: bedroom
+
+✅ Q: Where is Sandra? [Story 10]
+   Context: Sandra went to the garden. | Sandra journeyed to the bedroom. | Mary travelled to the bathroom. | John journeyed to the bedroom.
+   ✅ Brain  [0.546s]: journeyed to the bedroom.
+   ✅ MemNet [0.000s]: bedroom
+   ✅ NTM    [0.000s]: bedroom
+   Expected: bedroom
+
+✅ Q: Where is John? [Story 10]
+   Context: Sandra went to the garden. | Sandra journeyed to the bedroom. | Mary travelled to the bathroom. | John journeyed to the bedroom. | Mary went back to the kitchen. | John went to the kitchen.
+   ✅ Brain  [0.367s]: went to the kitchen.
+   ✅ MemNet [0.000s]: kitchen
+   ✅ NTM    [0.000s]: kitchen
+   Expected: kitchen
+
+✅ Q: Where is Sandra? [Story 10]
+   Context: Sandra went to the garden. | Sandra journeyed to the bedroom. | Mary travelled to the bathroom. | John journeyed to the bedroom. | Mary went back to the kitchen. | John went to the kitchen. | Daniel travelled to the kitchen. | Sandra travelled to the bathroom.
+   ✅ Brain  [0.652s]: travelled to the bathroom.
+   ✅ MemNet [0.000s]: bathroom
+   ✅ NTM    [0.000s]: bathroom
+   Expected: bathroom
+
+✅ Q: Where is Daniel? [Story 10]
+   Context: Sandra went to the garden. | Sandra journeyed to the bedroom. | Mary travelled to the bathroom. | John journeyed to the bedroom. | Mary went back to the kitchen. | John went to the kitchen. | Daniel travelled to the kitchen. | Sandra travelled to the bathroom. | Sandra went back to the garden. | John went back to the garden.
+   ✅ Brain  [0.681s]: travelled to the kitchen.
+   ✅ MemNet [0.000s]: kitchen
+   ✅ NTM    [0.000s]: kitchen
+   Expected: kitchen
+
+✅ Q: Where is Mary? [Story 11]
+   Context: Sandra went back to the bathroom. | Mary moved to the garden.
+   ✅ Brain  [0.720s]: moved to the garden.
+   ✅ MemNet [0.000s]: garden
+   ✅ NTM    [0.000s]: garden
+   Expected: garden
+
+✅ Q: Where is Sandra? [Story 11]
+   Context: Sandra went back to the bathroom. | Mary moved to the garden. | Mary went back to the hallway. | Sandra went to the office.
+   ✅ Brain  [0.492s]: went to the office.
+   ✅ MemNet [0.000s]: office
+   ✅ NTM    [0.000s]: office
+   Expected: office
+
+✅ Q: Where is Sandra? [Story 11]
+   Context: Sandra went back to the bathroom. | Mary moved to the garden. | Mary went back to the hallway. | Sandra went to the office. | John went back to the hallway. | John travelled to the office.
+   ✅ Brain  [0.630s]: went to the office.
+   ✅ MemNet [0.000s]: office
+   ✅ NTM    [0.000s]: office
+   Expected: office
+
+✅ Q: Where is John? [Story 11]
+   Context: Sandra went back to the bathroom. | Mary moved to the garden. | Mary went back to the hallway. | Sandra went to the office. | John went back to the hallway. | John travelled to the office. | Sandra journeyed to the hallway. | Daniel moved to the office.
+   ✅ Brain  [0.390s]: travelled to the office.
+   ✅ MemNet [0.000s]: office
+   ✅ NTM    [0.000s]: office
+   Expected: office
+
+✅ Q: Where is John? [Story 11]
+   Context: Sandra went back to the bathroom. | Mary moved to the garden. | Mary went back to the hallway. | Sandra went to the office. | John went back to the hallway. | John travelled to the office. | Sandra journeyed to the hallway. | Daniel moved to the office. | Mary went to the office. | Sandra went to the office.
+   ✅ Brain  [0.424s]: travelled to the office.
+   ✅ MemNet [0.000s]: office
+   ✅ NTM    [0.000s]: office
+   Expected: office
+
+✅ Q: Where is Mary? [Story 12]
+   Context: Mary went back to the office. | John went back to the bathroom.
+   ✅ Brain  [0.711s]: went back to the office.
+   ✅ MemNet [0.000s]: office
+   ✅ NTM    [0.000s]: back office the
+   Expected: office
+
+✅ Q: Where is Mary? [Story 12]
+   Context: Mary went back to the office. | John went back to the bathroom. | John went to the hallway. | Mary journeyed to the hallway.
+   ✅ Brain  [0.593s]: journeyed to the hallway.
+   ✅ MemNet [0.000s]: hallway
+   ✅ NTM    [0.000s]: hallway
+   Expected: hallway
+
+✅ Q: Where is John? [Story 12]
+   Context: Mary went back to the office. | John went back to the bathroom. | John went to the hallway. | Mary journeyed to the hallway. | Sandra travelled to the hallway. | Mary travelled to the office.
+   ✅ Brain  [0.356s]: went to the hallway.
+   ✅ MemNet [0.000s]: hallway
+   ✅ NTM    [0.000s]: hallway
+   Expected: hallway
+
+✅ Q: Where is Sandra? [Story 12]
+   Context: Mary went back to the office. | John went back to the bathroom. | John went to the hallway. | Mary journeyed to the hallway. | Sandra travelled to the hallway. | Mary travelled to the office. | Mary went back to the hallway. | Sandra travelled to the office.
+   ✅ Brain  [0.387s]: travelled to the office.
+   ✅ MemNet [0.000s]: office
+   ✅ NTM    [0.000s]: office
+   Expected: office
+
+✅ Q: Where is Mary? [Story 12]
+   Context: Mary went back to the office. | John went back to the bathroom. | John went to the hallway. | Mary journeyed to the hallway. | Sandra travelled to the hallway. | Mary travelled to the office. | Mary went back to the hallway. | Sandra travelled to the office. | John went to the kitchen. | Sandra went to the hallway.
+   ✅ Brain  [0.426s]: went back to the hallway.
+   ✅ MemNet [0.000s]: hallway
+   ❌ NTM    [0.000s]: office
+   Expected: hallway
+
+✅ Q: Where is John? [Story 13]
+   Context: Sandra moved to the hallway. | John moved to the hallway.
+   ✅ Brain  [0.651s]: moved to the hallway.
+   ✅ MemNet [0.000s]: hallway
+   ✅ NTM    [0.000s]: hallway
+   Expected: hallway
+
+✅ Q: Where is John? [Story 13]
+   Context: Sandra moved to the hallway. | John moved to the hallway. | John journeyed to the bathroom. | Daniel went back to the bedroom.
+   ✅ Brain  [0.620s]: journeyed to the bathroom.
+   ✅ MemNet [0.000s]: bathroom
+   ✅ NTM    [0.000s]: bathroom
+   Expected: bathroom
+
+✅ Q: Where is Daniel? [Story 13]
+   Context: Sandra moved to the hallway. | John moved to the hallway. | John journeyed to the bathroom. | Daniel went back to the bedroom. | Mary travelled to the bedroom. | Mary journeyed to the garden.
+   ✅ Brain  [0.356s]: went back to the bedroom.
+   ✅ MemNet [0.000s]: bedroom
+   ✅ NTM    [0.000s]: back bedroom the
+   Expected: bedroom
+
+✅ Q: Where is Daniel? [Story 13]
+   Context: Sandra moved to the hallway. | John moved to the hallway. | John journeyed to the bathroom. | Daniel went back to the bedroom. | Mary travelled to the bedroom. | Mary journeyed to the garden. | John travelled to the bedroom. | Sandra journeyed to the garden.
+   ✅ Brain  [0.390s]: went back to the bedroom.
+   ✅ MemNet [0.000s]: bedroom
+   ✅ NTM    [0.000s]: back bedroom the
+   Expected: bedroom
+
+✅ Q: Where is John? [Story 13]
+   Context: Sandra moved to the hallway. | John moved to the hallway. | John journeyed to the bathroom. | Daniel went back to the bedroom. | Mary travelled to the bedroom. | Mary journeyed to the garden. | John travelled to the bedroom. | Sandra journeyed to the garden. | John journeyed to the kitchen. | Sandra went to the kitchen.
+   ✅ Brain  [0.429s]: journeyed to the kitchen.
+   ✅ MemNet [0.000s]: kitchen
+   ✅ NTM    [0.000s]: kitchen
+   Expected: kitchen
+
+✅ Q: Where is Daniel? [Story 14]
+   Context: Daniel went to the kitchen. | Mary travelled to the hallway.
+   ✅ Brain  [0.627s]: went to the kitchen.
+   ✅ MemNet [0.000s]: kitchen
+   ✅ NTM    [0.000s]: kitchen
+   Expected: kitchen
+
+✅ Q: Where is Mary? [Story 14]
+   Context: Daniel went to the kitchen. | Mary travelled to the hallway. | Daniel went back to the garden. | Mary went back to the bathroom.
+   ✅ Brain  [0.595s]: went back to the bathroom.
+   ✅ MemNet [0.000s]: bathroom
+   ❌ NTM    [0.000s]: hallway
+   Expected: bathroom
+
+✅ Q: Where is Daniel? [Story 14]
+   Context: Daniel went to the kitchen. | Mary travelled to the hallway. | Daniel went back to the garden. | Mary went back to the bathroom. | Sandra moved to the hallway. | John moved to the garden.
+   ✅ Brain  [0.354s]: went back to the garden.
+   ✅ MemNet [0.000s]: garden
+   ❌ NTM    [0.000s]: kitchen
+   Expected: garden
+
+✅ Q: Where is Daniel? [Story 14]
+   Context: Daniel went to the kitchen. | Mary travelled to the hallway. | Daniel went back to the garden. | Mary went back to the bathroom. | Sandra moved to the hallway. | John moved to the garden. | Daniel moved to the kitchen. | Mary travelled to the office.
+   ✅ Brain  [0.390s]: moved to the kitchen.
+   ✅ MemNet [0.000s]: kitchen
+   ✅ NTM    [0.000s]: kitchen
+   Expected: kitchen
+
+✅ Q: Where is Sandra? [Story 14]
+   Context: Daniel went to the kitchen. | Mary travelled to the hallway. | Daniel went back to the garden. | Mary went back to the bathroom. | Sandra moved to the hallway. | John moved to the garden. | Daniel moved to the kitchen. | Mary travelled to the office. | Daniel travelled to the hallway. | Sandra travelled to the bathroom.
+   ✅ Brain  [0.419s]: travelled to the bathroom.
+   ✅ MemNet [0.000s]: bathroom
+   ✅ NTM    [0.000s]: bathroom
+   Expected: bathroom
+
+✅ Q: Where is Sandra? [Story 15]
+   Context: Sandra moved to the kitchen. | Sandra went back to the garden.
+   ✅ Brain  [0.707s]: went back to the garden.
+   ✅ MemNet [0.000s]: garden
+   ❌ NTM    [0.000s]: kitchen
+   Expected: garden
+
+✅ Q: Where is Mary? [Story 15]
+   Context: Sandra moved to the kitchen. | Sandra went back to the garden. | Sandra journeyed to the office. | Mary moved to the office.
+   ✅ Brain  [0.607s]: moved to the office.
+   ✅ MemNet [0.000s]: office
+   ✅ NTM    [0.000s]: office
+   Expected: office
+
+✅ Q: Where is Sandra? [Story 15]
+   Context: Sandra moved to the kitchen. | Sandra went back to the garden. | Sandra journeyed to the office. | Mary moved to the office. | Sandra journeyed to the bathroom. | Daniel moved to the office.
+   ✅ Brain  [0.628s]: journeyed to the bathroom.
+   ✅ MemNet [0.000s]: bathroom
+   ✅ NTM    [0.000s]: bathroom
+   Expected: bathroom
+
+✅ Q: Where is Mary? [Story 15]
+   Context: Sandra moved to the kitchen. | Sandra went back to the garden. | Sandra journeyed to the office. | Mary moved to the office. | Sandra journeyed to the bathroom. | Daniel moved to the office. | Daniel went back to the kitchen. | Mary moved to the hallway.
+   ✅ Brain  [0.661s]: moved to the hallway.
+   ✅ MemNet [0.000s]: hallway
+   ✅ NTM    [0.000s]: hallway
+   Expected: hallway
+
+✅ Q: Where is John? [Story 15]
+   Context: Sandra moved to the kitchen. | Sandra went back to the garden. | Sandra journeyed to the office. | Mary moved to the office. | Sandra journeyed to the bathroom. | Daniel moved to the office. | Daniel went back to the kitchen. | Mary moved to the hallway. | John went to the office. | Sandra went to the office.
+   ✅ Brain  [0.425s]: went to the office.
+   ✅ MemNet [0.000s]: office
+   ✅ NTM    [0.000s]: office
+   Expected: office
+
+✅ Q: Where is Sandra? [Story 16]
+   Context: Sandra went to the garden. | Mary travelled to the bathroom.
+   ✅ Brain  [0.664s]: went to the garden.
+   ✅ MemNet [0.000s]: garden
+   ✅ NTM    [0.000s]: garden
+   Expected: garden
+
+✅ Q: Where is Mary? [Story 16]
+   Context: Sandra went to the garden. | Mary travelled to the bathroom. | Sandra moved to the bathroom. | Mary travelled to the hallway.
+   ✅ Brain  [0.637s]: travelled to the hallway.
+   ✅ MemNet [0.000s]: hallway
+   ✅ NTM    [0.000s]: hallway
+   Expected: hallway
+
+✅ Q: Where is Mary? [Story 16]
+   Context: Sandra went to the garden. | Mary travelled to the bathroom. | Sandra moved to the bathroom. | Mary travelled to the hallway. | Mary went back to the kitchen. | Daniel travelled to the bedroom.
+   ✅ Brain  [0.633s]: went back to the kitchen.
+   ✅ MemNet [0.000s]: kitchen
+   ❌ NTM    [0.000s]: hallway
+   Expected: kitchen
+
+✅ Q: Where is Daniel? [Story 16]
+   Context: Sandra went to the garden. | Mary travelled to the bathroom. | Sandra moved to the bathroom. | Mary travelled to the hallway. | Mary went back to the kitchen. | Daniel travelled to the bedroom. | Mary journeyed to the bedroom. | Mary journeyed to the office.
+   ✅ Brain  [0.659s]: travelled to the bedroom.
+   ✅ MemNet [0.000s]: bedroom
+   ✅ NTM    [0.000s]: bedroom
+   Expected: bedroom
+
+✅ Q: Where is Mary? [Story 16]
+   Context: Sandra went to the garden. | Mary travelled to the bathroom. | Sandra moved to the bathroom. | Mary travelled to the hallway. | Mary went back to the kitchen. | Daniel travelled to the bedroom. | Mary journeyed to the bedroom. | Mary journeyed to the office. | Mary went back to the bedroom. | Daniel went to the garden.
+   ✅ Brain  [0.696s]: went back to the bedroom.
+   ✅ MemNet [0.000s]: bedroom
+   ❌ NTM    [0.000s]: office
+   Expected: bedroom
+
+✅ Q: Where is Sandra? [Story 17]
+   Context: Mary journeyed to the garden. | Sandra went back to the office.
+   ✅ Brain  [0.707s]: went back to the office.
+   ✅ MemNet [0.000s]: office
+   ✅ NTM    [0.000s]: back office the
+   Expected: office
+
+✅ Q: Where is Sandra? [Story 17]
+   Context: Mary journeyed to the garden. | Sandra went back to the office. | Sandra went to the bathroom. | John travelled to the bathroom.
+   ✅ Brain  [0.328s]: went to the bathroom.
+   ✅ MemNet [0.000s]: bathroom
+   ✅ NTM    [0.000s]: bathroom
+   Expected: bathroom
+
+✅ Q: Where is Sandra? [Story 17]
+   Context: Mary journeyed to the garden. | Sandra went back to the office. | Sandra went to the bathroom. | John travelled to the bathroom. | Sandra moved to the bedroom. | Sandra travelled to the hallway.
+   ✅ Brain  [0.631s]: travelled to the hallway.
+   ✅ MemNet [0.000s]: hallway
+   ✅ NTM    [0.000s]: hallway
+   Expected: hallway
+
+✅ Q: Where is Mary? [Story 17]
+   Context: Mary journeyed to the garden. | Sandra went back to the office. | Sandra went to the bathroom. | John travelled to the bathroom. | Sandra moved to the bedroom. | Sandra travelled to the hallway. | Mary moved to the bathroom. | John went to the kitchen.
+   ✅ Brain  [0.671s]: moved to the bathroom.
+   ✅ MemNet [0.000s]: bathroom
+   ✅ NTM    [0.000s]: bathroom
+   Expected: bathroom
+
+✅ Q: Where is John? [Story 17]
+   Context: Mary journeyed to the garden. | Sandra went back to the office. | Sandra went to the bathroom. | John travelled to the bathroom. | Sandra moved to the bedroom. | Sandra travelled to the hallway. | Mary moved to the bathroom. | John went to the kitchen. | Daniel moved to the bathroom. | Daniel went to the office.
+   ✅ Brain  [0.426s]: went to the kitchen.
+   ✅ MemNet [0.000s]: kitchen
+   ✅ NTM    [0.000s]: kitchen
+   Expected: kitchen
+
+✅ Q: Where is Mary? [Story 18]
+   Context: Mary moved to the office. | Daniel went to the kitchen.
+   ✅ Brain  [0.708s]: moved to the office.
+   ✅ MemNet [0.000s]: office
+   ✅ NTM    [0.000s]: office
+   Expected: office
+
+✅ Q: Where is Daniel? [Story 18]
+   Context: Mary moved to the office. | Daniel went to the kitchen. | Sandra went to the bathroom. | Daniel moved to the office.
+   ✅ Brain  [0.583s]: moved to the office.
+   ✅ MemNet [0.000s]: office
+   ✅ NTM    [0.000s]: office
+   Expected: office
+
+✅ Q: Where is Daniel? [Story 18]
+   Context: Mary moved to the office. | Daniel went to the kitchen. | Sandra went to the bathroom. | Daniel moved to the office. | Sandra went to the office. | Sandra went to the hallway.
+   ✅ Brain  [0.620s]: moved to the office.
+   ✅ MemNet [0.000s]: office
+   ✅ NTM    [0.000s]: office
+   Expected: office
+
+✅ Q: Where is Sandra? [Story 18]
+   Context: Mary moved to the office. | Daniel went to the kitchen. | Sandra went to the bathroom. | Daniel moved to the office. | Sandra went to the office. | Sandra went to the hallway. | Mary went to the garden. | Daniel moved to the kitchen.
+   ✅ Brain  [0.650s]: went to the hallway.
+   ✅ MemNet [0.000s]: hallway
+   ✅ NTM    [0.000s]: hallway
+   Expected: hallway
+
+✅ Q: Where is Mary? [Story 18]
+   Context: Mary moved to the office. | Daniel went to the kitchen. | Sandra went to the bathroom. | Daniel moved to the office. | Sandra went to the office. | Sandra went to the hallway. | Mary went to the garden. | Daniel moved to the kitchen. | Mary went back to the kitchen. | John journeyed to the hallway.
+   ✅ Brain  [0.422s]: went back to the kitchen.
+   ✅ MemNet [0.000s]: kitchen
+   ❌ NTM    [0.000s]: garden
+   Expected: kitchen
+
+✅ Q: Where is John? [Story 19]
+   Context: John went back to the bathroom. | Mary travelled to the bathroom.
+   ✅ Brain  [0.732s]: went back to the bathroom.
+   ✅ MemNet [0.000s]: bathroom
+   ✅ NTM    [0.000s]: back bathroom the
+   Expected: bathroom
+
+✅ Q: Where is John? [Story 19]
+   Context: John went back to the bathroom. | Mary travelled to the bathroom. | Mary went to the garden. | Sandra moved to the garden.
+   ✅ Brain  [0.606s]: went back to the bathroom.
+   ✅ MemNet [0.000s]: bathroom
+   ✅ NTM    [0.000s]: back bathroom the
+   Expected: bathroom
+
+✅ Q: Where is John? [Story 19]
+   Context: John went back to the bathroom. | Mary travelled to the bathroom. | Mary went to the garden. | Sandra moved to the garden. | John went to the kitchen. | Daniel moved to the bathroom.
+   ✅ Brain  [0.363s]: went to the kitchen.
+   ✅ MemNet [0.000s]: kitchen
+   ✅ NTM    [0.000s]: kitchen
+   Expected: kitchen
+
+✅ Q: Where is Mary? [Story 19]
+   Context: John went back to the bathroom. | Mary travelled to the bathroom. | Mary went to the garden. | Sandra moved to the garden. | John went to the kitchen. | Daniel moved to the bathroom. | Daniel went back to the hallway. | Mary went to the kitchen.
+   ✅ Brain  [0.391s]: went to the kitchen.
+   ✅ MemNet [0.000s]: kitchen
+   ✅ NTM    [0.000s]: kitchen
+   Expected: kitchen
+
+✅ Q: Where is Daniel? [Story 19]
+   Context: John went back to the bathroom. | Mary travelled to the bathroom. | Mary went to the garden. | Sandra moved to the garden. | John went to the kitchen. | Daniel moved to the bathroom. | Daniel went back to the hallway. | Mary went to the kitchen. | Daniel went to the garden. | Daniel travelled to the hallway.
+   ✅ Brain  [0.421s]: travelled to the hallway.
+   ✅ MemNet [0.000s]: hallway
+   ✅ NTM    [0.000s]: hallway
+   Expected: hallway
+
+✅ Q: Where is Mary? [Story 20]
+   Context: Mary went back to the bedroom. | Mary travelled to the bathroom.
+   ✅ Brain  [0.718s]: travelled to the bathroom.
+   ✅ MemNet [0.000s]: bathroom
+   ✅ NTM    [0.000s]: bathroom
+   Expected: bathroom
+
+✅ Q: Where is Mary? [Story 20]
+   Context: Mary went back to the bedroom. | Mary travelled to the bathroom. | John travelled to the office. | Mary travelled to the bedroom.
+   ✅ Brain  [0.601s]: travelled to the bedroom.
+   ✅ MemNet [0.000s]: bedroom
+   ✅ NTM    [0.000s]: bedroom
+   Expected: bedroom
+
+✅ Q: Where is Mary? [Story 20]
+   Context: Mary went back to the bedroom. | Mary travelled to the bathroom. | John travelled to the office. | Mary travelled to the bedroom. | John journeyed to the kitchen. | John moved to the hallway.
+   ✅ Brain  [0.631s]: travelled to the bedroom.
+   ✅ MemNet [0.000s]: bedroom
+   ✅ NTM    [0.000s]: bedroom
+   Expected: bedroom
+
+✅ Q: Where is Mary? [Story 20]
+   Context: Mary went back to the bedroom. | Mary travelled to the bathroom. | John travelled to the office. | Mary travelled to the bedroom. | John journeyed to the kitchen. | John moved to the hallway. | Daniel moved to the hallway. | Mary went back to the garden.
+   ✅ Brain  [0.663s]: went back to the garden.
+   ✅ MemNet [0.000s]: garden
+   ❌ NTM    [0.000s]: bedroom
+   Expected: garden
+
+✅ Q: Where is Daniel? [Story 20]
+   Context: Mary went back to the bedroom. | Mary travelled to the bathroom. | John travelled to the office. | Mary travelled to the bedroom. | John journeyed to the kitchen. | John moved to the hallway. | Daniel moved to the hallway. | Mary went back to the garden. | Daniel went back to the office. | Daniel travelled to the kitchen.
+   ✅ Brain  [0.694s]: travelled to the kitchen.
+   ✅ MemNet [0.000s]: kitchen
+   ✅ NTM    [0.000s]: kitchen
+   Expected: kitchen
+
+✅ Q: Where is Daniel? [Story 21]
+   Context: Daniel moved to the garden. | Mary went back to the bathroom.
+   ✅ Brain  [0.707s]: moved to the garden.
+   ✅ MemNet [0.000s]: garden
+   ✅ NTM    [0.000s]: garden
+   Expected: garden
+
+✅ Q: Where is Sandra? [Story 21]
+   Context: Daniel moved to the garden. | Mary went back to the bathroom. | Daniel travelled to the kitchen. | Sandra went to the kitchen.
+   ✅ Brain  [0.595s]: went to the kitchen.
+   ✅ MemNet [0.000s]: kitchen
+   ✅ NTM    [0.000s]: kitchen
+   Expected: kitchen
+
+✅ Q: Where is Mary? [Story 21]
+   Context: Daniel moved to the garden. | Mary went back to the bathroom. | Daniel travelled to the kitchen. | Sandra went to the kitchen. | Daniel journeyed to the garden. | Mary journeyed to the kitchen.
+   ✅ Brain  [0.636s]: journeyed to the kitchen.
+   ✅ MemNet [0.000s]: kitchen
+   ✅ NTM    [0.000s]: kitchen
+   Expected: kitchen
+
+✅ Q: Where is Mary? [Story 21]
+   Context: Daniel moved to the garden. | Mary went back to the bathroom. | Daniel travelled to the kitchen. | Sandra went to the kitchen. | Daniel journeyed to the garden. | Mary journeyed to the kitchen. | Mary moved to the hallway. | John went back to the bedroom.
+   ✅ Brain  [0.391s]: moved to the hallway.
+   ✅ MemNet [0.000s]: hallway
+   ✅ NTM    [0.000s]: hallway
+   Expected: hallway
+
+✅ Q: Where is Mary? [Story 21]
+   Context: Daniel moved to the garden. | Mary went back to the bathroom. | Daniel travelled to the kitchen. | Sandra went to the kitchen. | Daniel journeyed to the garden. | Mary journeyed to the kitchen. | Mary moved to the hallway. | John went back to the bedroom. | John moved to the office. | John travelled to the bathroom.
+   ✅ Brain  [0.428s]: moved to the hallway.
+   ✅ MemNet [0.000s]: hallway
+   ✅ NTM    [0.000s]: hallway
+   Expected: hallway
+
+✅ Q: Where is Sandra? [Story 22]
+   Context: Mary went back to the hallway. | Sandra journeyed to the garden.
+   ✅ Brain  [0.731s]: journeyed to the garden.
+   ✅ MemNet [0.000s]: garden
+   ✅ NTM    [0.000s]: garden
+   Expected: garden
+
+✅ Q: Where is Sandra? [Story 22]
+   Context: Mary went back to the hallway. | Sandra journeyed to the garden. | Sandra travelled to the bathroom. | John travelled to the hallway.
+   ✅ Brain  [0.325s]: travelled to the bathroom.
+   ✅ MemNet [0.000s]: bathroom
+   ✅ NTM    [0.000s]: bathroom
+   Expected: bathroom
+
+✅ Q: Where is Mary? [Story 22]
+   Context: Mary went back to the hallway. | Sandra journeyed to the garden. | Sandra travelled to the bathroom. | John travelled to the hallway. | John travelled to the garden. | Mary journeyed to the bedroom.
+   ✅ Brain  [0.356s]: journeyed to the bedroom.
+   ✅ MemNet [0.000s]: bedroom
+   ✅ NTM    [0.000s]: bedroom
+   Expected: bedroom
+
+✅ Q: Where is John? [Story 22]
+   Context: Mary went back to the hallway. | Sandra journeyed to the garden. | Sandra travelled to the bathroom. | John travelled to the hallway. | John travelled to the garden. | Mary journeyed to the bedroom. | Sandra journeyed to the office. | Daniel journeyed to the hallway.
+   ✅ Brain  [0.655s]: travelled to the garden.
+   ✅ MemNet [0.000s]: garden
+   ✅ NTM    [0.000s]: garden
+   Expected: garden
+
+✅ Q: Where is Mary? [Story 22]
+   Context: Mary went back to the hallway. | Sandra journeyed to the garden. | Sandra travelled to the bathroom. | John travelled to the hallway. | John travelled to the garden. | Mary journeyed to the bedroom. | Sandra journeyed to the office. | Daniel journeyed to the hallway. | Mary journeyed to the hallway. | Mary moved to the bedroom.
+   ✅ Brain  [0.423s]: moved to the bedroom.
+   ✅ MemNet [0.000s]: bedroom
+   ✅ NTM    [0.000s]: bedroom
+   Expected: bedroom
+
+✅ Q: Where is Sandra? [Story 23]
+   Context: Sandra journeyed to the kitchen. | Sandra journeyed to the garden.
+   ✅ Brain  [0.632s]: journeyed to the garden.
+   ✅ MemNet [0.000s]: garden
+   ✅ NTM    [0.000s]: garden
+   Expected: garden
+
+✅ Q: Where is Sandra? [Story 23]
+   Context: Sandra journeyed to the kitchen. | Sandra journeyed to the garden. | Daniel travelled to the kitchen. | Mary moved to the bedroom.
+   ✅ Brain  [0.525s]: journeyed to the garden.
+   ✅ MemNet [0.000s]: garden
+   ✅ NTM    [0.000s]: garden
+   Expected: garden
+
+✅ Q: Where is Sandra? [Story 23]
+   Context: Sandra journeyed to the kitchen. | Sandra journeyed to the garden. | Daniel travelled to the kitchen. | Mary moved to the bedroom. | Sandra moved to the bedroom. | John travelled to the garden.
+   ✅ Brain  [0.568s]: moved to the bedroom.
+   ✅ MemNet [0.000s]: bedroom
+   ✅ NTM    [0.000s]: bedroom
+   Expected: bedroom
+
+✅ Q: Where is Sandra? [Story 23]
+   Context: Sandra journeyed to the kitchen. | Sandra journeyed to the garden. | Daniel travelled to the kitchen. | Mary moved to the bedroom. | Sandra moved to the bedroom. | John travelled to the garden. | Sandra went back to the kitchen. | John journeyed to the bedroom.
+   ✅ Brain  [0.392s]: went back to the kitchen.
+   ✅ MemNet [0.000s]: kitchen
+   ❌ NTM    [0.000s]: bedroom
+   Expected: kitchen
+
+✅ Q: Where is Daniel? [Story 23]
+   Context: Sandra journeyed to the kitchen. | Sandra journeyed to the garden. | Daniel travelled to the kitchen. | Mary moved to the bedroom. | Sandra moved to the bedroom. | John travelled to the garden. | Sandra went back to the kitchen. | John journeyed to the bedroom. | Daniel went back to the bathroom. | Sandra journeyed to the bedroom.
+   ✅ Brain  [0.423s]: went back to the bathroom.
+   ✅ MemNet [0.000s]: bathroom
+   ❌ NTM    [0.000s]: kitchen
+   Expected: bathroom
+
+✅ Q: Where is Mary? [Story 24]
+   Context: Mary went back to the hallway. | Daniel went back to the bedroom.
+   ✅ Brain  [0.710s]: went back to the hallway.
+   ✅ MemNet [0.000s]: hallway
+   ✅ NTM    [0.000s]: back hallway the
+   Expected: hallway
+
+✅ Q: Where is Sandra? [Story 24]
+   Context: Mary went back to the hallway. | Daniel went back to the bedroom. | Sandra moved to the bathroom. | Sandra journeyed to the hallway.
+   ✅ Brain  [0.605s]: journeyed to the hallway.
+   ✅ MemNet [0.000s]: hallway
+   ✅ NTM    [0.000s]: hallway
+   Expected: hallway
+
+✅ Q: Where is Mary? [Story 24]
+   Context: Mary went back to the hallway. | Daniel went back to the bedroom. | Sandra moved to the bathroom. | Sandra journeyed to the hallway. | Mary went back to the bedroom. | Mary went back to the garden.
+   ✅ Brain  [0.636s]: went back to the garden.
+   ✅ MemNet [0.000s]: garden
+   ✅ NTM    [0.000s]: back garden the
+   Expected: garden
+
+✅ Q: Where is John? [Story 24]
+   Context: Mary went back to the hallway. | Daniel went back to the bedroom. | Sandra moved to the bathroom. | Sandra journeyed to the hallway. | Mary went back to the bedroom. | Mary went back to the garden. | Sandra went back to the bathroom. | John went to the office.
+   ✅ Brain  [0.388s]: went to the office.
+   ✅ MemNet [0.000s]: office
+   ✅ NTM    [0.000s]: office
+   Expected: office
+
+✅ Q: Where is John? [Story 24]
+   Context: Mary went back to the hallway. | Daniel went back to the bedroom. | Sandra moved to the bathroom. | Sandra journeyed to the hallway. | Mary went back to the bedroom. | Mary went back to the garden. | Sandra went back to the bathroom. | John went to the office. | Daniel travelled to the garden. | Sandra travelled to the hallway.
+   ✅ Brain  [0.422s]: went to the office.
+   ✅ MemNet [0.000s]: office
+   ✅ NTM    [0.000s]: office
+   Expected: office
+
+✅ Q: Where is John? [Story 25]
+   Context: John went back to the hallway. | Sandra journeyed to the kitchen.
+   ✅ Brain  [0.711s]: went back to the hallway.
+   ✅ MemNet [0.000s]: hallway
+   ✅ NTM    [0.000s]: back hallway the
+   Expected: hallway
+
+✅ Q: Where is John? [Story 25]
+   Context: John went back to the hallway. | Sandra journeyed to the kitchen. | Daniel journeyed to the office. | John went to the kitchen.
+   ✅ Brain  [0.594s]: went to the kitchen.
+   ✅ MemNet [0.000s]: kitchen
+   ✅ NTM    [0.000s]: kitchen
+   Expected: kitchen
+
+✅ Q: Where is John? [Story 25]
+   Context: John went back to the hallway. | Sandra journeyed to the kitchen. | Daniel journeyed to the office. | John went to the kitchen. | Daniel journeyed to the garden. | John travelled to the bedroom.
+   ✅ Brain  [0.619s]: travelled to the bedroom.
+   ✅ MemNet [0.000s]: bedroom
+   ✅ NTM    [0.000s]: bedroom
+   Expected: bedroom
+
+✅ Q: Where is Daniel? [Story 25]
+   Context: John went back to the hallway. | Sandra journeyed to the kitchen. | Daniel journeyed to the office. | John went to the kitchen. | Daniel journeyed to the garden. | John travelled to the bedroom. | Daniel journeyed to the office. | Daniel went to the bedroom.
+   ✅ Brain  [0.657s]: went to the bedroom.
+   ✅ MemNet [0.000s]: bedroom
+   ✅ NTM    [0.000s]: bedroom
+   Expected: bedroom
+
+✅ Q: Where is Daniel? [Story 25]
+   Context: John went back to the hallway. | Sandra journeyed to the kitchen. | Daniel journeyed to the office. | John went to the kitchen. | Daniel journeyed to the garden. | John travelled to the bedroom. | Daniel journeyed to the office. | Daniel went to the bedroom. | Sandra travelled to the hallway. | Sandra journeyed to the bedroom.
+   ✅ Brain  [0.687s]: went to the bedroom.
+   ✅ MemNet [0.000s]: bedroom
+   ✅ NTM    [0.000s]: bedroom
+   Expected: bedroom
+
+✅ Q: Where is John? [Story 26]
+   Context: John moved to the kitchen. | Daniel travelled to the garden.
+   ✅ Brain  [0.649s]: moved to the kitchen.
+   ✅ MemNet [0.000s]: kitchen
+   ✅ NTM    [0.000s]: kitchen
+   Expected: kitchen
+
+✅ Q: Where is Daniel? [Story 26]
+   Context: John moved to the kitchen. | Daniel travelled to the garden. | Daniel went to the kitchen. | Daniel travelled to the bathroom.
+   ✅ Brain  [0.593s]: travelled to the bathroom.
+   ✅ MemNet [0.000s]: bathroom
+   ✅ NTM    [0.000s]: bathroom
+   Expected: bathroom
+
+✅ Q: Where is John? [Story 26]
+   Context: John moved to the kitchen. | Daniel travelled to the garden. | Daniel went to the kitchen. | Daniel travelled to the bathroom. | John moved to the bathroom. | Mary journeyed to the bathroom.
+   ✅ Brain  [0.624s]: moved to the bathroom.
+   ✅ MemNet [0.000s]: bathroom
+   ✅ NTM    [0.000s]: bathroom
+   Expected: bathroom
+
+✅ Q: Where is Mary? [Story 26]
+   Context: John moved to the kitchen. | Daniel travelled to the garden. | Daniel went to the kitchen. | Daniel travelled to the bathroom. | John moved to the bathroom. | Mary journeyed to the bathroom. | Mary went to the kitchen. | Daniel journeyed to the garden.
+   ✅ Brain  [0.680s]: went to the kitchen.
+   ✅ MemNet [0.000s]: kitchen
+   ✅ NTM    [0.000s]: kitchen
+   Expected: kitchen
+
+✅ Q: Where is Daniel? [Story 26]
+   Context: John moved to the kitchen. | Daniel travelled to the garden. | Daniel went to the kitchen. | Daniel travelled to the bathroom. | John moved to the bathroom. | Mary journeyed to the bathroom. | Mary went to the kitchen. | Daniel journeyed to the garden. | Daniel went to the kitchen. | John went to the hallway.
+   ✅ Brain  [0.687s]: went to the kitchen.
+   ✅ MemNet [0.000s]: kitchen
+   ✅ NTM    [0.000s]: kitchen
+   Expected: kitchen
+
+✅ Q: Where is Sandra? [Story 27]
+   Context: Sandra went back to the kitchen. | Sandra travelled to the bathroom.
+   ✅ Brain  [0.708s]: travelled to the bathroom.
+   ✅ MemNet [0.000s]: bathroom
+   ✅ NTM    [0.000s]: bathroom
+   Expected: bathroom
+
+✅ Q: Where is Daniel? [Story 27]
+   Context: Sandra went back to the kitchen. | Sandra travelled to the bathroom. | John travelled to the garden. | Daniel moved to the hallway.
+   ✅ Brain  [0.594s]: moved to the hallway.
+   ✅ MemNet [0.000s]: hallway
+   ✅ NTM    [0.000s]: hallway
+   Expected: hallway
+
+✅ Q: Where is Sandra? [Story 27]
+   Context: Sandra went back to the kitchen. | Sandra travelled to the bathroom. | John travelled to the garden. | Daniel moved to the hallway. | John went to the kitchen. | Daniel journeyed to the garden.
+   ✅ Brain  [0.671s]: travelled to the bathroom.
+   ✅ MemNet [0.000s]: bathroom
+   ✅ NTM    [0.000s]: bathroom
+   Expected: bathroom
+
+✅ Q: Where is Daniel? [Story 27]
+   Context: Sandra went back to the kitchen. | Sandra travelled to the bathroom. | John travelled to the garden. | Daniel moved to the hallway. | John went to the kitchen. | Daniel journeyed to the garden. | Daniel journeyed to the hallway. | Sandra journeyed to the garden.
+   ✅ Brain  [0.752s]: journeyed to the hallway.
+   ✅ MemNet [0.000s]: hallway
+   ✅ NTM    [0.000s]: hallway
+   Expected: hallway
+
+✅ Q: Where is John? [Story 27]
+   Context: Sandra went back to the kitchen. | Sandra travelled to the bathroom. | John travelled to the garden. | Daniel moved to the hallway. | John went to the kitchen. | Daniel journeyed to the garden. | Daniel journeyed to the hallway. | Sandra journeyed to the garden. | John went back to the hallway. | Mary travelled to the office.
+   ✅ Brain  [0.422s]: went back to the hallway.
+   ✅ MemNet [0.000s]: hallway
+   ❌ NTM    [0.000s]: kitchen
+   Expected: hallway
+
+✅ Q: Where is Daniel? [Story 28]
+   Context: Daniel moved to the bedroom. | John went back to the garden.
+   ✅ Brain  [0.770s]: moved to the bedroom.
+   ✅ MemNet [0.000s]: bedroom
+   ✅ NTM    [0.000s]: bedroom
+   Expected: bedroom
+
+✅ Q: Where is John? [Story 28]
+   Context: Daniel moved to the bedroom. | John went back to the garden. | John travelled to the bathroom. | John travelled to the garden.
+   ✅ Brain  [0.603s]: travelled to the garden.
+   ✅ MemNet [0.000s]: garden
+   ✅ NTM    [0.000s]: garden
+   Expected: garden
+
+✅ Q: Where is Daniel? [Story 28]
+   Context: Daniel moved to the bedroom. | John went back to the garden. | John travelled to the bathroom. | John travelled to the garden. | John went to the kitchen. | Daniel journeyed to the garden.
+   ✅ Brain  [0.634s]: journeyed to the garden.
+   ✅ MemNet [0.000s]: garden
+   ✅ NTM    [0.000s]: garden
+   Expected: garden
+
+✅ Q: Where is John? [Story 28]
+   Context: Daniel moved to the bedroom. | John went back to the garden. | John travelled to the bathroom. | John travelled to the garden. | John went to the kitchen. | Daniel journeyed to the garden. | John went back to the garden. | Sandra went back to the kitchen.
+   ✅ Brain  [0.661s]: went back to the garden.
+   ✅ MemNet [0.000s]: garden
+   ❌ NTM    [0.000s]: kitchen
+   Expected: garden
+
+✅ Q: Where is Daniel? [Story 28]
+   Context: Daniel moved to the bedroom. | John went back to the garden. | John travelled to the bathroom. | John travelled to the garden. | John went to the kitchen. | Daniel journeyed to the garden. | John went back to the garden. | Sandra went back to the kitchen. | Daniel journeyed to the hallway. | Daniel moved to the bathroom.
+   ✅ Brain  [0.693s]: moved to the bathroom.
+   ✅ MemNet [0.000s]: bathroom
+   ✅ NTM    [0.000s]: bathroom
+   Expected: bathroom
+
+✅ Q: Where is Mary? [Story 29]
+   Context: Mary travelled to the hallway. | Mary moved to the garden.
+   ✅ Brain  [0.658s]: moved to the garden.
+   ✅ MemNet [0.000s]: garden
+   ✅ NTM    [0.000s]: garden
+   Expected: garden
+
+✅ Q: Where is Sandra? [Story 29]
+   Context: Mary travelled to the hallway. | Mary moved to the garden. | Sandra went to the kitchen. | Sandra moved to the bathroom.
+   ✅ Brain  [0.602s]: moved to the bathroom.
+   ✅ MemNet [0.000s]: bathroom
+   ✅ NTM    [0.000s]: bathroom
+   Expected: bathroom
+
+✅ Q: Where is Mary? [Story 29]
+   Context: Mary travelled to the hallway. | Mary moved to the garden. | Sandra went to the kitchen. | Sandra moved to the bathroom. | Daniel went back to the bedroom. | John went back to the office.
+   ✅ Brain  [0.363s]: moved to the garden.
+   ✅ MemNet [0.000s]: garden
+   ✅ NTM    [0.000s]: garden
+   Expected: garden
+
+✅ Q: Where is Mary? [Story 29]
+   Context: Mary travelled to the hallway. | Mary moved to the garden. | Sandra went to the kitchen. | Sandra moved to the bathroom. | Daniel went back to the bedroom. | John went back to the office. | Mary went back to the office. | Mary went to the bathroom.
+   ✅ Brain  [0.396s]: went to the bathroom.
+   ✅ MemNet [0.000s]: bathroom
+   ✅ NTM    [0.000s]: bathroom
+   Expected: bathroom
+
+✅ Q: Where is Daniel? [Story 29]
+   Context: Mary travelled to the hallway. | Mary moved to the garden. | Sandra went to the kitchen. | Sandra moved to the bathroom. | Daniel went back to the bedroom. | John went back to the office. | Mary went back to the office. | Mary went to the bathroom. | Daniel went back to the kitchen. | Mary moved to the kitchen.
+   ✅ Brain  [0.415s]: went back to the kitchen.
+   ✅ MemNet [0.000s]: kitchen
+   ✅ NTM    [0.000s]: back kitchen the
+   Expected: kitchen
+
+✅ Q: Where is Daniel? [Story 30]
+   Context: Daniel went to the office. | John journeyed to the garden.
+   ✅ Brain  [0.665s]: went to the office.
+   ✅ MemNet [0.000s]: office
+   ✅ NTM    [0.000s]: office
+   Expected: office
+
+✅ Q: Where is John? [Story 30]
+   Context: Daniel went to the office. | John journeyed to the garden. | John travelled to the bathroom. | Daniel moved to the bedroom.
+   ✅ Brain  [0.597s]: travelled to the bathroom.
+   ✅ MemNet [0.000s]: bathroom
+   ✅ NTM    [0.000s]: bathroom
+   Expected: bathroom
+
+✅ Q: Where is John? [Story 30]
+   Context: Daniel went to the office. | John journeyed to the garden. | John travelled to the bathroom. | Daniel moved to the bedroom. | Mary travelled to the kitchen. | John journeyed to the kitchen.
+   ✅ Brain  [0.624s]: journeyed to the kitchen.
+   ✅ MemNet [0.000s]: kitchen
+   ✅ NTM    [0.000s]: kitchen
+   Expected: kitchen
+
+✅ Q: Where is Sandra? [Story 30]
+   Context: Daniel went to the office. | John journeyed to the garden. | John travelled to the bathroom. | Daniel moved to the bedroom. | Mary travelled to the kitchen. | John journeyed to the kitchen. | John travelled to the office. | Sandra moved to the office.
+   ✅ Brain  [0.386s]: moved to the office.
+   ✅ MemNet [0.000s]: office
+   ✅ NTM    [0.000s]: office
+   Expected: office
+
+✅ Q: Where is Sandra? [Story 30]
+   Context: Daniel went to the office. | John journeyed to the garden. | John travelled to the bathroom. | Daniel moved to the bedroom. | Mary travelled to the kitchen. | John journeyed to the kitchen. | John travelled to the office. | Sandra moved to the office. | John moved to the garden. | Mary journeyed to the bedroom.
+   ✅ Brain  [0.416s]: moved to the office.
+   ✅ MemNet [0.000s]: office
+   ✅ NTM    [0.000s]: office
+   Expected: office
+
+✅ Q: Where is Sandra? [Story 31]
+   Context: Sandra journeyed to the hallway. | Daniel travelled to the hallway.
+   ✅ Brain  [0.620s]: journeyed to the hallway.
+   ✅ MemNet [0.000s]: hallway
+   ✅ NTM    [0.000s]: hallway
+   Expected: hallway
+
+✅ Q: Where is John? [Story 31]
+   Context: Sandra journeyed to the hallway. | Daniel travelled to the hallway. | John travelled to the hallway. | Sandra went to the bedroom.
+   ✅ Brain  [0.532s]: travelled to the hallway.
+   ✅ MemNet [0.000s]: hallway
+   ✅ NTM    [0.000s]: hallway
+   Expected: hallway
+
+✅ Q: Where is Sandra? [Story 31]
+   Context: Sandra journeyed to the hallway. | Daniel travelled to the hallway. | John travelled to the hallway. | Sandra went to the bedroom. | John travelled to the office. | Sandra went to the kitchen.
+   ✅ Brain  [0.558s]: went to the kitchen.
+   ✅ MemNet [0.000s]: kitchen
+   ✅ NTM    [0.000s]: kitchen
+   Expected: kitchen
+
+✅ Q: Where is Sandra? [Story 31]
+   Context: Sandra journeyed to the hallway. | Daniel travelled to the hallway. | John travelled to the hallway. | Sandra went to the bedroom. | John travelled to the office. | Sandra went to the kitchen. | Mary moved to the office. | Daniel moved to the office.
+   ✅ Brain  [0.384s]: went to the kitchen.
+   ✅ MemNet [0.000s]: kitchen
+   ✅ NTM    [0.000s]: kitchen
+   Expected: kitchen
+
+✅ Q: Where is Daniel? [Story 31]
+   Context: Sandra journeyed to the hallway. | Daniel travelled to the hallway. | John travelled to the hallway. | Sandra went to the bedroom. | John travelled to the office. | Sandra went to the kitchen. | Mary moved to the office. | Daniel moved to the office. | Daniel went back to the bathroom. | Daniel travelled to the office.
+   ✅ Brain  [0.422s]: travelled to the office.
+   ✅ MemNet [0.000s]: office
+   ✅ NTM    [0.000s]: office
+   Expected: office
+
+✅ Q: Where is Mary? [Story 32]
+   Context: Mary went to the bathroom. | John travelled to the hallway.
+   ✅ Brain  [0.711s]: went to the bathroom.
+   ✅ MemNet [0.000s]: bathroom
+   ✅ NTM    [0.000s]: bathroom
+   Expected: bathroom
+
+✅ Q: Where is John? [Story 32]
+   Context: Mary went to the bathroom. | John travelled to the hallway. | John moved to the kitchen. | Mary went back to the hallway.
+   ✅ Brain  [0.595s]: moved to the kitchen.
+   ✅ MemNet [0.000s]: kitchen
+   ✅ NTM    [0.000s]: kitchen
+   Expected: kitchen
+
+✅ Q: Where is John? [Story 32]
+   Context: Mary went to the bathroom. | John travelled to the hallway. | John moved to the kitchen. | Mary went back to the hallway. | Daniel went back to the bedroom. | Mary journeyed to the garden.
+   ✅ Brain  [0.642s]: moved to the kitchen.
+   ✅ MemNet [0.000s]: kitchen
+   ✅ NTM    [0.000s]: kitchen
+   Expected: kitchen
+
+✅ Q: Where is Daniel? [Story 32]
+   Context: Mary went to the bathroom. | John travelled to the hallway. | John moved to the kitchen. | Mary went back to the hallway. | Daniel went back to the bedroom. | Mary journeyed to the garden. | Mary went back to the office. | Daniel went back to the bathroom.
+   ✅ Brain  [0.661s]: went back to the bathroom.
+   ✅ MemNet [0.000s]: bathroom
+   ✅ NTM    [0.000s]: back bathroom the
+   Expected: bathroom
+
+✅ Q: Where is Mary? [Story 32]
+   Context: Mary went to the bathroom. | John travelled to the hallway. | John moved to the kitchen. | Mary went back to the hallway. | Daniel went back to the bedroom. | Mary journeyed to the garden. | Mary went back to the office. | Daniel went back to the bathroom. | Sandra moved to the hallway. | John went back to the bedroom.
+   ✅ Brain  [0.424s]: went back to the office.
+   ✅ MemNet [0.000s]: office
+   ❌ NTM    [0.000s]: garden
+   Expected: office
+
+✅ Q: Where is Daniel? [Story 33]
+   Context: Daniel journeyed to the bedroom. | John went to the kitchen.
+   ✅ Brain  [0.667s]: journeyed to the bedroom.
+   ✅ MemNet [0.000s]: bedroom
+   ✅ NTM    [0.000s]: bedroom
+   Expected: bedroom
+
+✅ Q: Where is Sandra? [Story 33]
+   Context: Daniel journeyed to the bedroom. | John went to the kitchen. | Mary moved to the office. | Sandra travelled to the bathroom.
+   ✅ Brain  [0.321s]: travelled to the bathroom.
+   ✅ MemNet [0.000s]: bathroom
+   ✅ NTM    [0.000s]: bathroom
+   Expected: bathroom
+
+✅ Q: Where is Mary? [Story 33]
+   Context: Daniel journeyed to the bedroom. | John went to the kitchen. | Mary moved to the office. | Sandra travelled to the bathroom. | Mary went to the kitchen. | Sandra journeyed to the bedroom.
+   ✅ Brain  [0.358s]: went to the kitchen.
+   ✅ MemNet [0.000s]: kitchen
+   ✅ NTM    [0.000s]: kitchen
+   Expected: kitchen
+
+✅ Q: Where is Daniel? [Story 33]
+   Context: Daniel journeyed to the bedroom. | John went to the kitchen. | Mary moved to the office. | Sandra travelled to the bathroom. | Mary went to the kitchen. | Sandra journeyed to the bedroom. | Sandra journeyed to the office. | Daniel went back to the bathroom.
+   ✅ Brain  [0.396s]: went back to the bathroom.
+   ✅ MemNet [0.000s]: bathroom
+   ❌ NTM    [0.000s]: bedroom
+   Expected: bathroom
+
+✅ Q: Where is Sandra? [Story 33]
+   Context: Daniel journeyed to the bedroom. | John went to the kitchen. | Mary moved to the office. | Sandra travelled to the bathroom. | Mary went to the kitchen. | Sandra journeyed to the bedroom. | Sandra journeyed to the office. | Daniel went back to the bathroom. | Mary went back to the office. | John went back to the office.
+   ✅ Brain  [0.416s]: journeyed to the office.
+   ✅ MemNet [0.000s]: office
+   ✅ NTM    [0.000s]: office
+   Expected: office
+
+✅ Q: Where is John? [Story 34]
+   Context: Mary moved to the garden. | John went to the bedroom.
+   ✅ Brain  [0.595s]: went to the bedroom.
+   ✅ MemNet [0.000s]: bedroom
+   ✅ NTM    [0.000s]: bedroom
+   Expected: bedroom
+
+✅ Q: Where is Mary? [Story 34]
+   Context: Mary moved to the garden. | John went to the bedroom. | Daniel journeyed to the kitchen. | Sandra went to the bathroom.
+   ✅ Brain  [0.331s]: moved to the garden.
+   ✅ MemNet [0.000s]: garden
+   ✅ NTM    [0.000s]: garden
+   Expected: garden
+
+✅ Q: Where is Sandra? [Story 34]
+   Context: Mary moved to the garden. | John went to the bedroom. | Daniel journeyed to the kitchen. | Sandra went to the bathroom. | Daniel journeyed to the bathroom. | Daniel moved to the garden.
+   ✅ Brain  [0.361s]: went to the bathroom.
+   ✅ MemNet [0.000s]: bathroom
+   ✅ NTM    [0.000s]: bathroom
+   Expected: bathroom
+
+✅ Q: Where is Daniel? [Story 34]
+   Context: Mary moved to the garden. | John went to the bedroom. | Daniel journeyed to the kitchen. | Sandra went to the bathroom. | Daniel journeyed to the bathroom. | Daniel moved to the garden. | Daniel went to the kitchen. | Mary journeyed to the bathroom.
+   ✅ Brain  [0.385s]: went to the kitchen.
+   ✅ MemNet [0.000s]: kitchen
+   ✅ NTM    [0.000s]: kitchen
+   Expected: kitchen
+
+✅ Q: Where is Mary? [Story 34]
+   Context: Mary moved to the garden. | John went to the bedroom. | Daniel journeyed to the kitchen. | Sandra went to the bathroom. | Daniel journeyed to the bathroom. | Daniel moved to the garden. | Daniel went to the kitchen. | Mary journeyed to the bathroom. | Sandra travelled to the garden. | Sandra went to the hallway.
+   ✅ Brain  [0.415s]: journeyed to the bathroom.
+   ✅ MemNet [0.000s]: bathroom
+   ✅ NTM    [0.000s]: bathroom
+   Expected: bathroom
+
+✅ Q: Where is Sandra? [Story 35]
+   Context: Sandra travelled to the office. | Sandra travelled to the bathroom.
+   ✅ Brain  [0.632s]: travelled to the bathroom.
+   ✅ MemNet [0.000s]: bathroom
+   ✅ NTM    [0.000s]: bathroom
+   Expected: bathroom
+
+✅ Q: Where is Mary? [Story 35]
+   Context: Sandra travelled to the office. | Sandra travelled to the bathroom. | Mary went back to the hallway. | Mary travelled to the bathroom.
+   ✅ Brain  [0.599s]: travelled to the bathroom.
+   ✅ MemNet [0.000s]: bathroom
+   ✅ NTM    [0.000s]: bathroom
+   Expected: bathroom
+
+✅ Q: Where is Mary? [Story 35]
+   Context: Sandra travelled to the office. | Sandra travelled to the bathroom. | Mary went back to the hallway. | Mary travelled to the bathroom. | Daniel went to the bedroom. | Mary went to the office.
+   ✅ Brain  [0.599s]: went to the office.
+   ✅ MemNet [0.000s]: office
+   ✅ NTM    [0.000s]: office
+   Expected: office
+
+✅ Q: Where is Mary? [Story 35]
+   Context: Sandra travelled to the office. | Sandra travelled to the bathroom. | Mary went back to the hallway. | Mary travelled to the bathroom. | Daniel went to the bedroom. | Mary went to the office. | Mary travelled to the hallway. | John moved to the garden.
+   ✅ Brain  [0.397s]: travelled to the hallway.
+   ✅ MemNet [0.000s]: hallway
+   ✅ NTM    [0.000s]: hallway
+   Expected: hallway
+
+✅ Q: Where is John? [Story 35]
+   Context: Sandra travelled to the office. | Sandra travelled to the bathroom. | Mary went back to the hallway. | Mary travelled to the bathroom. | Daniel went to the bedroom. | Mary went to the office. | Mary travelled to the hallway. | John moved to the garden. | Sandra journeyed to the office. | Sandra moved to the bathroom.
+   ✅ Brain  [0.422s]: moved to the garden.
+   ✅ MemNet [0.000s]: garden
+   ✅ NTM    [0.000s]: garden
+   Expected: garden
+
+✅ Q: Where is Mary? [Story 36]
+   Context: Sandra journeyed to the garden. | Mary travelled to the hallway.
+   ✅ Brain  [0.628s]: travelled to the hallway.
+   ✅ MemNet [0.000s]: hallway
+   ✅ NTM    [0.000s]: hallway
+   Expected: hallway
+
+✅ Q: Where is Mary? [Story 36]
+   Context: Sandra journeyed to the garden. | Mary travelled to the hallway. | John travelled to the bathroom. | Sandra went back to the kitchen.
+   ✅ Brain  [0.327s]: travelled to the hallway.
+   ✅ MemNet [0.000s]: hallway
+   ✅ NTM    [0.000s]: hallway
+   Expected: hallway
+
+✅ Q: Where is John? [Story 36]
+   Context: Sandra journeyed to the garden. | Mary travelled to the hallway. | John travelled to the bathroom. | Sandra went back to the kitchen. | Daniel travelled to the bathroom. | Daniel travelled to the kitchen.
+   ✅ Brain  [0.621s]: travelled to the bathroom.
+   ✅ MemNet [0.000s]: bathroom
+   ✅ NTM    [0.000s]: bathroom
+   Expected: bathroom
+
+✅ Q: Where is John? [Story 36]
+   Context: Sandra journeyed to the garden. | Mary travelled to the hallway. | John travelled to the bathroom. | Sandra went back to the kitchen. | Daniel travelled to the bathroom. | Daniel travelled to the kitchen. | John went back to the hallway. | John travelled to the bathroom.
+   ✅ Brain  [1.616s]: travelled to the bathroom.
+   ✅ MemNet [0.000s]: bathroom
+   ✅ NTM    [0.000s]: bathroom
+   Expected: bathroom
+
+✅ Q: Where is Mary? [Story 36]
+   Context: Sandra journeyed to the garden. | Mary travelled to the hallway. | John travelled to the bathroom. | Sandra went back to the kitchen. | Daniel travelled to the bathroom. | Daniel travelled to the kitchen. | John went back to the hallway. | John travelled to the bathroom. | Mary journeyed to the bathroom. | Mary travelled to the bedroom.
+   ✅ Brain  [0.690s]: travelled to the bedroom.
+   ✅ MemNet [0.000s]: bedroom
+   ✅ NTM    [0.000s]: bedroom
+   Expected: bedroom
+
+✅ Q: Where is Daniel? [Story 37]
+   Context: John went to the office. | Daniel journeyed to the kitchen.
+   ✅ Brain  [0.670s]: journeyed to the kitchen.
+   ✅ MemNet [0.000s]: kitchen
+   ✅ NTM    [0.000s]: kitchen
+   Expected: kitchen
+
+✅ Q: Where is Daniel? [Story 37]
+   Context: John went to the office. | Daniel journeyed to the kitchen. | John travelled to the bedroom. | John moved to the garden.
+   ✅ Brain  [0.589s]: journeyed to the kitchen.
+   ✅ MemNet [0.000s]: kitchen
+   ✅ NTM    [0.000s]: kitchen
+   Expected: kitchen
+
+✅ Q: Where is John? [Story 37]
+   Context: John went to the office. | Daniel journeyed to the kitchen. | John travelled to the bedroom. | John moved to the garden. | Daniel journeyed to the bathroom. | John journeyed to the bedroom.
+   ✅ Brain  [0.625s]: journeyed to the bedroom.
+   ✅ MemNet [0.000s]: bedroom
+   ✅ NTM    [0.000s]: bedroom
+   Expected: bedroom
+
+✅ Q: Where is John? [Story 37]
+   Context: John went to the office. | Daniel journeyed to the kitchen. | John travelled to the bedroom. | John moved to the garden. | Daniel journeyed to the bathroom. | John journeyed to the bedroom. | Sandra journeyed to the kitchen. | Mary moved to the garden.
+   ✅ Brain  [0.386s]: journeyed to the bedroom.
+   ✅ MemNet [0.000s]: bedroom
+   ✅ NTM    [0.000s]: bedroom
+   Expected: bedroom
+
+✅ Q: Where is Sandra? [Story 37]
+   Context: John went to the office. | Daniel journeyed to the kitchen. | John travelled to the bedroom. | John moved to the garden. | Daniel journeyed to the bathroom. | John journeyed to the bedroom. | Sandra journeyed to the kitchen. | Mary moved to the garden. | Sandra journeyed to the bathroom. | Sandra went back to the bedroom.
+   ✅ Brain  [0.427s]: went back to the bedroom.
+   ✅ MemNet [0.000s]: bedroom
+   ❌ NTM    [0.000s]: bathroom
+   Expected: bedroom
+
+✅ Q: Where is Sandra? [Story 38]
+   Context: Daniel went back to the bedroom. | Sandra travelled to the bedroom.
+   ✅ Brain  [0.718s]: travelled to the bedroom.
+   ✅ MemNet [0.000s]: bedroom
+   ✅ NTM    [0.000s]: bedroom
+   Expected: bedroom
+
+✅ Q: Where is Mary? [Story 38]
+   Context: Daniel went back to the bedroom. | Sandra travelled to the bedroom. | Sandra went to the office. | Mary went to the office.
+   ✅ Brain  [0.570s]: went to the office.
+   ✅ MemNet [0.000s]: office
+   ✅ NTM    [0.000s]: office
+   Expected: office
+
+✅ Q: Where is Mary? [Story 38]
+   Context: Daniel went back to the bedroom. | Sandra travelled to the bedroom. | Sandra went to the office. | Mary went to the office. | John journeyed to the garden. | Mary journeyed to the garden.
+   ✅ Brain  [0.629s]: journeyed to the garden.
+   ✅ MemNet [0.000s]: garden
+   ✅ NTM    [0.000s]: garden
+   Expected: garden
+
+✅ Q: Where is John? [Story 38]
+   Context: Daniel went back to the bedroom. | Sandra travelled to the bedroom. | Sandra went to the office. | Mary went to the office. | John journeyed to the garden. | Mary journeyed to the garden. | Daniel travelled to the bathroom. | John moved to the kitchen.
+   ✅ Brain  [0.389s]: moved to the kitchen.
+   ✅ MemNet [0.000s]: kitchen
+   ✅ NTM    [0.000s]: kitchen
+   Expected: kitchen
+
+✅ Q: Where is Mary? [Story 38]
+   Context: Daniel went back to the bedroom. | Sandra travelled to the bedroom. | Sandra went to the office. | Mary went to the office. | John journeyed to the garden. | Mary journeyed to the garden. | Daniel travelled to the bathroom. | John moved to the kitchen. | Sandra went back to the kitchen. | Daniel journeyed to the hallway.
+   ✅ Brain  [0.421s]: journeyed to the garden.
+   ✅ MemNet [0.000s]: garden
+   ✅ NTM    [0.000s]: garden
+   Expected: garden
+
+✅ Q: Where is Daniel? [Story 39]
+   Context: Daniel moved to the bathroom. | John moved to the office.
+   ✅ Brain  [0.646s]: moved to the bathroom.
+   ✅ MemNet [0.000s]: bathroom
+   ✅ NTM    [0.000s]: bathroom
+   Expected: bathroom
+
+✅ Q: Where is Mary? [Story 39]
+   Context: Daniel moved to the bathroom. | John moved to the office. | Mary went back to the office. | John went back to the hallway.
+   ✅ Brain  [0.605s]: went back to the office.
+   ✅ MemNet [0.000s]: office
+   ✅ NTM    [0.000s]: back office the
+   Expected: office
+
+✅ Q: Where is Mary? [Story 39]
+   Context: Daniel moved to the bathroom. | John moved to the office. | Mary went back to the office. | John went back to the hallway. | Mary moved to the hallway. | Mary journeyed to the kitchen.
+   ✅ Brain  [0.627s]: journeyed to the kitchen.
+   ✅ MemNet [0.000s]: kitchen
+   ✅ NTM    [0.000s]: kitchen
+   Expected: kitchen
+
+✅ Q: Where is Daniel? [Story 39]
+   Context: Daniel moved to the bathroom. | John moved to the office. | Mary went back to the office. | John went back to the hallway. | Mary moved to the hallway. | Mary journeyed to the kitchen. | Daniel went to the office. | Daniel moved to the bedroom.
+   ✅ Brain  [0.661s]: moved to the bedroom.
+   ✅ MemNet [0.000s]: bedroom
+   ✅ NTM    [0.000s]: bedroom
+   Expected: bedroom
+
+✅ Q: Where is Daniel? [Story 39]
+   Context: Daniel moved to the bathroom. | John moved to the office. | Mary went back to the office. | John went back to the hallway. | Mary moved to the hallway. | Mary journeyed to the kitchen. | Daniel went to the office. | Daniel moved to the bedroom. | Sandra journeyed to the hallway. | Daniel travelled to the garden.
+   ✅ Brain  [0.416s]: travelled to the garden.
+   ✅ MemNet [0.000s]: garden
+   ✅ NTM    [0.000s]: garden
+   Expected: garden
+
+✅ Q: Where is Sandra? [Story 40]
+   Context: Mary travelled to the hallway. | Sandra went to the garden.
+   ✅ Brain  [0.658s]: went to the garden.
+   ✅ MemNet [0.000s]: garden
+   ✅ NTM    [0.000s]: garden
+   Expected: garden
+
+✅ Q: Where is Daniel? [Story 40]
+   Context: Mary travelled to the hallway. | Sandra went to the garden. | Daniel travelled to the bedroom. | Mary went to the bedroom.
+   ✅ Brain  [0.527s]: travelled to the bedroom.
+   ✅ MemNet [0.000s]: bedroom
+   ✅ NTM    [0.000s]: bedroom
+   Expected: bedroom
+
+✅ Q: Where is Sandra? [Story 40]
+   Context: Mary travelled to the hallway. | Sandra went to the garden. | Daniel travelled to the bedroom. | Mary went to the bedroom. | Daniel moved to the hallway. | John travelled to the bathroom.
+   ✅ Brain  [0.512s]: went to the garden.
+   ✅ MemNet [0.000s]: garden
+   ✅ NTM    [0.000s]: garden
+   Expected: garden
+
+✅ Q: Where is Daniel? [Story 40]
+   Context: Mary travelled to the hallway. | Sandra went to the garden. | Daniel travelled to the bedroom. | Mary went to the bedroom. | Daniel moved to the hallway. | John travelled to the bathroom. | Daniel journeyed to the bathroom. | John journeyed to the office.
+   ✅ Brain  [0.383s]: journeyed to the bathroom.
+   ✅ MemNet [0.000s]: bathroom
+   ✅ NTM    [0.000s]: bathroom
+   Expected: bathroom
+
+✅ Q: Where is John? [Story 40]
+   Context: Mary travelled to the hallway. | Sandra went to the garden. | Daniel travelled to the bedroom. | Mary went to the bedroom. | Daniel moved to the hallway. | John travelled to the bathroom. | Daniel journeyed to the bathroom. | John journeyed to the office. | Mary went back to the garden. | John went to the kitchen.
+   ✅ Brain  [0.422s]: went to the kitchen.
+   ✅ MemNet [0.000s]: kitchen
+   ✅ NTM    [0.000s]: kitchen
+   Expected: kitchen
+
+✅ Q: Where is Daniel? [Story 41]
+   Context: Daniel travelled to the kitchen. | Daniel journeyed to the garden.
+   ✅ Brain  [0.622s]: journeyed to the garden.
+   ✅ MemNet [0.000s]: garden
+   ✅ NTM    [0.000s]: garden
+   Expected: garden
+
+✅ Q: Where is Daniel? [Story 41]
+   Context: Daniel travelled to the kitchen. | Daniel journeyed to the garden. | John journeyed to the office. | John travelled to the garden.
+   ✅ Brain  [0.511s]: journeyed to the garden.
+   ✅ MemNet [0.000s]: garden
+   ✅ NTM    [0.000s]: garden
+   Expected: garden
+
+✅ Q: Where is John? [Story 41]
+   Context: Daniel travelled to the kitchen. | Daniel journeyed to the garden. | John journeyed to the office. | John travelled to the garden. | Daniel moved to the office. | John went to the hallway.
+   ✅ Brain  [0.627s]: went to the hallway.
+   ✅ MemNet [0.000s]: hallway
+   ✅ NTM    [0.000s]: hallway
+   Expected: hallway
+
+✅ Q: Where is John? [Story 41]
+   Context: Daniel travelled to the kitchen. | Daniel journeyed to the garden. | John journeyed to the office. | John travelled to the garden. | Daniel moved to the office. | John went to the hallway. | John moved to the office. | Daniel journeyed to the kitchen.
+   ✅ Brain  [0.658s]: moved to the office.
+   ✅ MemNet [0.000s]: office
+   ✅ NTM    [0.000s]: office
+   Expected: office
+
+✅ Q: Where is Daniel? [Story 41]
+   Context: Daniel travelled to the kitchen. | Daniel journeyed to the garden. | John journeyed to the office. | John travelled to the garden. | Daniel moved to the office. | John went to the hallway. | John moved to the office. | Daniel journeyed to the kitchen. | Daniel went to the garden. | John went back to the bathroom.
+   ✅ Brain  [0.685s]: went to the garden.
+   ✅ MemNet [0.000s]: garden
+   ✅ NTM    [0.000s]: garden
+   Expected: garden
+
+✅ Q: Where is John? [Story 42]
+   Context: Mary went to the bathroom. | John went to the kitchen.
+   ✅ Brain  [0.710s]: went to the kitchen.
+   ✅ MemNet [0.000s]: kitchen
+   ✅ NTM    [0.000s]: kitchen
+   Expected: kitchen
+
+✅ Q: Where is Daniel? [Story 42]
+   Context: Mary went to the bathroom. | John went to the kitchen. | Daniel moved to the office. | Daniel moved to the bathroom.
+   ✅ Brain  [0.585s]: moved to the bathroom.
+   ✅ MemNet [0.000s]: bathroom
+   ✅ NTM    [0.000s]: bathroom
+   Expected: bathroom
+
+✅ Q: Where is John? [Story 42]
+   Context: Mary went to the bathroom. | John went to the kitchen. | Daniel moved to the office. | Daniel moved to the bathroom. | Sandra travelled to the bathroom. | Mary travelled to the kitchen.
+   ✅ Brain  [0.516s]: went to the kitchen.
+   ✅ MemNet [0.000s]: kitchen
+   ✅ NTM    [0.000s]: kitchen
+   Expected: kitchen
+
+✅ Q: Where is Mary? [Story 42]
+   Context: Mary went to the bathroom. | John went to the kitchen. | Daniel moved to the office. | Daniel moved to the bathroom. | Sandra travelled to the bathroom. | Mary travelled to the kitchen. | Mary went to the garden. | Sandra moved to the bedroom.
+   ✅ Brain  [0.555s]: went to the garden.
+   ✅ MemNet [0.000s]: garden
+   ✅ NTM    [0.000s]: garden
+   Expected: garden
+
+✅ Q: Where is Sandra? [Story 42]
+   Context: Mary went to the bathroom. | John went to the kitchen. | Daniel moved to the office. | Daniel moved to the bathroom. | Sandra travelled to the bathroom. | Mary travelled to the kitchen. | Mary went to the garden. | Sandra moved to the bedroom. | Sandra journeyed to the kitchen. | Daniel travelled to the garden.
+   ✅ Brain  [0.415s]: journeyed to the kitchen.
+   ✅ MemNet [0.000s]: kitchen
+   ✅ NTM    [0.000s]: kitchen
+   Expected: kitchen
+
+✅ Q: Where is Daniel? [Story 43]
+   Context: Daniel moved to the garden. | John went to the kitchen.
+   ✅ Brain  [0.699s]: moved to the garden.
+   ✅ MemNet [0.000s]: garden
+   ✅ NTM    [0.000s]: garden
+   Expected: garden
+
+✅ Q: Where is Mary? [Story 43]
+   Context: Daniel moved to the garden. | John went to the kitchen. | Mary went to the office. | Sandra travelled to the bedroom.
+   ✅ Brain  [0.488s]: went to the office.
+   ✅ MemNet [0.000s]: office
+   ✅ NTM    [0.000s]: office
+   Expected: office
+
+✅ Q: Where is John? [Story 43]
+   Context: Daniel moved to the garden. | John went to the kitchen. | Mary went to the office. | Sandra travelled to the bedroom. | Mary went to the bathroom. | John journeyed to the bathroom.
+   ✅ Brain  [0.360s]: journeyed to the bathroom.
+   ✅ MemNet [0.000s]: bathroom
+   ✅ NTM    [0.000s]: bathroom
+   Expected: bathroom
+
+✅ Q: Where is Mary? [Story 43]
+   Context: Daniel moved to the garden. | John went to the kitchen. | Mary went to the office. | Sandra travelled to the bedroom. | Mary went to the bathroom. | John journeyed to the bathroom. | Mary went back to the office. | John went back to the kitchen.
+   ✅ Brain  [0.398s]: went back to the office.
+   ✅ MemNet [0.000s]: office
+   ❌ NTM    [0.000s]: bathroom
+   Expected: office
+
+✅ Q: Where is John? [Story 43]
+   Context: Daniel moved to the garden. | John went to the kitchen. | Mary went to the office. | Sandra travelled to the bedroom. | Mary went to the bathroom. | John journeyed to the bathroom. | Mary went back to the office. | John went back to the kitchen. | John moved to the office. | Mary journeyed to the bathroom.
+   ✅ Brain  [0.421s]: moved to the office.
+   ✅ MemNet [0.000s]: office
+   ✅ NTM    [0.000s]: office
+   Expected: office
+
+✅ Q: Where is Mary? [Story 44]
+   Context: Mary travelled to the kitchen. | Mary moved to the bedroom.
+   ✅ Brain  [0.660s]: moved to the bedroom.
+   ✅ MemNet [0.000s]: bedroom
+   ✅ NTM    [0.000s]: bedroom
+   Expected: bedroom
+
+✅ Q: Where is Sandra? [Story 44]
+   Context: Mary travelled to the kitchen. | Mary moved to the bedroom. | Mary went to the hallway. | Sandra went back to the bathroom.
+   ✅ Brain  [0.480s]: went back to the bathroom.
+   ✅ MemNet [0.000s]: bathroom
+   ✅ NTM    [0.000s]: back bathroom the
+   Expected: bathroom
+
+✅ Q: Where is John? [Story 44]
+   Context: Mary travelled to the kitchen. | Mary moved to the bedroom. | Mary went to the hallway. | Sandra went back to the bathroom. | John went to the bedroom. | Daniel travelled to the garden.
+   ✅ Brain  [0.369s]: went to the bedroom.
+   ✅ MemNet [0.000s]: bedroom
+   ✅ NTM    [0.000s]: bedroom
+   Expected: bedroom
+
+✅ Q: Where is Sandra? [Story 44]
+   Context: Mary travelled to the kitchen. | Mary moved to the bedroom. | Mary went to the hallway. | Sandra went back to the bathroom. | John went to the bedroom. | Daniel travelled to the garden. | Daniel went to the hallway. | Sandra went to the office.
+   ✅ Brain  [0.385s]: went to the office.
+   ✅ MemNet [0.000s]: office
+   ✅ NTM    [0.000s]: office
+   Expected: office
+
+✅ Q: Where is Sandra? [Story 44]
+   Context: Mary travelled to the kitchen. | Mary moved to the bedroom. | Mary went to the hallway. | Sandra went back to the bathroom. | John went to the bedroom. | Daniel travelled to the garden. | Daniel went to the hallway. | Sandra went to the office. | Sandra journeyed to the bedroom. | John travelled to the bathroom.
+   ✅ Brain  [0.417s]: journeyed to the bedroom.
+   ✅ MemNet [0.000s]: bedroom
+   ✅ NTM    [0.000s]: bedroom
+   Expected: bedroom
+
+✅ Q: Where is John? [Story 45]
+   Context: John journeyed to the kitchen. | John journeyed to the garden.
+   ✅ Brain  [0.634s]: journeyed to the garden.
+   ✅ MemNet [0.000s]: garden
+   ✅ NTM    [0.000s]: garden
+   Expected: garden
+
+✅ Q: Where is Mary? [Story 45]
+   Context: John journeyed to the kitchen. | John journeyed to the garden. | Mary went back to the bathroom. | Mary moved to the garden.
+   ✅ Brain  [0.609s]: moved to the garden.
+   ✅ MemNet [0.000s]: garden
+   ✅ NTM    [0.000s]: garden
+   Expected: garden
+
+✅ Q: Where is Mary? [Story 45]
+   Context: John journeyed to the kitchen. | John journeyed to the garden. | Mary went back to the bathroom. | Mary moved to the garden. | Daniel travelled to the bedroom. | John moved to the kitchen.
+   ✅ Brain  [0.633s]: moved to the garden.
+   ✅ MemNet [0.000s]: garden
+   ✅ NTM    [0.000s]: garden
+   Expected: garden
+
+✅ Q: Where is Mary? [Story 45]
+   Context: John journeyed to the kitchen. | John journeyed to the garden. | Mary went back to the bathroom. | Mary moved to the garden. | Daniel travelled to the bedroom. | John moved to the kitchen. | John journeyed to the hallway. | Mary went back to the bathroom.
+   ✅ Brain  [0.678s]: went back to the bathroom.
+   ✅ MemNet [0.000s]: bathroom
+   ❌ NTM    [0.000s]: garden
+   Expected: bathroom
+
+✅ Q: Where is Mary? [Story 45]
+   Context: John journeyed to the kitchen. | John journeyed to the garden. | Mary went back to the bathroom. | Mary moved to the garden. | Daniel travelled to the bedroom. | John moved to the kitchen. | John journeyed to the hallway. | Mary went back to the bathroom. | John journeyed to the bathroom. | Sandra moved to the kitchen.
+   ✅ Brain  [0.424s]: went back to the bathroom.
+   ✅ MemNet [0.000s]: bathroom
+   ❌ NTM    [0.000s]: garden
+   Expected: bathroom
+
+✅ Q: Where is Daniel? [Story 46]
+   Context: Mary journeyed to the office. | Daniel journeyed to the bedroom.
+   ✅ Brain  [0.619s]: journeyed to the bedroom.
+   ✅ MemNet [0.000s]: bedroom
+   ✅ NTM    [0.000s]: bedroom
+   Expected: bedroom
+
+✅ Q: Where is Mary? [Story 46]
+   Context: Mary journeyed to the office. | Daniel journeyed to the bedroom. | Mary went to the bedroom. | Sandra went to the bedroom.
+   ✅ Brain  [0.529s]: went to the bedroom.
+   ✅ MemNet [0.000s]: bedroom
+   ✅ NTM    [0.000s]: bedroom
+   Expected: bedroom
+
+✅ Q: Where is Daniel? [Story 46]
+   Context: Mary journeyed to the office. | Daniel journeyed to the bedroom. | Mary went to the bedroom. | Sandra went to the bedroom. | John went back to the hallway. | Daniel went back to the bathroom.
+   ✅ Brain  [0.609s]: went back to the bathroom.
+   ✅ MemNet [0.000s]: bathroom
+   ❌ NTM    [0.000s]: bedroom
+   Expected: bathroom
+
+✅ Q: Where is John? [Story 46]
+   Context: Mary journeyed to the office. | Daniel journeyed to the bedroom. | Mary went to the bedroom. | Sandra went to the bedroom. | John went back to the hallway. | Daniel went back to the bathroom. | Mary travelled to the garden. | Daniel moved to the hallway.
+   ✅ Brain  [0.394s]: went back to the hallway.
+   ✅ MemNet [0.000s]: hallway
+   ✅ NTM    [0.000s]: back hallway the
+   Expected: hallway
+
+✅ Q: Where is Sandra? [Story 46]
+   Context: Mary journeyed to the office. | Daniel journeyed to the bedroom. | Mary went to the bedroom. | Sandra went to the bedroom. | John went back to the hallway. | Daniel went back to the bathroom. | Mary travelled to the garden. | Daniel moved to the hallway. | Sandra travelled to the office. | Daniel moved to the bathroom.
+   ✅ Brain  [0.417s]: travelled to the office.
+   ✅ MemNet [0.000s]: office
+   ✅ NTM    [0.000s]: office
+   Expected: office
+
+✅ Q: Where is Mary? [Story 47]
+   Context: Mary moved to the kitchen. | Sandra moved to the kitchen.
+   ✅ Brain  [0.647s]: moved to the kitchen.
+   ✅ MemNet [0.000s]: kitchen
+   ✅ NTM    [0.000s]: kitchen
+   Expected: kitchen
+
+✅ Q: Where is Sandra? [Story 47]
+   Context: Mary moved to the kitchen. | Sandra moved to the kitchen. | Mary went to the garden. | John moved to the bedroom.
+   ✅ Brain  [0.375s]: moved to the kitchen.
+   ✅ MemNet [0.000s]: kitchen
+   ✅ NTM    [0.000s]: kitchen
+   Expected: kitchen
+
+✅ Q: Where is John? [Story 47]
+   Context: Mary moved to the kitchen. | Sandra moved to the kitchen. | Mary went to the garden. | John moved to the bedroom. | Mary journeyed to the office. | Mary went to the bathroom.
+   ✅ Brain  [0.639s]: moved to the bedroom.
+   ✅ MemNet [0.000s]: bedroom
+   ✅ NTM    [0.000s]: bedroom
+   Expected: bedroom
+
+✅ Q: Where is Sandra? [Story 47]
+   Context: Mary moved to the kitchen. | Sandra moved to the kitchen. | Mary went to the garden. | John moved to the bedroom. | Mary journeyed to the office. | Mary went to the bathroom. | Sandra travelled to the garden. | Daniel went back to the hallway.
+   ✅ Brain  [0.386s]: travelled to the garden.
+   ✅ MemNet [0.000s]: garden
+   ✅ NTM    [0.000s]: garden
+   Expected: garden
+
+✅ Q: Where is Sandra? [Story 47]
+   Context: Mary moved to the kitchen. | Sandra moved to the kitchen. | Mary went to the garden. | John moved to the bedroom. | Mary journeyed to the office. | Mary went to the bathroom. | Sandra travelled to the garden. | Daniel went back to the hallway. | Daniel went to the bedroom. | Sandra journeyed to the hallway.
+   ✅ Brain  [0.418s]: journeyed to the hallway.
+   ✅ MemNet [0.000s]: hallway
+   ✅ NTM    [0.000s]: hallway
+   Expected: hallway
+
+✅ Q: Where is John? [Story 48]
+   Context: John went to the kitchen. | John went to the hallway.
+   ✅ Brain  [0.653s]: went to the hallway.
+   ✅ MemNet [0.000s]: hallway
+   ✅ NTM    [0.000s]: hallway
+   Expected: hallway
+
+✅ Q: Where is John? [Story 48]
+   Context: John went to the kitchen. | John went to the hallway. | John travelled to the bathroom. | Sandra travelled to the kitchen.
+   ✅ Brain  [0.541s]: travelled to the bathroom.
+   ✅ MemNet [0.000s]: bathroom
+   ✅ NTM    [0.000s]: bathroom
+   Expected: bathroom
+
+✅ Q: Where is John? [Story 48]
+   Context: John went to the kitchen. | John went to the hallway. | John travelled to the bathroom. | Sandra travelled to the kitchen. | John journeyed to the garden. | Sandra went back to the bedroom.
+   ✅ Brain  [0.622s]: journeyed to the garden.
+   ✅ MemNet [0.000s]: garden
+   ✅ NTM    [0.000s]: garden
+   Expected: garden
+
+✅ Q: Where is Sandra? [Story 48]
+   Context: John went to the kitchen. | John went to the hallway. | John travelled to the bathroom. | Sandra travelled to the kitchen. | John journeyed to the garden. | Sandra went back to the bedroom. | Mary moved to the hallway. | Mary went to the bedroom.
+   ✅ Brain  [0.662s]: went back to the bedroom.
+   ✅ MemNet [0.000s]: bedroom
+   ❌ NTM    [0.000s]: kitchen
+   Expected: bedroom
+
+✅ Q: Where is Mary? [Story 48]
+   Context: John went to the kitchen. | John went to the hallway. | John travelled to the bathroom. | Sandra travelled to the kitchen. | John journeyed to the garden. | Sandra went back to the bedroom. | Mary moved to the hallway. | Mary went to the bedroom. | Mary went back to the garden. | Sandra travelled to the hallway.
+   ✅ Brain  [0.699s]: went back to the garden.
+   ✅ MemNet [0.000s]: garden
+   ❌ NTM    [0.000s]: bedroom
+   Expected: garden
+
+✅ Q: Where is Daniel? [Story 49]
+   Context: Daniel went back to the bathroom. | Mary journeyed to the office.
+   ✅ Brain  [0.705s]: went back to the bathroom.
+   ✅ MemNet [0.000s]: bathroom
+   ✅ NTM    [0.000s]: back bathroom the
+   Expected: bathroom
+
+✅ Q: Where is Daniel? [Story 49]
+   Context: Daniel went back to the bathroom. | Mary journeyed to the office. | Sandra went back to the garden. | Daniel moved to the garden.
+   ✅ Brain  [0.595s]: moved to the garden.
+   ✅ MemNet [0.000s]: garden
+   ✅ NTM    [0.000s]: garden
+   Expected: garden
+
+✅ Q: Where is Mary? [Story 49]
+   Context: Daniel went back to the bathroom. | Mary journeyed to the office. | Sandra went back to the garden. | Daniel moved to the garden. | Daniel journeyed to the hallway. | John moved to the garden.
+   ✅ Brain  [0.368s]: journeyed to the office.
+   ✅ MemNet [0.000s]: office
+   ✅ NTM    [0.000s]: office
+   Expected: office
+
+✅ Q: Where is Sandra? [Story 49]
+   Context: Daniel went back to the bathroom. | Mary journeyed to the office. | Sandra went back to the garden. | Daniel moved to the garden. | Daniel journeyed to the hallway. | John moved to the garden. | Sandra went back to the hallway. | Mary went back to the bedroom.
+   ✅ Brain  [0.404s]: went back to the hallway.
+   ✅ MemNet [0.000s]: hallway
+   ✅ NTM    [0.000s]: back hallway the
+   Expected: hallway
+
+✅ Q: Where is John? [Story 49]
+   Context: Daniel went back to the bathroom. | Mary journeyed to the office. | Sandra went back to the garden. | Daniel moved to the garden. | Daniel journeyed to the hallway. | John moved to the garden. | Sandra went back to the hallway. | Mary went back to the bedroom. | John journeyed to the office. | John went to the bathroom.
+   ✅ Brain  [0.420s]: went to the bathroom.
+   ✅ MemNet [0.000s]: bathroom
+   ✅ NTM    [0.000s]: bathroom
+   Expected: bathroom
+
+✅ Q: Where is Daniel? [Story 50]
+   Context: Sandra moved to the bathroom. | Daniel journeyed to the garden.
+   ✅ Brain  [0.658s]: journeyed to the garden.
+   ✅ MemNet [0.000s]: garden
+   ✅ NTM    [0.000s]: garden
+   Expected: garden
+
+✅ Q: Where is Sandra? [Story 50]
+   Context: Sandra moved to the bathroom. | Daniel journeyed to the garden. | Mary journeyed to the bathroom. | Sandra moved to the hallway.
+   ✅ Brain  [0.538s]: moved to the hallway.
+   ✅ MemNet [0.000s]: hallway
+   ✅ NTM    [0.000s]: hallway
+   Expected: hallway
+
+✅ Q: Where is Daniel? [Story 50]
+   Context: Sandra moved to the bathroom. | Daniel journeyed to the garden. | Mary journeyed to the bathroom. | Sandra moved to the hallway. | Daniel moved to the office. | Daniel went to the garden.
+   ✅ Brain  [0.406s]: went to the garden.
+   ✅ MemNet [0.000s]: garden
+   ✅ NTM    [0.000s]: garden
+   Expected: garden
+
+✅ Q: Where is Daniel? [Story 50]
+   Context: Sandra moved to the bathroom. | Daniel journeyed to the garden. | Mary journeyed to the bathroom. | Sandra moved to the hallway. | Daniel moved to the office. | Daniel went to the garden. | John travelled to the bathroom. | Mary moved to the bedroom.
+   ✅ Brain  [0.382s]: went to the garden.
+   ✅ MemNet [0.000s]: garden
+   ✅ NTM    [0.000s]: garden
+   Expected: garden
+
+✅ Q: Where is Mary? [Story 50]
+   Context: Sandra moved to the bathroom. | Daniel journeyed to the garden. | Mary journeyed to the bathroom. | Sandra moved to the hallway. | Daniel moved to the office. | Daniel went to the garden. | John travelled to the bathroom. | Mary moved to the bedroom. | Sandra went back to the bathroom. | Sandra went to the garden.
+   ✅ Brain  [0.423s]: moved to the bedroom.
+   ✅ MemNet [0.000s]: bedroom
+   ✅ NTM    [0.000s]: bedroom
+   Expected: bedroom
+
+
+======================================================================
+RESULT bAbI Task 1: 250/250 (100.0%) | Time: 140.9s
+BASELINES: TF-IDF: 0% | BM25: 0% (no working memory) | MemNet: 100% | NTM: 88%
+======================================================================
+======================================================================
+MODEL STATISTICS
+======================================================================
+Neurons: 48301
+Connections: 1477371
+MYELINATED: 19195 (1.3%)
+USED: 77942 (5.3%)
+NEW: 1380234
+
+Episodic memory:
+  Total episodes: 68955
+  NEW: 35160
+  REPLAYED: 2142
+  CONSOLIDATED: 30744
+  DECAYING: 909
+
+======================================================================
+ALL RESULTS SUMMARY
+======================================================================
+⚠️ CURRICULUM: 49/50 (98.0%) | Time: 23.1s
+   ❌ What is ice?
+✅ STRICT: 3/3 (100.0%) | Time: 2.2s
+⚠️ PRESCHOOL: 46/48 (95.8%) | Time: 22.1s
+   ❌ What happens when you fall?
+   ❌ When should you wash your hands?
+✅ GRADE1: 64/64 (100.0%) | Time: 31.2s
+⚠️ FINEWEB: 7/9 (77.8%) | Time: 5.6s
+   ❌ What disappears from leaves?
+   ❌ What is sedimentary rock made of?
+⚠️ PARAPHRASE: 25/50 (50.0%) | Time: 30.1s
+   ❌ A dog is what kind of thing?
+   ❌ Dogs belong to what category?
+   ❌ Tell me what a dog is
+   ❌ What category does a dog belong to?
+   ❌ Apples are classified as what?
+   ❌ What kind of food is an apple?
+   ❌ Tell me the sky's color
+   ❌ What is hot's opposite?
+   ❌ Name the capital of France
+   ❌ Paris is located where?
+   ❌ The sun is a type of what?
+   ❌ What kind of celestial body is the sun?
+   ❌ Tell me what the sun is
+   ❌ Water is what state of matter?
+   ❌ What sound does a dog make?
+   ❌ Dogs make what sound?
+   ❌ What sound does a cat make?
+   ❌ What body part do we use to see?
+   ❌ Seeing is done with what?
+   ❌ Hearing is done with what?
+   ❌ By what is sound heard?
+   ❌ By what organ do we smell?
+   ❌ After Monday comes what?
+   ❌ Monday is followed by what day?
+   ❌ The day after Monday is what?
+✅ bAbI: 250/250 (100.0%) | Time: 140.9s
+
+TOTAL: 444/474 | Total time: 255.1s
+======================================================================
+
+==========================================================================================
+BASELINE COMPARISON
+==========================================================================================
+QA Baselines: TF-IDF, BM25 (tested on all QA tests)
+Working Memory Baselines: MemNet, NTM (tested ONLY on bAbI)
+
+Test           Brain  TF-IDF    BM25  MemNet     NTM
+------------------------------------------------------------
+CURRICULUM     98.0%   58.0%   48.0%    N/A    N/A
+STRICT        100.0%   33.3%   33.3%    N/A    N/A
+PRESCHOOL      95.8%   22.9%   22.9%    N/A    N/A
+GRADE1        100.0%   39.1%   37.5%    N/A    N/A
+FINEWEB        77.8%    0.0%    0.0%    N/A    N/A
+PARAPHRASE     50.0%   38.0%   38.0%    N/A    N/A
+bAbI          100.0%    0.0%    0.0%  100.0%   88.4%
+------------------------------------------------------------
+AVERAGE        88.8%   31.9%   30.0%    N/A    N/A
+bAbI only:                           100.0%   88.4%
+============================================================
+Tests completed. Results saved to: logs/test_results_04.02.2026_23-05-13.txt

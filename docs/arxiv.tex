@@ -1475,13 +1475,15 @@ formal neuroscientific validation is claimed.
       baselines --- TF-IDF/BM25 fundamentally cannot handle working memory (tracking entity states).
       This validates that the biologically-inspired architecture provides genuine advantage beyond simple retrieval.
       
-      \textbf{Future baseline expansion (in progress):}
+      \textbf{Baselines:}
       \begin{itemize}
-        \item RAG baseline (Retriever + GPT) --- different class, but fair comparison
-        \item Memory Networks (Weston et al. 2015) --- direct comparison on bAbI
-        \item Neural Turing Machines (Graves et al. 2014) --- working memory comparison
-        \item Transformer-based QA (BERT, RoBERTa) --- fine-tuned on same data
+        \item TF-IDF --- term frequency-inverse document frequency
+        \item BM25 --- probabilistic IR model (Robertson et al.)
+        \item Memory Networks (Weston et al. 2015) --- attention over memory slots
+        \item Neural Turing Machines (Graves et al. 2014) --- external memory addressing
       \end{itemize}
+      QA Baselines (TF-IDF, BM25): tested on all QA tests.
+      Working Memory Baselines (MemNet, NTM): tested only on bAbI Task 1.
       The goal is NOT to beat all baselines, but to demonstrate unique capabilities:
       working memory (bAbI), source memory (trust-weighted retrieval), and biological plausibility.
 \item \textbf{Design philosophy} --- This project deliberately avoids ablation studies that remove 
@@ -1495,11 +1497,25 @@ formal neuroscientific validation is claimed.
 Future work will focus on reducing the current reliance on surface word forms by
 introducing an explicit intermediate representation layer.
 
-\textbf{Evaluation beyond fixed templates.} To quantify generalization, we will introduce a
+\textbf{Evaluation beyond fixed templates.} To quantify generalization, we introduced a
 paraphrase robustness protocol: for each test question, generate multiple surface variants
 (active/passive, connector synonyms, word-order changes) and measure accuracy degradation.
-We will also add systematic baseline comparisons with retrieval-augmented generation (RAG),
-Memory Networks, and other memory-augmented systems on identical datasets.
+Current paraphrase accuracy is 50\%, indicating significant room for improvement.
+
+\textbf{Baseline comparisons.} Beyond TF-IDF and BM25, we implemented two 
+working memory baselines: Memory Networks (attention over memory slots with recency bias) 
+and Neural Turing Machines (external memory with content-based addressing).
+All four baselines are trained on identical curriculum data.
+
+Baseline categorization:
+\begin{itemize}
+  \item \textbf{QA Baselines} (TF-IDF, BM25): tested on all standard QA tests
+  \item \textbf{Working Memory Baselines} (MemNet, NTM): tested only on bAbI Task 1
+\end{itemize}
+
+Key finding: only Brain combines working memory, source memory, and biological 
+plausibility---Memory Networks and NTM support working memory but lack source tracking 
+and biological grounding.
 
 Additional future work includes extending the architecture to multimodal memory, exploring
 larger-scale memory graphs, and studying interfaces between structural memory and language

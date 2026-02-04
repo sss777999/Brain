@@ -20,7 +20,7 @@ cd brain
 # Install dependencies (using uv)
 uv sync
 
-# Run tests (fast, without LLM) and without gpt evaluation. Local LLM and GPT funstion in project is cosmetic only
+# Run tests ((fast, without LLM and without GPT evaluation; baselines: TF-IDF, BM25 for QA, MemNet/NTM for bAbI)
 uv run python test_brain.py --no-llm --no-gpt
 
 # Run full tests with Broca's area (LLM verbalization) but without gpt evaluation

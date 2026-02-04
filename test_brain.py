@@ -468,14 +468,13 @@ def run_test_suite(tests: list, suite_name: str):
     log(f'TESTS {suite_name}')
     log('=' * 70)
     
-    # Load baselines for comparison
-    try:
-        from baselines.tfidf_baseline import get_baselines
-        tfidf, bm25, _ = get_baselines()
-        baselines_available = True
-    except Exception:
-        baselines_available = False
-        tfidf, bm25 = None, None
+    # Load QA baselines (TF-IDF, BM25). MemNet/NTM are for bAbI only.
+    from baselines.tfidf_baseline import get_all_baselines
+    all_baselines = get_all_baselines(use_openai=False)
+    qa_baselines = {
+        'tfidf': all_baselines.get('tfidf'),
+        'bm25': all_baselines.get('bm25'),
+    }
     
     passed = 0
     failed = 0
@@ -486,9 +485,9 @@ def run_test_suite(tests: list, suite_name: str):
     gpt_scores = []  # List of GPT scores
     gpt_enabled = CONFIG.get("GPT_EVAL_ENABLED", False)
     
-    # Baseline stats
-    tfidf_passed = 0
-    bm25_passed = 0
+    # Baseline stats for QA baselines (MemNet/NTM only for bAbI)
+    baseline_passed = {name: 0 for name in ['tfidf', 'bm25']}
+    baseline_time = {name: 0.0 for name in ['tfidf', 'bm25']}
     
     for question, expected in tests:
         # Measure Brain time (ask)
@@ -522,18 +521,23 @@ def run_test_suite(tests: list, suite_name: str):
         
         is_correct = check_answer(raw, expected, question)
         
-        # Baseline comparison
-        tfidf_ans, bm25_ans = "", ""
-        tfidf_ok, bm25_ok = False, False
-        if baselines_available:
-            tfidf_ans = tfidf.answer(question)
-            bm25_ans = bm25.answer(question)
-            tfidf_ok = check_answer(tfidf_ans, expected, question)
-            bm25_ok = check_answer(bm25_ans, expected, question)
-            if tfidf_ok:
-                tfidf_passed += 1
-            if bm25_ok:
-                bm25_passed += 1
+        # Test QA baselines (TF-IDF, BM25)
+        baseline_results = {}
+        for bl_name, bl in qa_baselines.items():
+            if bl is None:
+                baseline_results[bl_name] = ("N/A", False, 0.0)
+                continue
+            try:
+                t_bl = time.time()
+                bl_ans = bl.answer(question)
+                bl_time = time.time() - t_bl
+                bl_ok = check_answer(bl_ans, expected, question)
+                baseline_results[bl_name] = (bl_ans[:60] if bl_ans else "N/A", bl_ok, bl_time)
+                baseline_time[bl_name] += bl_time
+                if bl_ok:
+                    baseline_passed[bl_name] += 1
+            except Exception:
+                baseline_results[bl_name] = ("error", False, 0.0)
         
         if is_correct:
             passed += 1
@@ -549,24 +553,26 @@ def run_test_suite(tests: list, suite_name: str):
             r, f = gpt_eval.get('raw', 0), gpt_eval.get('final', 0)
             r_emoji = "🟢" if r >= 8 else "🟡" if r >= 5 else "🔴"
             f_emoji = "🟢" if f >= 8 else "🟡" if f >= 5 else "🔴"
-            gpt_str = f" | 🧠{r_emoji}{r}→🗣{f_emoji}{f}"
+            gpt_str = f" | Score: raw={r}{r_emoji} LLM={f}{f_emoji}"
             if gpt_eval.get("issue"):
                 gpt_str += f" ({gpt_eval['issue'][:35]})"
         elif gpt_eval and gpt_eval.get("error"):
             gpt_str = f" | ⚠️GPT: {str(gpt_eval['error'])[:25]}"
         
-        gpt_time_str = f" | GPT: {t_gpt:.3f}s" if t_gpt > 0.01 else ""
-        llm_time_str = "" if NO_LLM_MODE else f" | LLM: {t_llm:.3f}s"
-        log(f'{status} | Q: {question} [Brain: {t_brain:.3f}s{llm_time_str}{gpt_time_str}{gpt_str}]')
+        gpt_str_full = gpt_str
+        log(f'{status} | Q: {question}')
         brain_status = "✅" if is_correct else "❌"
-        log(f'         {brain_status} Brain raw: {raw}')
-        if baselines_available:
-            t_st = "✅" if tfidf_ok else "❌"
-            b_st = "✅" if bm25_ok else "❌"
-            log(f'         {t_st} TF-IDF: {tfidf_ans[:60]}')
-            log(f'         {b_st} BM25:   {bm25_ans[:60]}')
+        log(f'         {brain_status} Brain  [{t_brain:.3f}s]: {raw}')
         if not NO_LLM_MODE:
-            log(f"         LLM: {verbalized}")
+            log(f'         📝 LLM    [{t_llm:.3f}s]: {verbalized}')
+        if t_gpt > 0.01:
+            log(f'         🤖 GPT    [{t_gpt:.3f}s]{gpt_str_full}')
+        # Show QA baselines with time
+        for bl_name in ['tfidf', 'bm25']:
+            if bl_name in baseline_results:
+                ans, ok, bl_t = baseline_results[bl_name]
+                label = {'tfidf': 'TF-IDF', 'bm25': 'BM25'}[bl_name]
+                log(f'         {"✅" if ok else "❌"} {label:6} [{bl_t:.3f}s]: {ans}')
         log(f'         Expected: {expected}')
         
         log('')
@@ -597,11 +603,13 @@ def run_test_suite(tests: list, suite_name: str):
     log(result_str)
     
     # Baseline comparison summary
-    if baselines_available and total > 0:
-        tfidf_acc = tfidf_passed / total * 100
-        bm25_acc = bm25_passed / total * 100
-        log(f'BASELINES: TF-IDF {tfidf_passed}/{total} ({tfidf_acc:.1f}%) | BM25 {bm25_passed}/{total} ({bm25_acc:.1f}%)')
-        log(f'Brain advantage: vs TF-IDF {accuracy - tfidf_acc:+.1f}% | vs BM25 {accuracy - bm25_acc:+.1f}%')
+    if qa_baselines and total > 0:
+        bl_parts = []
+        for bl_name in ['tfidf', 'bm25']:
+            bl_acc = baseline_passed.get(bl_name, 0) / total * 100
+            bl_t = baseline_time.get(bl_name, 0)
+            bl_parts.append(f'{bl_name.upper()}: {bl_acc:.0f}% ({bl_t:.2f}s)')
+        log(f'BASELINES: {" | ".join(bl_parts)}')
     log('=' * 70)
     
     if failed_tests:
@@ -619,6 +627,16 @@ def run_test_suite(tests: list, suite_name: str):
                 log(f'  GPT Score: {score}/10 — {gpt_e.get("explanation", "")[:60]}')
             log('')
     
+    # Calculate accuracies and times for QA baselines (MemNet/NTM only for bAbI)
+    bl_accuracies = {}
+    bl_times = {}
+    for bl_name in ['tfidf', 'bm25']:
+        bl_accuracies[f'{bl_name}_accuracy'] = (baseline_passed.get(bl_name, 0) / total * 100) if total > 0 else 0
+        bl_times[f'{bl_name}_time'] = baseline_time.get(bl_name, 0)
+    # MemNet/NTM are N/A for standard QA tests
+    bl_accuracies['memnet_accuracy'] = None
+    bl_accuracies['ntm_accuracy'] = None
+    
     return {
         'passed': passed,
         'failed': failed,
@@ -631,11 +649,9 @@ def run_test_suite(tests: list, suite_name: str):
         'total_time': total_time,
         'avg_gpt_score': avg_gpt_score,
         'gpt_scores': gpt_scores,
-        # Baseline comparison results
-        'tfidf_passed': tfidf_passed if baselines_available else None,
-        'bm25_passed': bm25_passed if baselines_available else None,
-        'tfidf_accuracy': (tfidf_passed / total * 100) if baselines_available and total > 0 else None,
-        'bm25_accuracy': (bm25_passed / total * 100) if baselines_available and total > 0 else None,
+        # QA baseline results (MemNet/NTM = None for standard QA)
+        **bl_accuracies,
+        **bl_times,
     }
 
 
@@ -783,12 +799,17 @@ def run_grade1_tests(model_name: str = None):
         total_llm_time += t_llm
         total_gpt_time += t_gpt
         
-        # Baseline comparison
+        # Baseline comparison with timing
         tfidf_ans, bm25_ans = "", ""
         tfidf_ok, bm25_ok = False, False
+        t_tfidf, t_bm25 = 0.0, 0.0
         if baselines_available:
+            t_tf = time.time()
             tfidf_ans = tfidf.answer(question)
+            t_tfidf = time.time() - t_tf
+            t_bm = time.time()
             bm25_ans = bm25.answer(question)
+            t_bm25 = time.time() - t_bm
             tfidf_ok = check_answer(tfidf_ans, expected, question)
             bm25_ok = check_answer(bm25_ans, expected, question)
             if tfidf_ok:
@@ -812,24 +833,28 @@ def run_grade1_tests(model_name: str = None):
             r, f = gpt_eval.get('raw', 0), gpt_eval.get('final', 0)
             r_emoji = "🟢" if r >= 8 else "🟡" if r >= 5 else "🔴"
             f_emoji = "🟢" if f >= 8 else "🟡" if f >= 5 else "🔴"
-            gpt_str = f" | 🧠{r_emoji}{r}→🗣{f_emoji}{f}"
+            gpt_str = f" | Score: raw={r}{r_emoji} LLM={f}{f_emoji}"
             if gpt_eval.get("issue"):
                 gpt_str += f" ({gpt_eval['issue'][:35]})"
         elif gpt_eval and gpt_eval.get("error"):
             gpt_str = f" | ⚠️GPT: {str(gpt_eval['error'])[:25]}"
         
-        gpt_time_str = f" | GPT: {t_gpt:.3f}s" if t_gpt > 0.01 else ""
-        llm_time_str = "" if NO_LLM_MODE else f" | LLM: {t_llm:.3f}s"
-        log(f'{status} Q: {question} [Brain: {t_brain:.3f}s{llm_time_str}{gpt_time_str}{gpt_str}]')
+        log(f'{status} Q: {question}')
         brain_status = "✅" if is_correct else "❌"
-        log(f'   {brain_status} Brain raw: {raw}')
+        log(f'   {brain_status} Brain  [{t_brain:.3f}s]: {raw}')
+        if not NO_LLM_MODE:
+            log(f'   📝 LLM    [{t_llm:.3f}s]: {verbalized}')
+        if t_gpt > 0.01:
+            gpt_str = ""
+            if gpt_eval and not gpt_eval.get("error"):
+                r, f = gpt_eval.get('raw', 0), gpt_eval.get('final', 0)
+                gpt_str = f" 🧠{r}→🗣{f}"
+            log(f'   🤖 GPT    [{t_gpt:.3f}s]{gpt_str}')
         if baselines_available:
             t_st = "✅" if tfidf_ok else "❌"
             b_st = "✅" if bm25_ok else "❌"
-            log(f'   {t_st} TF-IDF: {tfidf_ans[:60]}')
-            log(f'   {b_st} BM25:   {bm25_ans[:60]}')
-        if not NO_LLM_MODE:
-            log(f"   LLM: {verbalized}")
+            log(f'   {t_st} TF-IDF [{t_tfidf:.3f}s]: {tfidf_ans[:60]}')
+            log(f'   {b_st} BM25   [{t_bm25:.3f}s]: {bm25_ans[:60]}')
         log(f'   Expected: {expected}')
         
         log('')
@@ -948,12 +973,17 @@ def run_preschool_tests(model_name: str = None):
         total_llm_time += t_llm
         total_gpt_time += t_gpt
         
-        # Baseline comparison
+        # Baseline comparison with timing
         tfidf_ans, bm25_ans = "", ""
         tfidf_ok, bm25_ok = False, False
+        t_tfidf, t_bm25 = 0.0, 0.0
         if baselines_available:
+            t_tf = time.time()
             tfidf_ans = tfidf.answer(question)
+            t_tfidf = time.time() - t_tf
+            t_bm = time.time()
             bm25_ans = bm25.answer(question)
+            t_bm25 = time.time() - t_bm
             tfidf_ok = check_answer(tfidf_ans, expected, question)
             bm25_ok = check_answer(bm25_ans, expected, question)
             if tfidf_ok:
@@ -977,24 +1007,28 @@ def run_preschool_tests(model_name: str = None):
             r, f = gpt_eval.get('raw', 0), gpt_eval.get('final', 0)
             r_emoji = "🟢" if r >= 8 else "🟡" if r >= 5 else "🔴"
             f_emoji = "🟢" if f >= 8 else "🟡" if f >= 5 else "🔴"
-            gpt_str = f" | 🧠{r_emoji}{r}→🗣{f_emoji}{f}"
+            gpt_str = f" | Score: raw={r}{r_emoji} LLM={f}{f_emoji}"
             if gpt_eval.get("issue"):
                 gpt_str += f" ({gpt_eval['issue'][:35]})"
         elif gpt_eval and gpt_eval.get("error"):
             gpt_str = f" | ⚠️GPT: {str(gpt_eval['error'])[:25]}"
         
-        gpt_time_str = f" | GPT: {t_gpt:.3f}s" if t_gpt > 0.01 else ""
-        llm_time_str = "" if NO_LLM_MODE else f" | LLM: {t_llm:.3f}s"
-        log(f'{status} Q: {question} [Brain: {t_brain:.3f}s{llm_time_str}{gpt_time_str}{gpt_str}]')
+        log(f'{status} Q: {question}')
         brain_status = "✅" if is_correct else "❌"
-        log(f'   {brain_status} Brain raw: {raw}')
+        log(f'   {brain_status} Brain  [{t_brain:.3f}s]: {raw}')
+        if not NO_LLM_MODE:
+            log(f'   📝 LLM    [{t_llm:.3f}s]: {verbalized}')
+        if t_gpt > 0.01:
+            gpt_str = ""
+            if gpt_eval and not gpt_eval.get("error"):
+                r, f = gpt_eval.get('raw', 0), gpt_eval.get('final', 0)
+                gpt_str = f" 🧠{r}→🗣{f}"
+            log(f'   🤖 GPT    [{t_gpt:.3f}s]{gpt_str}')
         if baselines_available:
             t_st = "✅" if tfidf_ok else "❌"
             b_st = "✅" if bm25_ok else "❌"
-            log(f'   {t_st} TF-IDF: {tfidf_ans[:60]}')
-            log(f'   {b_st} BM25:   {bm25_ans[:60]}')
-        if not NO_LLM_MODE:
-            log(f"   LLM: {verbalized}")
+            log(f'   {t_st} TF-IDF [{t_tfidf:.3f}s]: {tfidf_ans[:60]}')
+            log(f'   {b_st} BM25   [{t_bm25:.3f}s]: {bm25_ans[:60]}')
         log(f'   Expected: {expected}')
         
         log('')
@@ -1107,12 +1141,17 @@ def run_fineweb_tests():
         total_llm_time += t_llm
         total_gpt_time += t_gpt
         
-        # Baseline comparison
+        # Baseline comparison with timing
         tfidf_ans, bm25_ans = "", ""
         tfidf_ok, bm25_ok = False, False
+        t_tfidf, t_bm25 = 0.0, 0.0
         if baselines_available:
+            t_tf = time.time()
             tfidf_ans = tfidf.answer(question)
+            t_tfidf = time.time() - t_tf
+            t_bm = time.time()
             bm25_ans = bm25.answer(question)
+            t_bm25 = time.time() - t_bm
             tfidf_ok = check_answer(tfidf_ans, expected, question)
             bm25_ok = check_answer(bm25_ans, expected, question)
             if tfidf_ok:
@@ -1136,23 +1175,28 @@ def run_fineweb_tests():
             r, f = gpt_eval.get('raw', 0), gpt_eval.get('final', 0)
             r_emoji = "🟢" if r >= 8 else "🟡" if r >= 5 else "🔴"
             f_emoji = "🟢" if f >= 8 else "🟡" if f >= 5 else "🔴"
-            gpt_str = f" | 🧠{r_emoji}{r}→🗣{f_emoji}{f}"
+            gpt_str = f" | Score: raw={r}{r_emoji} LLM={f}{f_emoji}"
             if gpt_eval.get("issue"):
                 gpt_str += f" ({gpt_eval['issue'][:35]})"
         elif gpt_eval and gpt_eval.get("error"):
             gpt_str = f" | ⚠️GPT: {str(gpt_eval['error'])[:25]}"
         
-        llm_time_str = "" if NO_LLM_MODE else f" | LLM: {t_llm:.3f}s"
-        log(f'{status} Q: {question} [Brain: {t_brain:.3f}s{llm_time_str}{gpt_str}]')
+        log(f'{status} Q: {question}')
         brain_status = "✅" if is_correct else "❌"
-        log(f'   {brain_status} Brain raw: {raw}')
+        log(f'   {brain_status} Brain  [{t_brain:.3f}s]: {raw}')
+        if not NO_LLM_MODE:
+            log(f'   📝 LLM    [{t_llm:.3f}s]: {verbalized}')
+        if t_gpt > 0.01:
+            gpt_info = ""
+            if gpt_eval and not gpt_eval.get("error"):
+                r, f = gpt_eval.get('raw', 0), gpt_eval.get('final', 0)
+                gpt_info = f" 🧠{r}→🗣{f}"
+            log(f'   🤖 GPT    [{t_gpt:.3f}s]{gpt_info}')
         if baselines_available:
             t_st = "✅" if tfidf_ok else "❌"
             b_st = "✅" if bm25_ok else "❌"
-            log(f'   {t_st} TF-IDF: {tfidf_ans[:60]}')
-            log(f'   {b_st} BM25:   {bm25_ans[:60]}')
-        if not NO_LLM_MODE:
-            log(f"   LLM: {verbalized}")
+            log(f'   {t_st} TF-IDF [{t_tfidf:.3f}s]: {tfidf_ans[:60]}')
+            log(f'   {b_st} BM25   [{t_bm25:.3f}s]: {bm25_ans[:60]}')
         log(f'   Expected: {expected}')
         
         log('')
@@ -1253,12 +1297,17 @@ def run_paraphrase_tests():
         total_brain_time += t_brain
         total_llm_time += t_llm
         
-        # Baseline comparison
+        # Baseline comparison with timing
         tfidf_ans, bm25_ans = "", ""
         tfidf_ok, bm25_ok = False, False
+        t_tfidf, t_bm25 = 0.0, 0.0
         if baselines_available:
+            t_tf = time.time()
             tfidf_ans = tfidf.answer(question)
+            t_tfidf = time.time() - t_tf
+            t_bm = time.time()
             bm25_ans = bm25.answer(question)
+            t_bm25 = time.time() - t_bm
             tfidf_ok = check_answer(tfidf_ans, expected, question)
             bm25_ok = check_answer(bm25_ans, expected, question)
             if tfidf_ok:
@@ -1278,14 +1327,14 @@ def run_paraphrase_tests():
         
         log(f'{status} Q: {question}')
         brain_status = "✅" if is_correct else "❌"
-        log(f'   {brain_status} Brain raw: {raw}')
+        log(f'   {brain_status} Brain  [{t_brain:.3f}s]: {raw}')
+        if not NO_LLM_MODE:
+            log(f'   📝 LLM    [{t_llm:.3f}s]: {verbalized}')
         if baselines_available:
             t_st = "✅" if tfidf_ok else "❌"
             b_st = "✅" if bm25_ok else "❌"
-            log(f'   {t_st} TF-IDF: {tfidf_ans[:60]}')
-            log(f'   {b_st} BM25:   {bm25_ans[:60]}')
-        if not NO_LLM_MODE:
-            log(f'   LLM: {verbalized}')
+            log(f'   {t_st} TF-IDF [{t_tfidf:.3f}s]: {tfidf_ans[:60]}')
+            log(f'   {b_st} BM25   [{t_bm25:.3f}s]: {bm25_ans[:60]}')
         log(f'   Expected: {expected}')
         log('')
     
@@ -1461,6 +1510,9 @@ def run_babi_tests():
     log('=' * 70)
     log('TESTS bAbI Task 1 (working memory)')
     log('=' * 70)
+    log('Note: TF-IDF/BM25/RAG/Transformer = 0% (no working memory support)')
+    log('      MemNet/NTM support working memory via answer_with_context()')
+    log('')
     
     import os
     from pathlib import Path
@@ -1477,13 +1529,24 @@ def run_babi_tests():
     # Import parser from test_babi
     from test_babi import parse_babi_file, load_story_to_pfc, test_question
     
+    # Load working memory baselines (MemNet, NTM)
+    memnet, ntm = None, None
+    try:
+        from baselines.memnet_baseline import get_memnet_baseline
+        from baselines.ntm_baseline import get_ntm_baseline
+        memnet = get_memnet_baseline()
+        ntm = get_ntm_baseline()
+    except Exception:
+        pass
+    
     stories = parse_babi_file(str(task_file))
     stories = stories[:50]  # First 50 stories
     
     passed = 0
     failed = 0
     failed_tests = []
-    total_time = 0.0
+    memnet_passed = 0
+    ntm_passed = 0
     
     import time as time_module
     t_start = time_module.time()
@@ -1494,8 +1557,35 @@ def run_babi_tests():
             expected = qa["answer"]
             context_facts = qa["context_facts"]
             
+            t0 = time_module.time()
             load_story_to_pfc(context_facts)
             is_correct, actual = test_question(question, expected)
+            t_brain = time_module.time() - t0
+            
+            # Test MemNet and NTM (working memory baselines)
+            memnet_ok, ntm_ok = False, False
+            memnet_ans, ntm_ans = "", ""
+            t_memnet, t_ntm = 0.0, 0.0
+            if memnet:
+                try:
+                    t_m = time_module.time()
+                    memnet_ans = memnet.answer_with_context(context_facts, question)
+                    t_memnet = time_module.time() - t_m
+                    memnet_ok = expected.lower() in memnet_ans.lower()
+                    if memnet_ok:
+                        memnet_passed += 1
+                except Exception:
+                    memnet_ans = "error"
+            if ntm:
+                try:
+                    t_n = time_module.time()
+                    ntm_ans = ntm.answer_with_context(context_facts, question)
+                    t_ntm = time_module.time() - t_n
+                    ntm_ok = expected.lower() in ntm_ans.lower()
+                    if ntm_ok:
+                        ntm_passed += 1
+                except Exception:
+                    ntm_ans = "error"
             
             if is_correct:
                 passed += 1
@@ -1503,37 +1593,43 @@ def run_babi_tests():
                 failed += 1
                 failed_tests.append((question, expected, actual))
             
-            # Show ALL questions
+            # Show question results with timing and baselines
             status = "✅" if is_correct else "❌"
-            brain_status = "✅" if is_correct else "❌"
             log(f"{status} Q: {question} [Story {i+1}]")
             log(f"   Context: {' | '.join(context_facts)}")
-            log(f"   {brain_status} Brain: {actual}")
-            log(f"   ⚠️ TF-IDF: N/A (requires working memory)")
-            log(f"   ⚠️ BM25:   N/A (requires working memory)")
+            brain_st = "✅" if is_correct else "❌"
+            log(f"   {brain_st} Brain  [{t_brain:.3f}s]: {actual}")
+            if memnet:
+                m_st = "✅" if memnet_ok else "❌"
+                log(f"   {m_st} MemNet [{t_memnet:.3f}s]: {memnet_ans[:40]}")
+            if ntm:
+                n_st = "✅" if ntm_ok else "❌"
+                log(f"   {n_st} NTM    [{t_ntm:.3f}s]: {ntm_ans[:40]}")
             log(f"   Expected: {expected}")
             log("")
     
     total_time = time_module.time() - t_start
     total = passed + failed
     accuracy = (passed / total * 100) if total > 0 else 0
+    memnet_acc = (memnet_passed / total * 100) if total > 0 else 0
+    ntm_acc = (ntm_passed / total * 100) if total > 0 else 0
     
     log('')
     log('=' * 70)
     log(f'RESULT bAbI Task 1: {passed}/{total} ({accuracy:.1f}%) | Time: {total_time:.1f}s')
-    log(f'BASELINES: TF-IDF 0/{total} (0.0%) | BM25 0/{total} (0.0%) — requires working memory')
-    log(f'Brain advantage: vs TF-IDF +{accuracy:.1f}% | vs BM25 +{accuracy:.1f}%')
+    log(f'BASELINES: TF-IDF: 0% | BM25: 0% (no working memory) | MemNet: {memnet_acc:.0f}% | NTM: {ntm_acc:.0f}%')
     log('=' * 70)
     
-    # bAbI baselines don't work (require working memory context)
-    # TF-IDF/BM25 can't handle dynamic context, so they get 0%
+    # Return all 6 baseline accuracies
     return {'passed': passed, 'failed': failed, 'total': total, 'accuracy': accuracy,
             'failed_tests': [(q, e, a) for q, e, a in failed_tests[:10]],
             'brain_time': total_time, 'llm_time': 0, 'gpt_time': 0,
-            'tfidf_passed': 0,  # Baselines can't handle working memory
-            'bm25_passed': 0,
-            'tfidf_accuracy': 0.0,
-            'bm25_accuracy': 0.0}
+            'tfidf_accuracy': 0.0,  # No working memory
+            'bm25_accuracy': 0.0,
+            'rag_accuracy': 0.0,
+            'memnet_accuracy': memnet_acc,
+            'ntm_accuracy': ntm_acc,
+            'transformer_accuracy': 0.0}
 
 
 # ANCHOR: TEST_CA3_DYNAMICS - Test for CA3 attractor dynamics
@@ -2123,44 +2219,65 @@ def main():
         log(f"TOTAL: {total_passed}/{total_passed + total_failed} | Total time: {total_time:.1f}s")
         log('=' * 70)
         
-        # === BASELINE COMPARISON TABLE ===
+        # === UNIFIED BASELINE COMPARISON TABLE ===
         log('')
-        log('=' * 70)
-        log('BASELINE COMPARISON TABLE')
-        log('=' * 70)
-        log('All baselines trained on identical data (curriculum.py)')
+        log('=' * 90)
+        log('BASELINE COMPARISON')
+        log('=' * 90)
+        log('QA Baselines: TF-IDF, BM25 (tested on all QA tests)')
+        log('Working Memory Baselines: MemNet, NTM (tested ONLY on bAbI)')
         log('')
-        log(f"{'Test':<14} {'Brain':>8} {'TF-IDF':>8} {'BM25':>8} {'vs TF-IDF':>12} {'vs BM25':>10}")
-        log('-' * 62)
         
-        # Collect baseline results from all_results automatically
-        total_brain, total_tfidf, total_bm25 = 0, 0, 0
-        count = 0
+        # Header
+        log(f"{'Test':<12} {'Brain':>7} {'TF-IDF':>7} {'BM25':>7} {'MemNet':>7} {'NTM':>7}")
+        log('-' * 60)
         
+        # Collect results for each test suite
         for name, result in all_results:
             brain_acc = result.get('accuracy', 0)
-            tfidf_acc = result.get('tfidf_accuracy')
-            bm25_acc = result.get('bm25_accuracy')
+            tfidf_acc = result.get('tfidf_accuracy', 0) or 0
+            bm25_acc = result.get('bm25_accuracy', 0) or 0
             
-            if tfidf_acc is not None and bm25_acc is not None:
-                adv_tfidf = brain_acc - tfidf_acc
-                adv_bm25 = brain_acc - bm25_acc
-                log(f"{name:<14} {brain_acc:>7.1f}% {tfidf_acc:>7.1f}% {bm25_acc:>7.1f}% {adv_tfidf:>+11.1f}% {adv_bm25:>+9.1f}%")
-                total_brain += brain_acc
-                total_tfidf += tfidf_acc
-                total_bm25 += bm25_acc
-                count += 1
+            # MemNet/NTM only for bAbI (working memory)
+            memnet_acc = result.get('memnet_accuracy')
+            ntm_acc = result.get('ntm_accuracy')
+            
+            # Format: show N/A for MemNet/NTM on non-bAbI tests
+            memnet_str = f"{memnet_acc:>6.1f}%" if memnet_acc is not None else "   N/A"
+            ntm_str = f"{ntm_acc:>6.1f}%" if ntm_acc is not None else "   N/A"
+            
+            log(f"{name:<12} {brain_acc:>6.1f}% {tfidf_acc:>6.1f}% {bm25_acc:>6.1f}% {memnet_str} {ntm_str}")
+        
+        log('-' * 60)
+        
+        # Calculate averages correctly:
+        # - Brain: average of ALL tests
+        # - TF-IDF/BM25: average of QA tests only (exclude bAbI - they can't do working memory)
+        # - MemNet/NTM: only bAbI (they only support working memory tests)
+        if all_results:
+            n = len(all_results)
+            avg_brain = sum(r.get('accuracy', 0) for _, r in all_results) / n
+            
+            # TF-IDF/BM25 average excludes bAbI (they have 0% by definition - no working memory)
+            qa_results = [(name, r) for name, r in all_results if name != 'bAbI']
+            if qa_results:
+                n_qa = len(qa_results)
+                avg_tfidf = sum((r.get('tfidf_accuracy', 0) or 0) for _, r in qa_results) / n_qa
+                avg_bm25 = sum((r.get('bm25_accuracy', 0) or 0) for _, r in qa_results) / n_qa
             else:
-                log(f"{name:<14} {brain_acc:>7.1f}%      N/A      N/A          N/A        N/A")
+                avg_tfidf, avg_bm25 = 0.0, 0.0
+            
+            # MemNet/NTM only tested on bAbI
+            babi_results = [r for name, r in all_results if name == 'bAbI']
+            if babi_results:
+                memnet_acc = babi_results[0].get('memnet_accuracy', 0) or 0
+                ntm_acc = babi_results[0].get('ntm_accuracy', 0) or 0
+                log(f"{'AVERAGE':<12} {avg_brain:>6.1f}% {avg_tfidf:>6.1f}% {avg_bm25:>6.1f}%    N/A    N/A")
+                log(f"{'bAbI only:':<12} {'':>7} {'':>7} {'':>7}{memnet_acc:>6.1f}% {ntm_acc:>6.1f}%")
+            else:
+                log(f"{'AVERAGE':<12} {avg_brain:>6.1f}% {avg_tfidf:>6.1f}% {avg_bm25:>6.1f}%    N/A    N/A")
         
-        if count > 0:
-            avg_brain = total_brain / count
-            avg_tfidf = total_tfidf / count
-            avg_bm25 = total_bm25 / count
-            log('-' * 62)
-            log(f"{'AVERAGE':<14} {avg_brain:>7.1f}% {avg_tfidf:>7.1f}% {avg_bm25:>7.1f}% {avg_brain - avg_tfidf:>+11.1f}% {avg_brain - avg_bm25:>+9.1f}%")
-        
-        log('=' * 70)
+        log('=' * 60)
     
     log(f"Tests completed. Results saved to: {LOG_FILE}")
     
@@ -2251,36 +2368,44 @@ def generate_results_md(all_results: list, stats: dict) -> None:
     lines.append("| Test | Brain | TF-IDF | BM25 | Brain vs TF-IDF | Brain vs BM25 |")
     lines.append("|------|-------|--------|------|-----------------|---------------|")
     
-    total_brain, total_tfidf, total_bm25 = 0.0, 0.0, 0.0
-    count = 0
     babi_note = False
+    
+    # Separate QA tests and bAbI for correct averaging
+    qa_brain, qa_tfidf, qa_bm25 = 0.0, 0.0, 0.0
+    qa_count = 0
+    babi_result = None
     
     for name, result in all_results:
         brain_acc = result.get('accuracy', 0)
         tfidf_acc = result.get('tfidf_accuracy')
         bm25_acc = result.get('bm25_accuracy')
+        memnet_acc = result.get('memnet_accuracy')
+        ntm_acc = result.get('ntm_accuracy')
         
-        if tfidf_acc is not None and bm25_acc is not None:
+        if name == 'bAbI':
+            babi_note = True
+            babi_result = result
+            # Show bAbI with MemNet/NTM, TF-IDF/BM25 = N/A
+            lines.append(f"| bAbI* | **{brain_acc:.1f}%** | N/A | N/A | MemNet: {memnet_acc:.1f}% | NTM: {ntm_acc:.1f}% |")
+        elif tfidf_acc is not None and bm25_acc is not None:
             adv_tfidf = brain_acc - tfidf_acc
             adv_bm25 = brain_acc - bm25_acc
-            name_display = f"{name}*" if name == 'bAbI' else name
-            if name == 'bAbI':
-                babi_note = True
-            lines.append(f"| {name_display} | **{brain_acc:.1f}%** | {tfidf_acc:.1f}% | {bm25_acc:.1f}% | **{adv_tfidf:+.1f}%** | **{adv_bm25:+.1f}%** |")
-            total_brain += brain_acc
-            total_tfidf += tfidf_acc
-            total_bm25 += bm25_acc
-            count += 1
+            lines.append(f"| {name} | **{brain_acc:.1f}%** | {tfidf_acc:.1f}% | {bm25_acc:.1f}% | **{adv_tfidf:+.1f}%** | **{adv_bm25:+.1f}%** |")
+            qa_brain += brain_acc
+            qa_tfidf += tfidf_acc
+            qa_bm25 += bm25_acc
+            qa_count += 1
     
-    if count > 0:
-        avg_brain = total_brain / count
-        avg_tfidf = total_tfidf / count
-        avg_bm25 = total_bm25 / count
-        lines.append(f"| **AVERAGE** | **{avg_brain:.1f}%** | **{avg_tfidf:.1f}%** | **{avg_bm25:.1f}%** | **{avg_brain - avg_tfidf:+.1f}%** | **{avg_brain - avg_bm25:+.1f}%** |")
+    # AVERAGE for QA tests only (exclude bAbI from TF-IDF/BM25 average)
+    if qa_count > 0:
+        avg_brain = qa_brain / qa_count
+        avg_tfidf = qa_tfidf / qa_count
+        avg_bm25 = qa_bm25 / qa_count
+        lines.append(f"| **AVERAGE (QA)** | **{avg_brain:.1f}%** | **{avg_tfidf:.1f}%** | **{avg_bm25:.1f}%** | **{avg_brain - avg_tfidf:+.1f}%** | **{avg_brain - avg_bm25:+.1f}%** |")
     
     if babi_note:
         lines.append("")
-        lines.append("*bAbI requires working memory — TF-IDF/BM25 cannot track entity movements across sentences.")
+        lines.append("*bAbI requires working memory — TF-IDF/BM25 cannot track entity movements. MemNet/NTM are working memory baselines.")
     
     # Dynamic Key Findings based on actual results
     lines.append("")
@@ -2288,8 +2413,8 @@ def generate_results_md(all_results: list, stats: dict) -> None:
     lines.append("")
     
     # Calculate dynamic values
-    advantage_min = int(avg_brain - avg_tfidf) if count > 0 else 0
-    advantage_max = int(max((r.get('accuracy', 0) - (r.get('tfidf_accuracy') or 0)) for _, r in all_results if r.get('tfidf_accuracy') is not None) if count > 0 else 0)
+    advantage_min = int(avg_brain - avg_tfidf) if qa_count > 0 else 0
+    advantage_max = int(max((r.get('accuracy', 0) - (r.get('tfidf_accuracy') or 0)) for name, r in all_results if name != 'bAbI' and r.get('tfidf_accuracy') is not None) if qa_count > 0 else 0)
     
     # Find bAbI accuracy
     babi_acc = next((r.get('accuracy', 0) for name, r in all_results if name == 'bAbI'), None)

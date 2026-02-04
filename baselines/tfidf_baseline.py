@@ -304,6 +304,8 @@ def load_curriculum_data() -> List[str]:
 _TFIDF_BASELINE = None
 _BM25_BASELINE = None
 _KEYWORD_BASELINE = None
+_RAG_BASELINE = None
+_MEMNET_BASELINE = None
 
 def get_baselines():
     """Get or build all baselines."""
@@ -326,6 +328,75 @@ def get_baselines():
         _KEYWORD_BASELINE.build_index()
     
     return _TFIDF_BASELINE, _BM25_BASELINE, _KEYWORD_BASELINE
+
+
+def get_extended_baselines(use_openai: bool = False):
+    """
+    Get extended baselines including RAG and MemNet.
+    
+    Args:
+        use_openai: Whether to use OpenAI API for RAG generation
+        
+    Returns:
+        Tuple of (tfidf, bm25, keyword, rag, memnet)
+    """
+    global _RAG_BASELINE, _MEMNET_BASELINE
+    
+    tfidf, bm25, keyword = get_baselines()
+    
+    if _RAG_BASELINE is None:
+        try:
+            from baselines.rag_baseline import get_rag_baseline
+            _RAG_BASELINE = get_rag_baseline(use_openai=use_openai)
+        except Exception as e:
+            print(f"Warning: RAG baseline not available: {e}")
+            _RAG_BASELINE = None
+    
+    if _MEMNET_BASELINE is None:
+        try:
+            from baselines.memnet_baseline import get_memnet_baseline
+            _MEMNET_BASELINE = get_memnet_baseline()
+        except Exception as e:
+            print(f"Warning: MemNet baseline not available: {e}")
+            _MEMNET_BASELINE = None
+    
+    return tfidf, bm25, keyword, _RAG_BASELINE, _MEMNET_BASELINE
+
+
+# Global NTM and Transformer baselines
+_NTM_BASELINE = None
+_TRANSFORMER_BASELINE = None
+
+def get_all_baselines(use_openai: bool = False):
+    """
+    Get all baselines for comparison.
+    
+    QA Baselines (tested on all tests):
+        - TF-IDF: term frequency-inverse document frequency (lexical)
+        - BM25: probabilistic IR model (lexical)
+    
+    Working Memory Baselines (tested only on bAbI):
+        - MemNet: attention over memory slots
+        - NTM: external memory with content-based addressing
+    """
+    global _NTM_BASELINE
+    
+    tfidf, bm25, keyword, rag, memnet = get_extended_baselines(use_openai)
+    
+    if _NTM_BASELINE is None:
+        try:
+            from baselines.ntm_baseline import get_ntm_baseline
+            _NTM_BASELINE = get_ntm_baseline()
+        except Exception as e:
+            print(f"Warning: NTM baseline not available: {e}")
+            _NTM_BASELINE = None
+    
+    return {
+        'tfidf': tfidf,
+        'bm25': bm25,
+        'memnet': memnet,
+        'ntm': _NTM_BASELINE,
+    }
 
 
 # ANCHOR: RUN_BASELINE_TESTS
