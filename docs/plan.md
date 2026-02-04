@@ -96,14 +96,52 @@ NEXT PHASES (recommended order):
     - Role bonus in CA3 scoring for episodes with matching semantic roles
     - Biology: Fillmore's Case Grammar, temporal-parietal cortex (Binder 2009)
 
-FUTURE WORK (baseline expansion — in progress):
-- RAG baseline (Retriever + GPT) — different class, but fair comparison
-- Memory Networks (Weston et al. 2015) — direct comparison on bAbI
-- Neural Turing Machines (Graves et al. 2014) — working memory comparison
-- Transformer-based QA (BERT, RoBERTa) — fine-tuned on same data
-- The goal is NOT to beat all baselines, but to show unique capabilities:
-  - Working memory (bAbI): IR methods = 0%
-  - Source memory: trust-weighted retrieval
+13) Baselines — ✅ DONE (February 2026)
+    - TF-IDF: term frequency-inverse document frequency
+    - BM25: probabilistic IR model (Robertson et al.)
+    - MemNet: attention over memory slots (Weston et al. 2015)
+    - NTM: external memory with content-based addressing (Graves et al. 2014)
+    - All baselines tested on identical curriculum data
+
+BASELINE SUMMARY:
+| Baseline    | Type                  | Working Memory | Source Memory | Bio-plausible |
+|-------------|-----------------------|----------------|---------------|---------------|
+| TF-IDF      | IR (term frequency)   | No             | No            | No            |
+| BM25        | IR (probabilistic)    | No             | No            | No            |
+| MemNet      | Attention over memory | Yes            | No            | No            |
+| NTM         | External memory       | Yes            | No            | No            |
+| **Brain**   | Hippocampal circuit   | Yes            | Yes           | Yes           |
+
+QA Baselines (TF-IDF, BM25): tested on all QA tests
+Working Memory Baselines (MemNet, NTM): tested ONLY on bAbI Task 1
+
+14) bAbI Tasks 2-20 — 🔄 TODO (Future)
+    Currently only Task 1 (single supporting fact) is tested.
+    Tasks 2-20 test KEY cognitive abilities that Brain should support:
+    - Task 2: Two supporting facts
+    - Task 3: Three supporting facts  
+    - Task 4: Two argument relations
+    - Task 5: Three argument relations
+    - Task 6: Yes/No questions
+    - Task 7: Counting
+    - Task 8: Lists/Sets
+    - Task 9: Simple negation
+    - Task 10: Indefinite knowledge
+    - Task 11: Basic coreference
+    - Task 12: Conjunction
+    - Task 13: Compound coreference
+    - Task 14: Time reasoning
+    - Task 15: Basic deduction
+    - Task 16: Basic induction
+    - Task 17: Positional reasoning
+    - Task 18: Size reasoning
+    - Task 19: Path finding
+    - Task 20: Agent's motivations
+    These are CRITICAL for demonstrating Brain's reasoning capabilities.
+
+The goal is NOT to beat all baselines, but to show unique capabilities:
+  - Working memory (bAbI): TF-IDF/BM25 = 0%, MemNet/NTM/Brain > 0%
+  - Source memory: trust-weighted retrieval (only Brain)
   - Biological plausibility: mechanisms with neuroscience references
 
 ========================================
