@@ -1065,11 +1065,11 @@ INPUT: "What is the capital of France?"
 |    - Projects to: EC Layer V (consolidation), PFC (working memory)       |
 +--------------------------------------------------------------------------+
 | 7. ANSWER GENERATION (motor_output.py -> SequenceGenerator)              |
-|    - Get episode.input_words (preserves hippocampal time cell order)     |
-|    - Filter out question words: {what, is, the, capital, of, france}     |
-|    - Remaining: ["paris"]                                                |
-|    - Insert connectors if needed (from connection.connector)             |
-|    - Raw answer: "paris"                                                 |
+|    - Get episode.input_words (CONTENT words from hippocampal memory)     |
+|    - Filter out question words (lateral inhibition)                      |
+|    - BROCA'S FORMULATOR: restore function words from connectors          |
+|      stored in connections (dorsal stream, Hagoort 2005, Levelt 1989)    |
+|    - Example: ["capital","france"] + connectors -> "capital of france"    |
 +--------------------------------------------------------------------------+
 | 8. OPTIONAL: LLM POSTPROCESSING (llm_postprocess.py)                     |
 |    - Broca's area analogue for grammatical speech                        |
@@ -1105,7 +1105,7 @@ In the implementation, basal ganglia select between ``retrieve'' (single-hop) an
 
 Retrieving the correct information is not sufficient---the answer must be produced in correct word order. This is the function of motor output areas, particularly Broca's area for speech production \citep{hickok2007cortical}.
 
-The system implements a \texttt{SequenceGenerator} class that preserves the temporal order stored in hippocampal time cells. When an episode is retrieved, its \texttt{input\_words} tuple maintains the original sequence in which words were encoded. The motor output module reads this sequence and generates the answer in the correct order.
+The system implements a \texttt{SequenceGenerator} class that preserves the temporal order stored in hippocampal time cells. When an episode is retrieved, its \texttt{input\_words} tuple maintains the original sequence of \emph{content words} as encoded. Function words (articles, prepositions, copulas) are not stored in episodic memory but are reconstructed during speech production by restoring \emph{connectors} from the learned connection graph. For example, the connection \texttt{capital --[of]--> france} stores the function word ``of'' as a connector; during answer generation, this connector is inserted between the content words, yielding ``capital of france'' rather than ``capital france''. This mirrors the biological Formulator stage of Levelt's speech production model \citep{levelt1989speaking}, where Broca's area reconstructs grammatical structure from lexical frames stored in the dorsal stream \citep{hagoort2005broca,hickok2007cortical}.
 
 This separation mirrors the biological distinction between \emph{knowing} something (hippocampal/cortical retrieval) and \emph{saying} something (motor planning and execution). A person may know that Paris is the capital of France, but producing the sentence ``The capital of France is Paris'' requires additional motor sequencing.
 
