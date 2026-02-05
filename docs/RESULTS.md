@@ -1,6 +1,6 @@
 # Brain Model Test Results
 
-**Date:** February 04, 2026 (auto-generated)
+**Date:** February 05, 2026 (auto-generated)
 **Model:** brain_model
 **Training:** curriculum → preschool → grade1 → bAbI → FineWeb-Edu
 
@@ -10,13 +10,13 @@
 
 | Metric | Value |
 |--------|-------|
-| Neurons | 48,301 |
-| Connections | 1,477,371 |
+| Neurons | 48,295 |
+| Connections | 1,477,365 |
 | MYELINATED | 19,195 (1.3%) |
-| USED | 77,942 (5.3%) |
+| USED | 77,936 (5.3%) |
 | NEW | 1,380,234 |
-| Episodes | 68,955 |
-| — NEW | 35,160 |
+| Episodes | 68,945 |
+| — NEW | 35,150 |
 | — REPLAYED | 2,142 |
 | — CONSOLIDATED | 30,744 |
 | — DECAYING | 909 |
@@ -33,8 +33,7 @@
 | **GRADE1** | 64 | 64 | **100.0%** | Grade 1 world knowledge |
 | **FINEWEB** | 7 | 9 | **77.8%** | Educational text facts |
 | **PARAPHRASE** | 25 | 50 | **50.0%** | Surface form robustness |
-| **bAbI** | 250 | 250 | **100.0%** | Working memory |
-| **TOTAL** | **444** | **474** | **93.7%** | All tests combined |
+| **TOTAL** | **194** | **224** | **86.6%** | All tests combined |
 
 ---
 
@@ -50,15 +49,11 @@ All baselines trained on **identical data** (curriculum.py sentences + connectio
 | GRADE1 | **100.0%** | 39.1% | 37.5% | **+60.9%** | **+62.5%** |
 | FINEWEB | **77.8%** | 0.0% | 0.0% | **+77.8%** | **+77.8%** |
 | PARAPHRASE | **50.0%** | 38.0% | 38.0% | **+12.0%** | **+12.0%** |
-| bAbI* | **100.0%** | N/A | N/A | MemNet: 100.0% | NTM: 88.4% |
 | **AVERAGE (QA)** | **86.9%** | **31.9%** | **30.0%** | **+55.0%** | **+57.0%** |
-
-*bAbI requires working memory — TF-IDF/BM25 cannot track entity movements. MemNet/NTM are working memory baselines.
 
 ### Key Findings
 
 1. **Brain significantly outperforms simple IR methods** (+55-77%)
-2. **Working memory (bAbI)** — Brain achieves 100%, baselines cannot handle context
 3. **Paraphrase robustness** — 50% accuracy indicates room for improvement
 4. **"I don't know" capability** — Brain correctly abstains on unknown queries
 
@@ -70,7 +65,7 @@ All baselines trained on **identical data** (curriculum.py sentences + connectio
 ### CURRICULUM (1 failures)
 | Question | Brain Answer | Expected |
 |----------|--------------|----------|
-| What is ice? | melts gets warm | melts gets warm |
+| What is ice? | melts when it gets warm | melts when it gets warm |
 
 ### PRESCHOOL (2 failures)
 | Question | Brain Answer | Expected |
@@ -82,12 +77,12 @@ All baselines trained on **identical data** (curriculum.py sentences + connectio
 | Question | Brain Answer | Expected |
 |----------|--------------|----------|
 | What disappears from leaves? | I do not know | ['chlorophyll', 'green'] |
-| What is sedimentary rock made of? | sedimentary rock made | ['bones', 'shells', 'organic', 'sandstone', 'limestone', 'shale'] |
+| What is sedimentary rock made of? | sedimentary rock is made | ['bones', 'shells', 'organic', 'sandstone', 'limestone', 'shale'] |
 
 ### PARAPHRASE (25 failures)
 | Question | Brain Answer | Expected |
 |----------|--------------|----------|
-| A dog is what kind of thing? | things smell good smell bad | ['animal', 'pet', 'mammal'] |
+| A dog is what kind of thing? | things smell and some good and some smell bad | ['animal', 'pet', 'mammal'] |
 | Dogs belong to what category? | I do not know | ['animal', 'pet', 'mammal'] |
 | Tell me what a dog is | I do not know | ['animal', 'pet', 'mammal'] |
 | What category does a dog belong to? | I do not know | ['animal', 'pet', 'mammal'] |

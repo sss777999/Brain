@@ -104,11 +104,11 @@ This is **THE** diagram showing how the model answers questions. Read this FIRST
 ║         ▼                                                                     ║
 ║  ┌─────────────────────────────────────────────────────────────────────────┐ ║
 ║  │ 7. ANSWER GENERATION (motor_output.py → SequenceGenerator)              │ ║
-║  │    • Get episode.input_words (preserves hippocampal time cell order)    │ ║
-║  │    • Filter out question words: {what, is, the, capital, of, france}    │ ║
-║  │    • Remaining: ["paris"]                                               │ ║
-║  │    • Insert connectors if needed (from connection.connector)            │ ║
-║  │    • Raw answer: "paris"                                                │ ║
+║  │    • Get episode.input_words (CONTENT words from hippocampal memory)    │ ║
+║  │    • Filter out question words (lateral inhibition)                     │ ║
+║  │    • BROCA'S FORMULATOR: restore function words from connectors         │ ║
+║  │      stored in connections (dorsal stream, Hagoort 2005, Levelt 1989)   │ ║
+║  │    • Example: ["capital","france"] + connectors → "capital of france"    │ ║
 ║  └─────────────────────────────────────────────────────────────────────────┘ ║
 ║         │                                                                     ║
 ║         ▼                                                                     ║
@@ -439,11 +439,13 @@ the KNOWLEDGE is real, only the INTERFACE is simplified.
    - Hippocampus/CA3 use PFC cues for scoring and binding checks.
    - Connector matching is relation-specific (no accidental `is`→`is_a` prefix match).
 
-8. **Motor Output / Sequence Generator (PHASE 3.6)** — correct word order:
+8. **Motor Output / Sequence Generator (PHASE 3.6)** — correct word order + grammar:
    - `motor_output.py` with `SequenceGenerator` class
-   - Preserves hippocampal time cell order (input_words tuple)
+   - Preserves hippocampal time cell order (input_words = content words only)
+   - `_insert_connectors()` restores function words from `connection.connector`
+   - Connectors learned during training: "is", "is a", "of", "and", etc.
    - `generate_answer_ordered()` replaces legacy answer generation
-   - Biology: Broca's area for speech production (Hickok & Poeppel 2007)
+   - Biology: Broca's area formulator (Levelt 1989, Hagoort 2005, Hickok & Poeppel 2007)
 
 9. **Multi-hop Reasoning (PHASE 3.7)** — compositional working memory:
    - `ask_multi_hop()` function for multi-hop questions
@@ -1976,8 +1978,8 @@ set_config("RETRIEVAL_TEMPERATURE", 0.5)       # Probabilistic selection
 
 ## NEXT STEPS (Phase 4+)
 
-- [ ] Improve answer generation (word order)
-- [ ] Fix grammar (is/are by context)
+- [x] Improve answer generation (word order + connector restoration)
+- [ ] Fix grammar (is/are by context, articles a/the)
 - [ ] Add dialogue context
 - [x] Test on large datasets (Tatoeba + FineWeb-Edu) — Phase 3
 - [ ] Cortex integration for long-term memory

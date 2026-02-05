@@ -101,11 +101,13 @@ class SequenceGenerator:
             # All words were query words — return full episode
             answer_words = list(ordered_words)
         
-        # BIOLOGY (Hippocampal Time Cells):
-        # input_words now contains ALL words (including function words)
-        # in original order. Simply join them - order is already correct.
-        # No need to restore connectors - they are already in sequence.
-        return ' '.join(answer_words)
+        # BIOLOGY (Broca's Area, Dorsal Stream — Hagoort 2005, Levelt 1989):
+        # input_words contains CONTENT words only (semantic memory from hippocampus).
+        # Function words are reconstructed from connection connectors
+        # (learned syntactic links in dorsal stream during training).
+        # This mirrors how Broca's area reconstructs grammar during speech production.
+        answer_with_connectors = self._insert_connectors(answer_words, word_to_neuron)
+        return ' '.join(answer_with_connectors)
     
     # API_PRIVATE
     def _insert_connectors(
@@ -141,7 +143,10 @@ class SequenceGenerator:
             connector = self._find_connector(prev_word, curr_word, word_to_neuron)
             
             if connector:
-                result.append(connector)
+                # Expand connector format: "is_a" → ["is", "a"], "of" → ["of"]
+                # BIOLOGY: connectors are stored as compressed syntactic links;
+                # Broca's area expands them into individual function words for speech output
+                result.extend(connector.split('_'))
             
             result.append(curr_word)
         
