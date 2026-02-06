@@ -2224,7 +2224,7 @@ def main():
         log('=' * 90)
         log('BASELINE COMPARISON')
         log('=' * 90)
-        log('QA Baselines: TF-IDF, BM25 (tested on all QA tests)')
+        log('QA Baselines: TF-IDF, BM25 (trained on ALL data, tested on all QA tests)')
         log('Working Memory Baselines: MemNet, NTM (tested ONLY on bAbI)')
         log('')
         
@@ -2444,7 +2444,17 @@ def generate_results_md(all_results: list, stats: dict) -> None:
             for item in failed_tests[:10]:  # Max 10 failures per suite
                 q = item[0] if len(item) > 0 else "?"
                 ans = str(item[1]) if len(item) > 1 else "?"
-                exp = str(item[2]) if len(item) > 2 else "?"
+                # Expected is at different index depending on tuple format:
+                # (q, raw, verbalized, expected, gpt) → item[3] (CURRICULUM/GRADE1/PRESCHOOL)
+                # (q, raw, expected, gpt) → item[2] (STRICT)
+                # (q, raw, expected) → item[2] (PARAPHRASE)
+                # Heuristic: if item has 5 elements, expected is at index 3
+                if len(item) >= 5:
+                    exp = str(item[3])
+                elif len(item) >= 3:
+                    exp = str(item[2])
+                else:
+                    exp = "?"
                 lines.append(f"| {q} | {ans} | {exp} |")
             lines.append("")
     
