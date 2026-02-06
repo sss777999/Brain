@@ -1,6 +1,6 @@
 # Brain Model Test Results
 
-**Date:** February 05, 2026 (auto-generated)
+**Date:** February 06, 2026 (auto-generated)
 **Model:** brain_model
 **Training:** curriculum → preschool → grade1 → bAbI → FineWeb-Edu
 
@@ -10,16 +10,16 @@
 
 | Metric | Value |
 |--------|-------|
-| Neurons | 48,295 |
-| Connections | 1,477,365 |
-| MYELINATED | 19,195 (1.3%) |
-| USED | 77,936 (5.3%) |
-| NEW | 1,380,234 |
-| Episodes | 68,945 |
-| — NEW | 35,150 |
-| — REPLAYED | 2,142 |
-| — CONSOLIDATED | 30,744 |
-| — DECAYING | 909 |
+| Neurons | 48,311 |
+| Connections | 1,485,089 |
+| MYELINATED | 23,120 (1.6%) |
+| USED | 76,613 (5.2%) |
+| NEW | 1,385,356 |
+| Episodes | 76,073 |
+| — NEW | 35,057 |
+| — REPLAYED | 2,193 |
+| — CONSOLIDATED | 37,518 |
+| — DECAYING | 1,305 |
 
 ---
 
@@ -30,10 +30,10 @@
 | **CURRICULUM** | 49 | 50 | **98.0%** | Core knowledge tests |
 | **STRICT** | 3 | 3 | **100.0%** | "I do not know" tests |
 | **PRESCHOOL** | 46 | 48 | **95.8%** | Ages 3-6 knowledge |
-| **GRADE1** | 64 | 64 | **100.0%** | Grade 1 world knowledge |
+| **GRADE1** | 62 | 64 | **96.9%** | Grade 1 world knowledge |
 | **FINEWEB** | 7 | 9 | **77.8%** | Educational text facts |
-| **PARAPHRASE** | 25 | 50 | **50.0%** | Surface form robustness |
-| **TOTAL** | **194** | **224** | **86.6%** | All tests combined |
+| **PARAPHRASE** | 24 | 50 | **48.0%** | Surface form robustness |
+| **TOTAL** | **191** | **224** | **85.3%** | All tests combined |
 
 ---
 
@@ -43,18 +43,18 @@ All baselines trained on **identical data** (curriculum.py sentences + connectio
 
 | Test | Brain | TF-IDF | BM25 | Brain vs TF-IDF | Brain vs BM25 |
 |------|-------|--------|------|-----------------|---------------|
-| CURRICULUM | **98.0%** | 58.0% | 48.0% | **+40.0%** | **+50.0%** |
+| CURRICULUM | **98.0%** | 64.0% | 70.0% | **+34.0%** | **+28.0%** |
 | STRICT | **100.0%** | 33.3% | 33.3% | **+66.7%** | **+66.7%** |
-| PRESCHOOL | **95.8%** | 22.9% | 22.9% | **+72.9%** | **+72.9%** |
-| GRADE1 | **100.0%** | 39.1% | 37.5% | **+60.9%** | **+62.5%** |
-| FINEWEB | **77.8%** | 0.0% | 0.0% | **+77.8%** | **+77.8%** |
-| PARAPHRASE | **50.0%** | 38.0% | 38.0% | **+12.0%** | **+12.0%** |
-| **AVERAGE (QA)** | **86.9%** | **31.9%** | **30.0%** | **+55.0%** | **+57.0%** |
+| PRESCHOOL | **95.8%** | 81.2% | 87.5% | **+14.6%** | **+8.3%** |
+| GRADE1 | **96.9%** | 68.8% | 71.9% | **+28.1%** | **+25.0%** |
+| FINEWEB | **77.8%** | 11.1% | 33.3% | **+66.7%** | **+44.4%** |
+| PARAPHRASE | **48.0%** | 48.0% | 52.0% | **+0.0%** | **-4.0%** |
+| **AVERAGE (QA)** | **86.1%** | **51.1%** | **58.0%** | **+35.0%** | **+28.1%** |
 
 ### Key Findings
 
-1. **Brain significantly outperforms simple IR methods** (+55-77%)
-3. **Paraphrase robustness** — 50% accuracy indicates room for improvement
+1. **Brain significantly outperforms simple IR methods** (+35-66%)
+3. **Paraphrase robustness** — 48% accuracy indicates room for improvement
 4. **"I don't know" capability** — Brain correctly abstains on unknown queries
 
 
@@ -65,13 +65,19 @@ All baselines trained on **identical data** (curriculum.py sentences + connectio
 ### CURRICULUM (1 failures)
 | Question | Brain Answer | Expected |
 |----------|--------------|----------|
-| What is ice? | melts when it gets warm | melts when it gets warm |
+| What is ice? | gets warm it melts | ['solid', 'cold', 'frozen'] |
 
 ### PRESCHOOL (2 failures)
 | Question | Brain Answer | Expected |
 |----------|--------------|----------|
-| What happens when you fall? | I do not know | I do not know |
-| When should you wash your hands? | eat | eat |
+| What happens when you fall? | I do not know | ['hurt', 'pain'] |
+| When should you wash your hands? | soap | ['before eating', 'after toilet', 'eating'] |
+
+### GRADE1 (2 failures)
+| Question | Brain Answer | Expected |
+|----------|--------------|----------|
+| When do leaves fall? | change color | ['autumn', 'fall'] |
+| When should we wash hands? | soap | ['before eating', 'eat'] |
 
 ### FINEWEB (2 failures)
 | Question | Brain Answer | Expected |
@@ -79,18 +85,18 @@ All baselines trained on **identical data** (curriculum.py sentences + connectio
 | What disappears from leaves? | I do not know | ['chlorophyll', 'green'] |
 | What is sedimentary rock made of? | sedimentary rock is made | ['bones', 'shells', 'organic', 'sandstone', 'limestone', 'shale'] |
 
-### PARAPHRASE (25 failures)
+### PARAPHRASE (26 failures)
 | Question | Brain Answer | Expected |
 |----------|--------------|----------|
 | A dog is what kind of thing? | things smell and some good and some smell bad | ['animal', 'pet', 'mammal'] |
 | Dogs belong to what category? | I do not know | ['animal', 'pet', 'mammal'] |
-| Tell me what a dog is | I do not know | ['animal', 'pet', 'mammal'] |
+| Tell me what a dog is | ellen do look sits up in a chair with my hat | ['animal', 'pet', 'mammal'] |
 | What category does a dog belong to? | I do not know | ['animal', 'pet', 'mammal'] |
 | Apples are classified as what? | I do not know | ['fruit'] |
 | What kind of food is an apple? | I do not know | ['fruit'] |
 | Tell me the sky's color | I do not know | ['blue'] |
 | What is hot's opposite? | I do not know | ['cold'] |
-| Name the capital of France | beijing china | ['paris'] |
+| Name the capital of France | beijing is china | ['paris'] |
 | Paris is located where? | I do not know | ['france'] |
 
 ---

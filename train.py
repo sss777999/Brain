@@ -371,30 +371,38 @@ STATS = {
 
 def normalize_connector(connector: str | None) -> str | None:
     """
-    Process a connector: keep a/an (category markers), remove the.
+    Process a connector: normalize an->a, keep all other function words including 'the'.
     
-    BIOLOGY: The indefinite article a/an indicates categorization:
-    - "X is A Y" = X belongs to the category Y (IS-A, taxonomy)
-    - "X is Y" = X has the property Y (HAS-PROPERTY, attribute)
+    BIOLOGY (Construction Grammar, Goldberg 1995; Tomasello 2003):
+    Function words are integral parts of syntactic constructions learned from exposure.
+    - "in the" is a prepositional construction (not just "in" + noise)
+    - "on the" is a prepositional construction
+    - "is a" marks IS-A categorization
+    - "is the" marks definite reference
+    
+    Only "an" -> "a" normalization is applied (phonological variant, same morpheme).
+    "the" is PRESERVED because it is part of learned constructions:
+    - "in_the_sky" (prepositional phrase construction)
+    - "is_the_capital" (definite copula construction)
+    - "on_the_ground" (locative construction)
     
     Examples:
-    - "is_a" -> "is_a" (category, keep it)
-    - "is_an" -> "is_a" (normalize an->a)
-    - "of_the" -> "of" (the does not carry semantics)
+    - "is_a" -> "is_a" (category, kept)
+    - "is_an" -> "is_a" (phonological normalization)
+    - "of_the" -> "of_the" (preserved — part of construction)
+    - "in_the" -> "in_the" (preserved — prepositional construction)
     - "is" -> "is" (no changes)
     """
     if connector is None:
         return None
     
     parts = connector.split('_')
-    # Normalize "an" -> "a" (both are indefinite articles)
-    # Remove only "the" (definite article; does not carry IS-A semantics)
+    # Normalize "an" -> "a" (same morpheme, phonological variant)
+    # Keep everything else including "the" — it is part of learned constructions
     filtered_parts = []
     for p in parts:
         if p == 'an':
             filtered_parts.append('a')
-        elif p == 'the':
-            continue  # Remove "the"
         else:
             filtered_parts.append(p)
     
@@ -1876,6 +1884,34 @@ def _ask_impl(question: str) -> str:
         else:
             # Content word not present in the lexicon: the model does not know this word
             unknown_content_words.append(cleaned)
+    
+    # POST-LOOP: Construction recognition (Broca's area, BA44/45)
+    # BIOLOGY (Construction Grammar, Goldberg 1995; Friederici 2011):
+    # Multi-word constructions are recognized as UNITS, not word-by-word.
+    # "What is X made of?" is a MATERIAL construction, not IS-A category.
+    # "What is under X?" is a LOCATIVE construction, not IS-A category.
+    # Broca's area overrides the default copula interpretation when
+    # a more specific construction is detected.
+    if query_connector == 'is_a':
+        cleaned_words = [clean_word(w) for w in words if clean_word(w)]
+        # MATERIAL construction: "made of/from" overrides IS-A
+        # "What is a table made of?" → material, not category
+        if 'made' in cleaned_words and any(w in cleaned_words for w in ('of', 'from')):
+            query_connector = None
+        # LOCATIVE construction: preposition immediately after copula
+        # "What is under the ground?" → location, not category
+        # Detect: copula followed by spatial preposition (no content word between)
+        else:
+            LOCATIVE_PREPS = {
+                'under', 'above', 'below', 'beneath', 'in', 'on',
+                'inside', 'behind', 'near', 'beside', 'between',
+            }
+            for i, w in enumerate(cleaned_words):
+                if w in ('is', 'are', 'was', 'were') and i + 1 < len(cleaned_words):
+                    next_w = cleaned_words[i + 1]
+                    if next_w in LOCATIVE_PREPS:
+                        query_connector = None
+                        break
     
     if not query_neurons:
         return "I do not understand the question"

@@ -283,10 +283,28 @@ class KeywordBaseline:
 
 # ANCHOR: LOAD_CURRICULUM
 def load_curriculum_data() -> List[str]:
-    """Load sentences from curriculum for baseline."""
+    """
+    Load ALL training data for baselines — same data that Brain is trained on.
+    
+    Description:
+        Loads sentences from all data sources used during Brain training:
+        curriculum, preschool, grade1, and FineWeb-Edu.
+    
+    Intent:
+        Fair baseline comparison requires baselines to have access to the
+        same knowledge as the Brain model. Previously only curriculum was
+        loaded, which made comparison unfair on PRESCHOOL/GRADE1/FINEWEB suites.
+    
+    Returns:
+        List[str]: All training sentences from all data sources.
+    """
+    sentences: List[str] = []
+    
+    # --- CURRICULUM (0-3 years) ---
     from curriculum import get_sentences, get_all_connections
     
-    sentences = get_sentences()
+    curriculum_sents = get_sentences()
+    sentences.extend(curriculum_sents)
     
     # Also add connection pairs as simple sentences
     connections = get_all_connections()
@@ -295,6 +313,52 @@ def load_curriculum_data() -> List[str]:
             w1, w2 = conn
             sentences.append(f"{w1} is {w2}")
             sentences.append(f"{w2} {w1}")
+    
+    # --- PRESCHOOL (3-6 years) ---
+    try:
+        from data.preschool_world import get_preschool_sentences
+        preschool_sents = get_preschool_sentences()
+        sentences.extend(preschool_sents)
+    except ImportError:
+        pass
+    
+    # --- GRADE1 (6-7 years) ---
+    try:
+        from data.grade1_world import get_grade1_sentences
+        grade1_sents = get_grade1_sentences()
+        sentences.extend(grade1_sents)
+        
+        # Also add fact triples as sentences
+        from data.grade1_world import get_grade1_facts
+        for fact in get_grade1_facts():
+            if len(fact) == 3:
+                subj, rel, obj = fact
+                rel_clean = rel.replace('_', ' ')
+                sentences.append(f"{subj} {rel_clean} {obj}")
+    except ImportError:
+        pass
+    
+    # --- FINEWEB-EDU (educational texts) ---
+    try:
+        import json
+        fineweb_cache = os.path.join(
+            os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+            "data", "fineweb_edu_sample.json"
+        )
+        if os.path.exists(fineweb_cache):
+            with open(fineweb_cache, "r") as f:
+                articles = json.load(f)
+            for article in articles[:1000]:  # Same limit as default training
+                text = article.get("text", "")
+                if not text:
+                    continue
+                # Split into sentences (same logic as train.py)
+                for sent in re.split(r'[.!?]+', text):
+                    sent = sent.strip()
+                    if sent and len(sent.split()) >= 3:
+                        sentences.append(sent)
+    except Exception:
+        pass
     
     return sentences
 
