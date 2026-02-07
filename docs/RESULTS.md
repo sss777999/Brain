@@ -10,13 +10,13 @@
 
 | Metric | Value |
 |--------|-------|
-| Neurons | 48,312 |
-| Connections | 1,471,237 |
+| Neurons | 48,318 |
+| Connections | 1,471,243 |
 | MYELINATED | 23,792 (1.6%) |
-| USED | 76,369 (5.2%) |
+| USED | 76,375 (5.2%) |
 | NEW | 1,371,076 |
-| Episodes | 76,678 |
-| — NEW | 35,076 |
+| Episodes | 76,688 |
+| — NEW | 35,086 |
 | — REPLAYED | 2,185 |
 | — CONSOLIDATED | 38,065 |
 | — DECAYING | 1,352 |
@@ -33,7 +33,8 @@
 | **GRADE1** | 64 | 64 | **100.0%** | Grade 1 world knowledge |
 | **FINEWEB** | 9 | 9 | **100.0%** | Educational text facts |
 | **PARAPHRASE** | 50 | 50 | **100.0%** | Surface form robustness |
-| **TOTAL** | **224** | **224** | **100.0%** | All tests combined |
+| **bAbI** | 250 | 250 | **100.0%** | Working memory |
+| **TOTAL** | **474** | **474** | **100.0%** | All tests combined |
 
 ---
 
@@ -49,11 +50,15 @@ All baselines trained on **identical data** (curriculum.py sentences + connectio
 | GRADE1 | **100.0%** | 68.8% | 71.9% | **+31.2%** | **+28.1%** |
 | FINEWEB | **100.0%** | 11.1% | 33.3% | **+88.9%** | **+66.7%** |
 | PARAPHRASE | **100.0%** | 48.0% | 48.0% | **+52.0%** | **+52.0%** |
+| bAbI* | **100.0%** | N/A | N/A | MemNet: 100.0% | NTM: 88.4% |
 | **AVERAGE (QA)** | **100.0%** | **51.1%** | **57.3%** | **+48.9%** | **+42.7%** |
+
+*bAbI requires working memory — TF-IDF/BM25 cannot track entity movements. MemNet/NTM are working memory baselines.
 
 ### Key Findings
 
 1. **Brain significantly outperforms simple IR methods** (+48-88%)
+2. **Working memory (bAbI)** — Brain achieves 100%, baselines cannot handle context
 3. **Paraphrase robustness** — 100% accuracy via Broca Phase 3 + temporal inference
 4. **"I don't know" capability** — Brain correctly abstains on unknown queries
 
