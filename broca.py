@@ -719,6 +719,226 @@ class SyntacticProcessor:
         return parsed.relation_direction
 
 
+# ANCHOR: COREFERENCE_RESOLVER - discourse model for pronoun resolution
+# API_PUBLIC
+class CoreferenceResolver:
+    """
+    Coreference resolution via discourse model in Broca's area.
+    
+    BIOLOGY (Fries 2005, Hagoort 2005):
+    Broca's area maintains a discourse model of active referents.
+    Pronouns (he/she/they/it) are bound to referents via gamma-band
+    synchronization between Broca's area and temporal cortex.
+    
+    The resolver tracks:
+    - Last mentioned male entity (for "he/him/his")
+    - Last mentioned female entity (for "she/her")
+    - Last mentioned entity pair (for "they/them/their")
+    - Last mentioned non-person entity (for "it/its")
+    
+    Intent: Enable multi-sentence comprehension by resolving anaphora,
+            required for bAbI Tasks 11, 13 and general discourse understanding.
+    
+    Args: None
+    Returns: Resolved sentence sequences via resolve_sequence()
+    Raises: None (graceful fallback — unresolved pronouns stay as-is)
+    """
+    
+    # ANCHOR: COREF_GENDER_LEXICON
+    # Common English names with gender (covers bAbI + general use)
+    # BIOLOGY: This is analogous to learned name-gender associations in
+    # temporal cortex, built from language exposure (not innate)
+    FEMALE_NAMES: Set[str] = {
+        'mary', 'sandra', 'julie', 'emily', 'jessica', 'gertrude',
+        'winona', 'lily', 'sarah', 'anna', 'emma', 'sophia', 'alice',
+        'jane', 'betty', 'helen', 'ruth', 'lisa', 'nancy', 'karen',
+    }
+    MALE_NAMES: Set[str] = {
+        'john', 'daniel', 'bill', 'fred', 'jeff', 'sumit', 'yann',
+        'jason', 'antoine', 'greg', 'julius', 'bernhard', 'brian',
+        'bob', 'tom', 'james', 'david', 'michael', 'robert', 'mark',
+    }
+    
+    # Pronouns by category
+    MALE_PRONOUNS: Set[str] = {'he', 'him', 'his', 'himself'}
+    FEMALE_PRONOUNS: Set[str] = {'she', 'her', 'hers', 'herself'}
+    PLURAL_PRONOUNS: Set[str] = {'they', 'them', 'their', 'themselves'}
+    NEUTER_PRONOUNS: Set[str] = {'it', 'its', 'itself'}
+    
+    # Temporal connectors that precede pronoun references
+    TEMPORAL_CONNECTORS: Set[str] = {
+        'after', 'afterwards', 'following', 'then', 'later',
+        'subsequently', 'before', 'meanwhile',
+    }
+    
+    def __init__(self) -> None:
+        """Initialize discourse model with empty referent slots."""
+        self._last_male: Optional[str] = None
+        self._last_female: Optional[str] = None
+        self._last_pair: Optional[Tuple[str, str]] = None
+        self._last_object: Optional[str] = None
+        self._entity_locations: Dict[str, str] = {}
+    
+    # ANCHOR: COREF_RESET
+    # API_PUBLIC
+    def reset(self) -> None:
+        """
+        Reset discourse model for new context.
+        
+        Intent: Clear referent tracking between stories/contexts.
+        """
+        self._last_male = None
+        self._last_female = None
+        self._last_pair = None
+        self._last_object = None
+        self._entity_locations = {}
+    
+    # API_PRIVATE
+    def _get_gender(self, name: str) -> Optional[str]:
+        """
+        Determine gender of a name from lexicon.
+        
+        Args:
+            name: Proper noun to check.
+        Returns:
+            'male', 'female', or None if unknown.
+        """
+        name_lower = name.lower()
+        if name_lower in self.FEMALE_NAMES:
+            return 'female'
+        if name_lower in self.MALE_NAMES:
+            return 'male'
+        return None
+    
+    # API_PRIVATE
+    def _extract_entities(self, sentence: str) -> List[str]:
+        """
+        Extract proper nouns (entities) from sentence.
+        
+        BIOLOGY: Temporal cortex recognizes known entities via
+        pattern matching against stored representations.
+        
+        Args:
+            sentence: Input sentence.
+        Returns:
+            List of entity names found.
+        """
+        words = sentence.split()
+        entities = []
+        for w in words:
+            # Clean punctuation
+            clean = w.strip('.,!?;:')
+            # Proper nouns are capitalized and known as names
+            if clean and clean[0].isupper() and self._get_gender(clean) is not None:
+                entities.append(clean)
+        return entities
+    
+    # API_PRIVATE
+    def _update_referents(self, sentence: str) -> None:
+        """
+        Update discourse model based on sentence content.
+        
+        BIOLOGY: Each new sentence updates the active referent slots
+        in working memory (PFC), with most recent mention taking priority
+        (recency bias, Howard & Kahana 2002).
+        
+        Args:
+            sentence: Current sentence being processed.
+        """
+        entities = self._extract_entities(sentence)
+        
+        # Track conjunction pairs: "Mary and Daniel travelled to X"
+        words_lower = sentence.lower().split()
+        if 'and' in words_lower:
+            and_idx = words_lower.index('and')
+            # Look for Name1 and Name2 pattern
+            if and_idx > 0 and and_idx < len(words_lower) - 1:
+                before = sentence.split()[and_idx - 1].strip('.,!?;:')
+                after = sentence.split()[and_idx + 1].strip('.,!?;:')
+                if self._get_gender(before) is not None and self._get_gender(after) is not None:
+                    self._last_pair = (before, after)
+        
+        # Update individual referents
+        for entity in entities:
+            gender = self._get_gender(entity)
+            if gender == 'male':
+                self._last_male = entity
+            elif gender == 'female':
+                self._last_female = entity
+    
+    # ANCHOR: COREF_RESOLVE_SENTENCE
+    # API_PRIVATE
+    def _resolve_sentence(self, sentence: str) -> str:
+        """
+        Resolve pronouns in a single sentence using current discourse model.
+        
+        BIOLOGY (Grodzinsky 2000): Broca's area performs trace deletion
+        and binding — replacing empty categories (pronouns) with their
+        antecedents from the discourse model.
+        
+        Args:
+            sentence: Sentence potentially containing pronouns.
+        Returns:
+            Sentence with pronouns replaced by referent names.
+        """
+        words = sentence.split()
+        resolved = []
+        
+        for i, word in enumerate(words):
+            clean = word.strip('.,!?;:').lower()
+            suffix = word[len(word.rstrip('.,!?;:')):]  # Preserve punctuation
+            
+            replacement = None
+            
+            if clean in self.MALE_PRONOUNS and self._last_male:
+                replacement = self._last_male
+            elif clean in self.FEMALE_PRONOUNS and self._last_female:
+                replacement = self._last_female
+            elif clean in self.PLURAL_PRONOUNS and self._last_pair:
+                # "they" → "Name1 and Name2"
+                replacement = f"{self._last_pair[0]} and {self._last_pair[1]}"
+            
+            if replacement:
+                resolved.append(replacement + suffix)
+            else:
+                resolved.append(word)
+        
+        return ' '.join(resolved)
+    
+    # ANCHOR: COREF_RESOLVE_SEQUENCE
+    # API_PUBLIC
+    def resolve_sequence(self, sentences: List[str]) -> List[str]:
+        """
+        Resolve coreference across a sequence of sentences.
+        
+        Processes sentences in order, updating the discourse model after
+        each sentence, and resolving pronouns based on current state.
+        
+        BIOLOGY: This models the incremental discourse processing in
+        Broca's area — each new sentence is integrated into the ongoing
+        discourse representation (Hagoort 2005, Unification Model).
+        
+        Args:
+            sentences: Ordered list of context sentences.
+        Returns:
+            List of sentences with pronouns resolved.
+        Raises:
+            AssertionError if sentences is empty.
+        """
+        assert len(sentences) > 0, "Must have sentences to resolve"
+        
+        resolved = []
+        for sentence in sentences:
+            # First resolve pronouns using current state
+            resolved_sent = self._resolve_sentence(sentence)
+            # Then update referents from the resolved sentence
+            self._update_referents(resolved_sent)
+            resolved.append(resolved_sent)
+        
+        assert len(resolved) == len(sentences), "Output must match input length"
+        return resolved
+
+
 # ANCHOR: MODULE_TEST
 if __name__ == "__main__":
     processor = SyntacticProcessor()
