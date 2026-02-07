@@ -175,13 +175,16 @@ class CA3:
         }
         
         # Find best episode using FULL scoring logic (connection strength, 2-hop, context, etc.)
-        best_idx = self._score_episodes(
+        best_idx, scored_candidates = self._score_episodes(
             completed, episodes, query_words, query_connector, word_to_neuron, verb_forms, question
         )
         
         # Postconditions
         assert best_idx == -1 or 0 <= best_idx < len(episodes), \
             f"best_idx {best_idx} out of range for {len(episodes)} episodes"
+        
+        # Store scored candidates for population coding (CA1 readout)
+        self._last_scored_candidates = scored_candidates
         
         return completed, best_idx
     
@@ -218,14 +221,15 @@ class CA3:
             verb_forms: VERB_FORMS dict for morphological expansion
             
         Returns:
-            Index of best episode, or -1 if none found
+            Tuple of (best_idx, scored_candidates) where scored_candidates is
+            a list of (original_idx, score) for population coding.
         """
         import math
         from episode import EpisodeState
         from pfc import classify_question, get_preferred_sources, QuestionType
         
         if not episodes:
-            return -1
+            return -1, []
         
         # BROCA'S AREA: Extract syntactic subject from question
         # BIOLOGY (Friederici 2011): BA44 builds syntactic structure
@@ -237,18 +241,36 @@ class CA3:
             parsed = broca.parse(question)
             question_subject = parsed.subject
         
-        # SOURCE MEMORY (Johnson et al., 1993): Filter by preferred source TYPES
-        # BIOLOGY: PFC classifies question type and routes to appropriate source types
+        # SOURCE MEMORY (Johnson et al., 1993): Preferred source filter + selective inclusion
+        # BIOLOGY: The brain preferentially retrieves from trusted sources
+        # (teacher, parent). Less-trusted sources (TV, hearsay) are recalled
+        # only when the memory trace is STRONGLY associated with the query
+        # — all key content words activate the same engram.
+        # Implementation: preferred sources are always included.
+        # Non-preferred sources are included ONLY if they contain ALL content
+        # query words (highly specific match). This prevents noise from
+        # thousands of loosely-related MEDIA episodes while allowing
+        # MEDIA-specific knowledge through when relevant.
         question_type = classify_question(query_words) if query_words else QuestionType.UNKNOWN
         preferred_source_types = get_preferred_sources(question_type)
         
-        # If preferred source types specified, filter episodes (with fallback)
+        INTERROGATIVE = {'what', 'who', 'where', 'when', 'why', 'how', 'which'}
+        quick_content_query = (query_words - INTERROGATIVE) if query_words else set()
+        
         if preferred_source_types:
+            # Start with preferred sources
             filtered_episodes = [
                 (i, ep) for i, ep in enumerate(episodes) 
                 if ep.source.upper() in preferred_source_types
             ]
-            # Fallback: if no episodes from preferred sources, use all
+            # Selective inclusion: non-preferred episodes containing ALL content
+            # query words — these are specifically relevant, not coincidental
+            if quick_content_query:
+                for i, ep in enumerate(episodes):
+                    if ep.source.upper() not in preferred_source_types:
+                        if quick_content_query.issubset(ep.input_neurons):
+                            filtered_episodes.append((i, ep))
+            # Fallback: if nothing from preferred sources, use all
             if not filtered_episodes:
                 filtered_episodes = [(i, ep) for i, ep in enumerate(episodes)]
         else:
@@ -280,6 +302,10 @@ class CA3:
         
         best_idx = -1
         best_score = 0.0
+        # BIOLOGY (Population Coding, Georgopoulos 1986):
+        # Collect ALL scored candidates — CA3 has multiple competing attractors,
+        # not just one winner. Top-K will be used by CA1 for readout blending.
+        scored_candidates: List[Tuple[int, float]] = []
         
         for original_idx, episode in filtered_episodes:
             engram = episode.input_neurons
@@ -368,11 +394,18 @@ class CA3:
                             
                             # TOP-DOWN MODULATION (connector matching)
                             if query_connector:
-                                if conn.has_connector(query_connector):
-                                    if other_id not in expanded_query:
-                                        base_strength *= 5.0  # Enhancement
+                                if isinstance(query_connector, (set, frozenset)):
+                                    # Soft facilitation: enhance only, no suppression
+                                    if any(conn.has_connector(tc) for tc in query_connector):
+                                        if other_id not in expanded_query:
+                                            base_strength *= 2.0  # Mild boost
                                 else:
-                                    base_strength *= 0.2  # Suppression
+                                    # Biased Competition: enhance + suppress
+                                    if conn.has_connector(query_connector):
+                                        if other_id not in expanded_query:
+                                            base_strength *= 5.0  # Enhancement
+                                    else:
+                                        base_strength *= 0.2  # Suppression
                         
                         # 2-hop: query -> intermediate -> other
                         for intermediate_id in engram:
@@ -407,16 +440,26 @@ class CA3:
                             rev_strength += conn_rev.forward_usage * 0.1
                             
                             if query_connector:
-                                if conn_rev.has_connector(query_connector):
-                                    rev_strength *= 5.0
+                                if isinstance(query_connector, (set, frozenset)):
+                                    if any(conn_rev.has_connector(tc) for tc in query_connector):
+                                        rev_strength *= 2.0  # Mild boost
                                 else:
-                                    rev_strength *= 0.2
+                                    if conn_rev.has_connector(query_connector):
+                                        rev_strength *= 5.0
+                                    else:
+                                        rev_strength *= 0.2
                             
                             connection_strength += rev_strength * context_multiplier
                             if is_context_word and rev_strength >= 1.0:
                                 context_words_connected.add(q_id)
             
             # Filter: unconnected context words = irrelevant episode
+            # BIOLOGY (Desimone & Duncan 1995): Lateral inhibition SILENCES
+            # weakly-matching attractors. If a key content word from the query
+            # has NO connection to any word in the episode, the episode is
+            # coincidental — not a true memory match.
+            # Non-preferred sources with ALL content words (selective inclusion)
+            # bypass this naturally: they have full query overlap, no unconnected.
             SKIP_FOR_UNCONNECTED = {
                 'what', 'who', 'where', 'when', 'why', 'how', 'which',
                 'many', 'much', 'some', 'any', 'few', 'several',
@@ -456,6 +499,12 @@ class CA3:
             # This prevents low-trust MEDIA from overriding high-trust LEARNING
             trust_multiplier = getattr(episode, 'trust', 1.0)
             
+            # SOURCE PREFERENCE BONUS: preferred sources get additive bonus
+            # BIOLOGY: Familiar/trusted traces have stronger engrams (LTP),
+            # making them easier to retrieve — analogous to +1 query overlap.
+            source_bonus = 1 if (preferred_source_types and 
+                                 episode.source.upper() in preferred_source_types) else 0
+            
             # SEMANTIC ROLE BONUS (Goal-conditioned Retrieval)
             # BIOLOGY (Desimone & Duncan 1995, Miller & Cohen 2001):
             # PFC provides top-down bias by specifying EXPECTED semantic roles.
@@ -469,16 +518,82 @@ class CA3:
                         role_bonus += w1 // 2  # Significant bonus for role match
                         break  # One match is enough
             
-            # Final score with trust weighting
+            # TEMPORAL CONCEPT INFERENCE (Hippocampal Time Cells)
+            # BIOLOGY (Eichenbaum 2014): When PFC sends "temporal" goal
+            # (from 'when' questions), hippocampus checks if episode
+            # contains temporal concepts. This is on-the-fly inference —
+            # the brain doesn't need pre-labeled roles, it recognizes
+            # temporal content via activated temporal concept representations.
+            # Anterior temporal lobe distinguishes temporal from spatial context.
+            if question and role_bonus == 0:
+                from pfc import get_expected_roles
+                expected_roles = get_expected_roles(question)
+                if 'time' in expected_roles:
+                    # ANCHOR: TEMPORAL_CONCEPTS - temporal nouns primed by PFC
+                    # BIOLOGY (Eichenbaum 2014): PFC temporal goal primes
+                    # temporal concept representations in anterior temporal lobe.
+                    # Hippocampus checks if episode contains NEW temporal info
+                    # (not already in the query — lateral inhibition).
+                    # Coverage: times of day, seasons, days, months, time units,
+                    # meal/activity times, holidays, frequency, historical eras,
+                    # life stages. Analogous to the brain's innate temporal
+                    # lexicon — children acquire temporal concepts early
+                    # (Nelson 1996, Friedman 1990).
+                    TEMPORAL_CONCEPTS = {
+                        # Times of day
+                        'morning', 'night', 'evening', 'afternoon', 'noon',
+                        'dawn', 'dusk', 'midnight', 'daybreak', 'nighttime',
+                        'daytime', 'sunrise', 'sunset', 'twilight', 'nightfall',
+                        # General temporal
+                        'day', 'today', 'tomorrow', 'yesterday', 'tonight',
+                        # Seasons
+                        'spring', 'summer', 'autumn', 'winter', 'fall',
+                        # Days of week
+                        'monday', 'tuesday', 'wednesday', 'thursday',
+                        'friday', 'saturday', 'sunday', 'weekday', 'weekend',
+                        # Months
+                        'january', 'february', 'march', 'april', 'may',
+                        'june', 'july', 'august', 'september', 'october',
+                        'november', 'december',
+                        # Time units
+                        'hour', 'minute', 'second', 'week', 'month', 'year',
+                        'decade', 'century', 'millennium',
+                        # Meal / activity times
+                        'breakfast', 'lunch', 'dinner', 'supper', 'brunch',
+                        'bedtime', 'naptime', 'lunchtime', 'dinnertime', 'mealtime',
+                        # Holidays / events
+                        'holiday', 'birthday', 'christmas', 'easter',
+                        'halloween', 'thanksgiving', 'valentine', 'anniversary',
+                        # Calendar / periods
+                        'season', 'semester', 'quarter', 'term',
+                        # Historical eras
+                        'era', 'epoch', 'age', 'period',
+                        'ancient', 'medieval', 'modern',
+                        # Frequency adverbs (temporal)
+                        'daily', 'weekly', 'monthly', 'yearly',
+                        'annually', 'nightly',
+                        # Life stages
+                        'childhood', 'adulthood', 'infancy', 'youth',
+                    }
+                    ep_words = set(episode.input_words) if hasattr(episode, 'input_words') else episode.input_neurons
+                    # Exclude query words: temporal bonus is for NEW info only
+                    non_query_temporal = (ep_words & TEMPORAL_CONCEPTS) - expanded_query
+                    if non_query_temporal:
+                        role_bonus += w1 // 2
+            
+            # Final score with trust weighting and source preference
             # BROCA'S AREA: subject_bonus adds weight for episodes with question subject
-            base_score = (query_overlap + subject_bonus) * w1 + avg_strength * w2 + overlap * w3 + consolidation_bonus + recency_bonus + role_bonus
+            base_score = (query_overlap + subject_bonus + source_bonus) * w1 + avg_strength * w2 + overlap * w3 + consolidation_bonus + recency_bonus + role_bonus
             score = base_score * trust_multiplier
             
             if score >= best_score:
                 best_score = score
                 best_idx = original_idx
+            
+            if score > 0:
+                scored_candidates.append((original_idx, score))
         
-        return best_idx
+        return best_idx, scored_candidates
     
     # API_PRIVATE
     def _spread_recurrent(
@@ -542,8 +657,13 @@ class CA3:
                 
                 # TOP-DOWN MODULATION: boost connections matching query_connector
                 # BIOLOGY (Zanto et al. 2011): PFC enhances relevant connections
-                if query_connector and conn.has_connector(query_connector):
-                    strength *= self.CONNECTOR_BOOST
+                # For frozenset (soft facilitation): check any matching connector
+                if query_connector:
+                    if isinstance(query_connector, (set, frozenset)):
+                        if any(conn.has_connector(tc) for tc in query_connector):
+                            strength *= self.CONNECTOR_BOOST
+                    elif conn.has_connector(query_connector):
+                        strength *= self.CONNECTOR_BOOST
                 
                 # Transmit activation
                 incoming = a * strength
