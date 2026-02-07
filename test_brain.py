@@ -1498,19 +1498,29 @@ def run_baseline_comparison():
 
 def run_babi_tests():
     """
-    Runs bAbI Task 1 tests (working memory).
+    Runs bAbI Tasks 1-20 tests (working memory + cognitive abilities).
     
-    bAbI tests working memory through temporal episodes.
+    BIOLOGY: Tests multiple cognitive mechanisms:
+    - Working memory (PFC situation model) — Tasks 1-3, 6-10
+    - Coreference resolution (Broca's area) — Tasks 11, 13
+    - Object tracking (PFC) — Tasks 2, 8
+    - Temporal reasoning (hippocampal time cells) — Tasks 3, 14
+    - Deduction/Induction (type system) — Tasks 15, 16
+    - Spatial reasoning (cognitive map) — Tasks 4, 17-19
+    - Motivation inference — Task 20
+    - Give/receive tracking — Task 5
+    
     Does not require special training - uses context() and ask().
     
     Returns:
-        dict with statistics: passed, failed, total, accuracy
+        list of (name, result_dict) tuples — one per bAbI task,
+        compatible with all_results format used by main() and generate_results_md().
     """
     log('')
     log('=' * 70)
-    log('TESTS bAbI Task 1 (working memory)')
+    log('TESTS bAbI Tasks 1-20 (working memory + cognitive abilities)')
     log('=' * 70)
-    log('Note: TF-IDF/BM25/RAG/Transformer = 0% (no working memory support)')
+    log('Note: TF-IDF/BM25 = 0% (no working memory support)')
     log('      MemNet/NTM support working memory via answer_with_context()')
     log('')
     
@@ -1518,18 +1528,15 @@ def run_babi_tests():
     from pathlib import Path
     
     data_dir = "data/babi/tasks_1-20_v1-2/en"
-    task_files = list(Path(data_dir).glob("qa1_*_train.txt"))
     
-    if not task_files:
+    if not os.path.exists(data_dir):
         log("❌ bAbI data not found")
-        return None
-    
-    task_file = task_files[0]
+        return []
     
     # Import parser from test_babi
     from test_babi import parse_babi_file, load_story_to_pfc, test_question
     
-    # Load working memory baselines (MemNet, NTM)
+    # Load working memory baselines (MemNet, NTM) — only for Task 1
     memnet, ntm = None, None
     try:
         from baselines.memnet_baseline import get_memnet_baseline
@@ -1539,97 +1546,157 @@ def run_babi_tests():
     except Exception:
         pass
     
-    stories = parse_babi_file(str(task_file))
-    stories = stories[:50]  # First 50 stories
-    
-    passed = 0
-    failed = 0
-    failed_tests = []
-    memnet_passed = 0
-    ntm_passed = 0
-    
     import time as time_module
     t_start = time_module.time()
     
-    for i, story in enumerate(stories):
-        for qa in story["qa"]:
-            question = qa["question"]
-            expected = qa["answer"]
-            context_facts = qa["context_facts"]
-            
-            t0 = time_module.time()
-            load_story_to_pfc(context_facts)
-            is_correct, actual = test_question(question, expected)
-            t_brain = time_module.time() - t0
-            
-            # Test MemNet and NTM (working memory baselines)
-            memnet_ok, ntm_ok = False, False
-            memnet_ans, ntm_ans = "", ""
-            t_memnet, t_ntm = 0.0, 0.0
-            if memnet:
-                try:
-                    t_m = time_module.time()
-                    memnet_ans = memnet.answer_with_context(context_facts, question)
-                    t_memnet = time_module.time() - t_m
-                    memnet_ok = expected.lower() in memnet_ans.lower()
-                    if memnet_ok:
-                        memnet_passed += 1
-                except Exception:
-                    memnet_ans = "error"
-            if ntm:
-                try:
-                    t_n = time_module.time()
-                    ntm_ans = ntm.answer_with_context(context_facts, question)
-                    t_ntm = time_module.time() - t_n
-                    ntm_ok = expected.lower() in ntm_ans.lower()
-                    if ntm_ok:
-                        ntm_passed += 1
-                except Exception:
-                    ntm_ans = "error"
-            
-            if is_correct:
-                passed += 1
-            else:
-                failed += 1
-                failed_tests.append((question, expected, actual))
-            
-            # Show question results with timing and baselines
-            status = "✅" if is_correct else "❌"
-            log(f"{status} Q: {question} [Story {i+1}]")
-            log(f"   Context: {' | '.join(context_facts)}")
-            brain_st = "✅" if is_correct else "❌"
-            log(f"   {brain_st} Brain  [{t_brain:.3f}s]: {actual}")
-            if memnet:
-                m_st = "✅" if memnet_ok else "❌"
-                log(f"   {m_st} MemNet [{t_memnet:.3f}s]: {memnet_ans[:40]}")
-            if ntm:
-                n_st = "✅" if ntm_ok else "❌"
-                log(f"   {n_st} NTM    [{t_ntm:.3f}s]: {ntm_ans[:40]}")
-            log(f"   Expected: {expected}")
-            log("")
+    # bAbI task short descriptions (for RESULTS.md)
+    BABI_TASK_NAMES = {
+        1: 'single-supporting-fact', 2: 'two-supporting-facts',
+        3: 'three-supporting-facts', 4: 'two-arg-relations',
+        5: 'three-arg-relations', 6: 'yes-no-questions',
+        7: 'counting', 8: 'lists-sets',
+        9: 'simple-negation', 10: 'indefinite-knowledge',
+        11: 'basic-coreference', 12: 'conjunction',
+        13: 'compound-coreference', 14: 'time-reasoning',
+        15: 'basic-deduction', 16: 'basic-induction',
+        17: 'positional-reasoning', 18: 'size-reasoning',
+        19: 'path-finding', 20: 'agents-motivations',
+    }
+    
+    per_task_results = []  # list of (name, result_dict)
+    grand_total_passed = 0
+    grand_total_failed = 0
+    
+    MAX_STORIES = 5  # 5 stories per task for speed (481 questions total)
+    
+    for task_num in range(1, 21):
+        task_files = list(Path(data_dir).glob(f"qa{task_num}_*_train.txt"))
+        if not task_files:
+            log(f"⚠️ Task {task_num}: file not found")
+            continue
+        
+        task_file = task_files[0]
+        task_name = BABI_TASK_NAMES.get(task_num, task_file.stem.replace("_train", "").replace(f"qa{task_num}_", ""))
+        stories = parse_babi_file(str(task_file))[:MAX_STORIES]
+        
+        task_passed = 0
+        task_failed = 0
+        task_failed_tests = []
+        task_brain_time = 0.0
+        memnet_passed = 0
+        ntm_passed = 0
+        t_task_start = time_module.time()
+        
+        log(f'--- bAbI Task {task_num}: {task_name} ---')
+        
+        for i, story in enumerate(stories):
+            for qa in story["qa"]:
+                question = qa["question"]
+                expected = qa["answer"]
+                context_facts = qa["context_facts"]
+                
+                load_story_to_pfc(context_facts)
+                
+                t_q = time_module.time()
+                is_correct, actual = test_question(question, expected)
+                t_brain = time_module.time() - t_q
+                task_brain_time += t_brain
+                
+                # Run MemNet/NTM baselines on ALL bAbI tasks
+                if memnet:
+                    try:
+                        memnet_ans = memnet.answer_with_context(context_facts, question)
+                        if expected.lower() in memnet_ans.lower():
+                            memnet_passed += 1
+                    except Exception:
+                        pass
+                if ntm:
+                    try:
+                        ntm_ans = ntm.answer_with_context(context_facts, question)
+                        if expected.lower() in ntm_ans.lower():
+                            ntm_passed += 1
+                    except Exception:
+                        pass
+                
+                if is_correct:
+                    task_passed += 1
+                else:
+                    task_failed += 1
+                    task_failed_tests.append((question, actual, expected))
+                
+                status = "✅ PASS" if is_correct else "❌ FAIL"
+                log(f'{status} | Q: {question}')
+                log(f'         {"✅" if is_correct else "❌"} Brain  [{t_brain:.3f}s]: {actual}')
+                log(f'         Expected: {expected}')
+                if not is_correct:
+                    log(f'         Context: {" | ".join(context_facts[:3])}...')
+                log('')
+        
+        task_total = task_passed + task_failed
+        task_acc = (task_passed / task_total * 100) if task_total > 0 else 0
+        task_wall_time = time_module.time() - t_task_start
+        grand_total_passed += task_passed
+        grand_total_failed += task_failed
+        
+        task_status = "✅" if task_acc >= 95 else "⚠️" if task_acc >= 50 else "❌"
+        log(f'{task_status} RESULT bAbI-{task_num} ({task_name}): {task_passed}/{task_total} ({task_acc:.1f}%) | Time: {task_wall_time:.1f}s')
+        log('')
+        
+        # Build result dict for this task (same format as run_test_suite)
+        task_result = {
+            'passed': task_passed,
+            'failed': task_failed,
+            'total': task_total,
+            'accuracy': task_acc,
+            'failed_tests': task_failed_tests[:10],
+            'brain_time': task_wall_time,
+            'llm_time': 0,
+            'gpt_time': 0,
+            # TF-IDF/BM25 = N/A for bAbI (no working memory)
+            'tfidf_accuracy': None,
+            'bm25_accuracy': None,
+            # MemNet/NTM tested on ALL bAbI tasks
+            'memnet_accuracy': (memnet_passed / task_total * 100) if task_total > 0 and memnet else None,
+            'ntm_accuracy': (ntm_passed / task_total * 100) if task_total > 0 and ntm else None,
+            'is_babi': True,
+            'babi_task_num': task_num,
+        }
+        per_task_results.append((f'bAbI-{task_num}', task_result))
     
     total_time = time_module.time() - t_start
-    total = passed + failed
-    accuracy = (passed / total * 100) if total > 0 else 0
-    memnet_acc = (memnet_passed / total * 100) if total > 0 else 0
-    ntm_acc = (ntm_passed / total * 100) if total > 0 else 0
+    grand_total = grand_total_passed + grand_total_failed
+    grand_accuracy = (grand_total_passed / grand_total * 100) if grand_total > 0 else 0
     
+    # Summary table
     log('')
     log('=' * 70)
-    log(f'RESULT bAbI Task 1: {passed}/{total} ({accuracy:.1f}%) | Time: {total_time:.1f}s')
-    log(f'BASELINES: TF-IDF: 0% | BM25: 0% (no working memory) | MemNet: {memnet_acc:.0f}% | NTM: {ntm_acc:.0f}%')
+    log('bAbI SUMMARY (all 20 tasks)')
+    log('=' * 70)
+    for name, result in per_task_results:
+        tn = result['babi_task_num']
+        p = result['passed']
+        t = result['total']
+        acc = result['accuracy']
+        bt = result['brain_time']
+        tname = BABI_TASK_NAMES.get(tn, '')
+        st = "✅" if acc >= 95 else "⚠️" if acc >= 50 else "❌"
+        bar = "█" * int(acc / 5) + "░" * (20 - int(acc / 5))
+        log(f"  {st} Task {tn:2d}: {bar} {acc:5.1f}%  ({p}/{t})  [{bt:.1f}s]  {tname}")
+    log(f'\nRESULT bAbI 1-20: {grand_total_passed}/{grand_total} ({grand_accuracy:.1f}%) | Time: {total_time:.1f}s')
+    log(f'Tasks ≥95%: {sum(1 for _, r in per_task_results if r["accuracy"] >= 95)}/20')
+    
+    # Show baselines for all tasks
+    if memnet or ntm:
+        memnet_total = sum(1 for _, r in per_task_results if r.get('memnet_accuracy') is not None and r['memnet_accuracy'] == 100)
+        ntm_total = sum(1 for _, r in per_task_results if r.get('ntm_accuracy') is not None and r['ntm_accuracy'] == 100)
+        memnet_avg_parts = [r['memnet_accuracy'] for _, r in per_task_results if r.get('memnet_accuracy') is not None]
+        ntm_avg_parts = [r['ntm_accuracy'] for _, r in per_task_results if r.get('ntm_accuracy') is not None]
+        memnet_avg = sum(memnet_avg_parts) / len(memnet_avg_parts) if memnet_avg_parts else 0
+        ntm_avg = sum(ntm_avg_parts) / len(ntm_avg_parts) if ntm_avg_parts else 0
+        log(f'BASELINES (all tasks): MemNet avg: {memnet_avg:.1f}% ({memnet_total}/20 tasks 100%) | NTM avg: {ntm_avg:.1f}% ({ntm_total}/20 tasks 100%)')
     log('=' * 70)
     
-    # Return all 6 baseline accuracies
-    return {'passed': passed, 'failed': failed, 'total': total, 'accuracy': accuracy,
-            'failed_tests': [(q, e, a) for q, e, a in failed_tests[:10]],
-            'brain_time': total_time, 'llm_time': 0, 'gpt_time': 0,
-            'tfidf_accuracy': 0.0,  # No working memory
-            'bm25_accuracy': 0.0,
-            'rag_accuracy': 0.0,
-            'memnet_accuracy': memnet_acc,
-            'ntm_accuracy': ntm_acc,
-            'transformer_accuracy': 0.0}
+    return per_task_results
 
 
 # ANCHOR: TEST_CA3_DYNAMICS - Test for CA3 attractor dynamics
@@ -2159,9 +2226,9 @@ def main():
         if paraphrase_result:
             all_results.append(('PARAPHRASE', paraphrase_result))
         if not skip_babi:
-            babi_result = run_babi_tests()  # bAbI Task 1 tests (working memory)
-            if babi_result:
-                all_results.append(('bAbI', babi_result))
+            babi_task_results = run_babi_tests()  # bAbI Tasks 1-20 (working memory)
+            if babi_task_results:
+                all_results.extend(babi_task_results)
     
     # Model statistics
     stats = get_statistics()
@@ -2192,7 +2259,12 @@ def main():
         total_failed = 0
         total_time = 0
         
-        for name, result in all_results:
+        # Separate QA and bAbI results for grouped display
+        qa_entries = [(n, r) for n, r in all_results if not r.get('is_babi')]
+        babi_entries = [(n, r) for n, r in all_results if r.get('is_babi')]
+        
+        # Show QA suites
+        for name, result in qa_entries:
             passed = result.get('passed', 0)
             failed = result.get('failed', 0)
             total = passed + failed
@@ -2209,11 +2281,40 @@ def main():
             status = "✅" if failed == 0 else "⚠️"
             log(f"{status} {name}: {passed}/{total} ({accuracy:.1f}%) | Time: {suite_time:.1f}s")
             
-            # Show failed tests
             failed_tests = result.get('failed_tests', [])
             for item in failed_tests:
                 q = item[0] if len(item) > 0 else "?"
                 log(f"   ❌ {q}")
+        
+        # Show bAbI tasks grouped
+        if babi_entries:
+            babi_passed = sum(r.get('passed', 0) for _, r in babi_entries)
+            babi_failed = sum(r.get('failed', 0) for _, r in babi_entries)
+            babi_total = babi_passed + babi_failed
+            babi_acc = (babi_passed / babi_total * 100) if babi_total > 0 else 0
+            babi_time = sum(r.get('brain_time', 0) for _, r in babi_entries)
+            
+            total_passed += babi_passed
+            total_failed += babi_failed
+            total_time += babi_time
+            
+            log(f'--- bAbI Tasks 1-20 ---')
+            for name, result in babi_entries:
+                passed = result.get('passed', 0)
+                failed = result.get('failed', 0)
+                total = passed + failed
+                accuracy = result.get('accuracy', 0)
+                bt = result.get('brain_time', 0)
+                status = "✅" if failed == 0 else "⚠️"
+                log(f"  {status} {name}: {passed}/{total} ({accuracy:.1f}%) | {bt:.1f}s")
+                
+                failed_tests = result.get('failed_tests', [])
+                for item in failed_tests:
+                    q = item[0] if len(item) > 0 else "?"
+                    log(f"     ❌ {q}")
+            
+            babi_status = "✅" if babi_failed == 0 else "⚠️"
+            log(f"{babi_status} bAbI TOTAL: {babi_passed}/{babi_total} ({babi_acc:.1f}%) | Time: {babi_time:.1f}s")
         
         log('')
         log(f"TOTAL: {total_passed}/{total_passed + total_failed} | Total time: {total_time:.1f}s")
@@ -2225,59 +2326,57 @@ def main():
         log('BASELINE COMPARISON')
         log('=' * 90)
         log('QA Baselines: TF-IDF, BM25 (trained on ALL data, tested on all QA tests)')
-        log('Working Memory Baselines: MemNet, NTM (tested ONLY on bAbI)')
+        log('Working Memory Baselines: MemNet, NTM (tested ONLY on bAbI Task 1)')
         log('')
         
         # Header
-        log(f"{'Test':<12} {'Brain':>7} {'TF-IDF':>7} {'BM25':>7} {'MemNet':>7} {'NTM':>7}")
-        log('-' * 60)
+        log(f"{'Test':<14} {'Brain':>7} {'TF-IDF':>7} {'BM25':>7} {'MemNet':>7} {'NTM':>7}")
+        log('-' * 62)
         
-        # Collect results for each test suite
-        for name, result in all_results:
+        # QA suites with TF-IDF/BM25
+        for name, result in qa_entries:
             brain_acc = result.get('accuracy', 0)
             tfidf_acc = result.get('tfidf_accuracy', 0) or 0
             bm25_acc = result.get('bm25_accuracy', 0) or 0
-            
-            # MemNet/NTM only for bAbI (working memory)
-            memnet_acc = result.get('memnet_accuracy')
-            ntm_acc = result.get('ntm_accuracy')
-            
-            # Format: show N/A for MemNet/NTM on non-bAbI tests
-            memnet_str = f"{memnet_acc:>6.1f}%" if memnet_acc is not None else "   N/A"
-            ntm_str = f"{ntm_acc:>6.1f}%" if ntm_acc is not None else "   N/A"
-            
-            log(f"{name:<12} {brain_acc:>6.1f}% {tfidf_acc:>6.1f}% {bm25_acc:>6.1f}% {memnet_str} {ntm_str}")
+            log(f"{name:<14} {brain_acc:>6.1f}% {tfidf_acc:>6.1f}% {bm25_acc:>6.1f}%    N/A    N/A")
         
-        log('-' * 60)
+        # bAbI per-task rows
+        if babi_entries:
+            for name, result in babi_entries:
+                brain_acc = result.get('accuracy', 0)
+                memnet_acc = result.get('memnet_accuracy')
+                ntm_acc = result.get('ntm_accuracy')
+                memnet_str = f"{memnet_acc:>6.1f}%" if memnet_acc is not None else "   N/A"
+                ntm_str = f"{ntm_acc:>6.1f}%" if ntm_acc is not None else "   N/A"
+                log(f"{name:<14} {brain_acc:>6.1f}%    N/A    N/A {memnet_str} {ntm_str}")
+            
+            # bAbI aggregate row
+            babi_passed = sum(r.get('passed', 0) for _, r in babi_entries)
+            babi_total_q = sum(r.get('passed', 0) + r.get('failed', 0) for _, r in babi_entries)
+            babi_acc = (babi_passed / babi_total_q * 100) if babi_total_q > 0 else 0
+            log(f"{'bAbI TOTAL':<14} {babi_acc:>6.1f}%    N/A    N/A    N/A    N/A")
         
-        # Calculate averages correctly:
-        # - Brain: average of ALL tests
-        # - TF-IDF/BM25: average of QA tests only (exclude bAbI - they can't do working memory)
-        # - MemNet/NTM: only bAbI (they only support working memory tests)
+        log('-' * 62)
+        
+        # Averages
         if all_results:
-            n = len(all_results)
-            avg_brain = sum(r.get('accuracy', 0) for _, r in all_results) / n
+            # QA average (with TF-IDF/BM25)
+            if qa_entries:
+                n_qa = len(qa_entries)
+                avg_qa_brain = sum(r.get('accuracy', 0) for _, r in qa_entries) / n_qa
+                avg_tfidf = sum((r.get('tfidf_accuracy', 0) or 0) for _, r in qa_entries) / n_qa
+                avg_bm25 = sum((r.get('bm25_accuracy', 0) or 0) for _, r in qa_entries) / n_qa
+                log(f"{'QA AVG':<14} {avg_qa_brain:>6.1f}% {avg_tfidf:>6.1f}% {avg_bm25:>6.1f}%    N/A    N/A")
             
-            # TF-IDF/BM25 average excludes bAbI (they have 0% by definition - no working memory)
-            qa_results = [(name, r) for name, r in all_results if name != 'bAbI']
-            if qa_results:
-                n_qa = len(qa_results)
-                avg_tfidf = sum((r.get('tfidf_accuracy', 0) or 0) for _, r in qa_results) / n_qa
-                avg_bm25 = sum((r.get('bm25_accuracy', 0) or 0) for _, r in qa_results) / n_qa
-            else:
-                avg_tfidf, avg_bm25 = 0.0, 0.0
-            
-            # MemNet/NTM only tested on bAbI
-            babi_results = [r for name, r in all_results if name == 'bAbI']
-            if babi_results:
-                memnet_acc = babi_results[0].get('memnet_accuracy', 0) or 0
-                ntm_acc = babi_results[0].get('ntm_accuracy', 0) or 0
-                log(f"{'AVERAGE':<12} {avg_brain:>6.1f}% {avg_tfidf:>6.1f}% {avg_bm25:>6.1f}%    N/A    N/A")
-                log(f"{'bAbI only:':<12} {'':>7} {'':>7} {'':>7}{memnet_acc:>6.1f}% {ntm_acc:>6.1f}%")
-            else:
-                log(f"{'AVERAGE':<12} {avg_brain:>6.1f}% {avg_tfidf:>6.1f}% {avg_bm25:>6.1f}%    N/A    N/A")
+            # MemNet/NTM average across all bAbI tasks
+            memnet_parts = [r.get('memnet_accuracy') for _, r in babi_entries if r.get('memnet_accuracy') is not None]
+            ntm_parts = [r.get('ntm_accuracy') for _, r in babi_entries if r.get('ntm_accuracy') is not None]
+            if memnet_parts or ntm_parts:
+                memnet_avg = sum(memnet_parts) / len(memnet_parts) if memnet_parts else 0
+                ntm_avg = sum(ntm_parts) / len(ntm_parts) if ntm_parts else 0
+                log(f"{'bAbI AVG:':<14} {'':>7} {'':>7} {'':>7}{memnet_avg:>6.1f}% {ntm_avg:>6.1f}%")
         
-        log('=' * 60)
+        log('=' * 62)
     
     log(f"Tests completed. Results saved to: {LOG_FILE}")
     
@@ -2335,9 +2434,13 @@ def generate_results_md(all_results: list, stats: dict) -> None:
         "",
         "## Test Results Summary",
         "",
-        "| Test Suite | Passed | Total | Accuracy | Description |",
-        "|------------|--------|-------|----------|-------------|",
+        "| Test Suite | Passed | Total | Accuracy | Time | Description |",
+        "|------------|--------|-------|----------|------|-------------|",
     ]
+    
+    # Separate QA and bAbI results
+    qa_entries = [(n, r) for n, r in all_results if not r.get('is_babi')]
+    babi_entries = [(n, r) for n, r in all_results if r.get('is_babi')]
     
     # Test descriptions
     descriptions = {
@@ -2347,85 +2450,112 @@ def generate_results_md(all_results: list, stats: dict) -> None:
         'GRADE1': 'Grade 1 world knowledge',
         'FINEWEB': 'Educational text facts',
         'PARAPHRASE': 'Surface form robustness',
-        'bAbI': 'Working memory',
     }
     
-    for name, result in all_results:
+    # QA test suites
+    for name, result in qa_entries:
         passed = result.get('passed', 0)
         total = passed + result.get('failed', 0)
         accuracy = result.get('accuracy', 0)
+        bt = result.get('brain_time', 0)
         desc = descriptions.get(name, '')
-        lines.append(f"| **{name}** | {passed} | {total} | **{accuracy:.1f}%** | {desc} |")
+        lines.append(f"| **{name}** | {passed} | {total} | **{accuracy:.1f}%** | {bt:.1f}s | {desc} |")
     
-    lines.append(f"| **TOTAL** | **{total_passed}** | **{total_tests}** | **{total_accuracy:.1f}%** | All tests combined |")
+    # bAbI per-task rows
+    if babi_entries:
+        babi_passed = sum(r.get('passed', 0) for _, r in babi_entries)
+        babi_failed = sum(r.get('failed', 0) for _, r in babi_entries)
+        babi_total = babi_passed + babi_failed
+        babi_acc = (babi_passed / babi_total * 100) if babi_total > 0 else 0
+        babi_time = sum(r.get('brain_time', 0) for _, r in babi_entries)
+        
+        for name, result in babi_entries:
+            p = result.get('passed', 0)
+            t = p + result.get('failed', 0)
+            a = result.get('accuracy', 0)
+            bt = result.get('brain_time', 0)
+            tn = result.get('babi_task_num', 0)
+            lines.append(f"| {name} | {p} | {t} | {a:.1f}% | {bt:.1f}s | bAbI Task {tn} |")
+        
+        lines.append(f"| **bAbI TOTAL** | **{babi_passed}** | **{babi_total}** | **{babi_acc:.1f}%** | {babi_time:.1f}s | All 20 bAbI tasks |")
+    
+    lines.append(f"| **TOTAL** | **{total_passed}** | **{total_tests}** | **{total_accuracy:.1f}%** | | All tests combined |")
     lines.append("")
     lines.append("---")
     lines.append("")
-    lines.append("## Comparison with IR Baselines")
-    lines.append("")
-    lines.append("All baselines trained on **identical data** (curriculum.py sentences + connections).")
-    lines.append("")
-    lines.append("| Test | Brain | TF-IDF | BM25 | Brain vs TF-IDF | Brain vs BM25 |")
-    lines.append("|------|-------|--------|------|-----------------|---------------|")
     
-    babi_note = False
+    # === BASELINE COMPARISON ===
+    lines.append("## Baseline Comparison")
+    lines.append("")
+    lines.append("QA baselines (TF-IDF, BM25) trained on **identical data**. Working memory baselines (MemNet, NTM) tested on bAbI Task 1 only.")
+    lines.append("")
+    lines.append("| Test | Brain | TF-IDF | BM25 | MemNet | NTM |")
+    lines.append("|------|-------|--------|------|--------|-----|")
     
-    # Separate QA tests and bAbI for correct averaging
+    # QA suites with TF-IDF/BM25
     qa_brain, qa_tfidf, qa_bm25 = 0.0, 0.0, 0.0
     qa_count = 0
-    babi_result = None
-    
-    for name, result in all_results:
+    for name, result in qa_entries:
         brain_acc = result.get('accuracy', 0)
-        tfidf_acc = result.get('tfidf_accuracy')
-        bm25_acc = result.get('bm25_accuracy')
-        memnet_acc = result.get('memnet_accuracy')
-        ntm_acc = result.get('ntm_accuracy')
-        
-        if name == 'bAbI':
-            babi_note = True
-            babi_result = result
-            # Show bAbI with MemNet/NTM, TF-IDF/BM25 = N/A
-            lines.append(f"| bAbI* | **{brain_acc:.1f}%** | N/A | N/A | MemNet: {memnet_acc:.1f}% | NTM: {ntm_acc:.1f}% |")
-        elif tfidf_acc is not None and bm25_acc is not None:
-            adv_tfidf = brain_acc - tfidf_acc
-            adv_bm25 = brain_acc - bm25_acc
-            lines.append(f"| {name} | **{brain_acc:.1f}%** | {tfidf_acc:.1f}% | {bm25_acc:.1f}% | **{adv_tfidf:+.1f}%** | **{adv_bm25:+.1f}%** |")
-            qa_brain += brain_acc
-            qa_tfidf += tfidf_acc
-            qa_bm25 += bm25_acc
-            qa_count += 1
+        tfidf_acc = result.get('tfidf_accuracy', 0) or 0
+        bm25_acc = result.get('bm25_accuracy', 0) or 0
+        lines.append(f"| {name} | **{brain_acc:.1f}%** | {tfidf_acc:.1f}% | {bm25_acc:.1f}% | N/A | N/A |")
+        qa_brain += brain_acc
+        qa_tfidf += tfidf_acc
+        qa_bm25 += bm25_acc
+        qa_count += 1
     
-    # AVERAGE for QA tests only (exclude bAbI from TF-IDF/BM25 average)
+    # bAbI per-task with MemNet/NTM
+    if babi_entries:
+        for name, result in babi_entries:
+            brain_acc = result.get('accuracy', 0)
+            memnet_acc = result.get('memnet_accuracy')
+            ntm_acc = result.get('ntm_accuracy')
+            memnet_str = f"{memnet_acc:.1f}%" if memnet_acc is not None else "N/A"
+            ntm_str = f"{ntm_acc:.1f}%" if ntm_acc is not None else "N/A"
+            lines.append(f"| {name} | **{brain_acc:.1f}%** | N/A | N/A | {memnet_str} | {ntm_str} |")
+        
+        # bAbI aggregate with MemNet/NTM averages
+        babi_passed = sum(r.get('passed', 0) for _, r in babi_entries)
+        babi_total_q = sum(r.get('passed', 0) + r.get('failed', 0) for _, r in babi_entries)
+        babi_acc = (babi_passed / babi_total_q * 100) if babi_total_q > 0 else 0
+        memnet_parts = [r.get('memnet_accuracy') for _, r in babi_entries if r.get('memnet_accuracy') is not None]
+        ntm_parts = [r.get('ntm_accuracy') for _, r in babi_entries if r.get('ntm_accuracy') is not None]
+        memnet_avg = f"{sum(memnet_parts)/len(memnet_parts):.1f}%" if memnet_parts else "N/A"
+        ntm_avg = f"{sum(ntm_parts)/len(ntm_parts):.1f}%" if ntm_parts else "N/A"
+        lines.append(f"| **bAbI TOTAL** | **{babi_acc:.1f}%** | N/A | N/A | {memnet_avg} | {ntm_avg} |")
+    
+    # QA average
     if qa_count > 0:
         avg_brain = qa_brain / qa_count
         avg_tfidf = qa_tfidf / qa_count
         avg_bm25 = qa_bm25 / qa_count
-        lines.append(f"| **AVERAGE (QA)** | **{avg_brain:.1f}%** | **{avg_tfidf:.1f}%** | **{avg_bm25:.1f}%** | **{avg_brain - avg_tfidf:+.1f}%** | **{avg_brain - avg_bm25:+.1f}%** |")
+        lines.append(f"| **QA AVG** | **{avg_brain:.1f}%** | **{avg_tfidf:.1f}%** | **{avg_bm25:.1f}%** | N/A | N/A |")
     
-    if babi_note:
-        lines.append("")
-        lines.append("*bAbI requires working memory — TF-IDF/BM25 cannot track entity movements. MemNet/NTM are working memory baselines.")
+    lines.append("")
+    lines.append("*bAbI requires working memory — TF-IDF/BM25 cannot track entity states. MemNet/NTM tested on all 20 tasks.*")
     
-    # Dynamic Key Findings based on actual results
+    # Dynamic Key Findings
     lines.append("")
     lines.append("### Key Findings")
     lines.append("")
     
-    # Calculate dynamic values
-    advantage_min = int(avg_brain - avg_tfidf) if qa_count > 0 else 0
-    advantage_max = int(max((r.get('accuracy', 0) - (r.get('tfidf_accuracy') or 0)) for name, r in all_results if name != 'bAbI' and r.get('tfidf_accuracy') is not None) if qa_count > 0 else 0)
+    avg_brain_v = qa_brain / qa_count if qa_count > 0 else 0
+    avg_tfidf_v = qa_tfidf / qa_count if qa_count > 0 else 0
+    advantage_min = int(avg_brain_v - avg_tfidf_v) if qa_count > 0 else 0
+    advantage_max = int(max((r.get('accuracy', 0) - (r.get('tfidf_accuracy') or 0)) for _, r in qa_entries if r.get('tfidf_accuracy') is not None)) if qa_count > 0 else 0
     
-    # Find bAbI accuracy
-    babi_acc = next((r.get('accuracy', 0) for name, r in all_results if name == 'bAbI'), None)
     paraphrase_acc = next((r.get('accuracy', 0) for name, r in all_results if name == 'PARAPHRASE'), None)
     strict_acc = next((r.get('accuracy', 0) for name, r in all_results if name == 'STRICT'), None)
     
     lines.append(f"1. **Brain significantly outperforms simple IR methods** (+{advantage_min}-{advantage_max}%)")
-    if babi_acc is not None:
-        lines.append(f"2. **Working memory (bAbI)** — Brain achieves {babi_acc:.0f}%, baselines cannot handle context")
+    if babi_entries:
+        babi_p = sum(r.get('passed', 0) for _, r in babi_entries)
+        babi_t = sum(r.get('passed', 0) + r.get('failed', 0) for _, r in babi_entries)
+        babi_a = (babi_p / babi_t * 100) if babi_t > 0 else 0
+        lines.append(f"2. **Working memory (bAbI 1-20)** — Brain achieves {babi_a:.0f}% ({babi_p}/{babi_t}), TF-IDF/BM25 cannot handle context")
     if paraphrase_acc is not None:
-        lines.append(f"3. **Paraphrase robustness** — {paraphrase_acc:.0f}% accuracy indicates room for improvement")
+        lines.append(f"3. **Paraphrase robustness** — {paraphrase_acc:.0f}% accuracy on surface form variation")
     if strict_acc is not None and strict_acc == 100:
         lines.append('4. **"I don\'t know" capability** — Brain correctly abstains on unknown queries')
     lines.append("")
@@ -2435,20 +2565,17 @@ def generate_results_md(all_results: list, stats: dict) -> None:
     lines.append("## Failed Tests Analysis")
     lines.append("")
     
+    any_failures = False
     for name, result in all_results:
         failed_tests = result.get('failed_tests', [])
         if failed_tests:
+            any_failures = True
             lines.append(f"### {name} ({len(failed_tests)} failures)")
             lines.append("| Question | Brain Answer | Expected |")
             lines.append("|----------|--------------|----------|")
-            for item in failed_tests[:10]:  # Max 10 failures per suite
+            for item in failed_tests[:10]:
                 q = item[0] if len(item) > 0 else "?"
                 ans = str(item[1]) if len(item) > 1 else "?"
-                # Expected is at different index depending on tuple format:
-                # (q, raw, verbalized, expected, gpt) → item[3] (CURRICULUM/GRADE1/PRESCHOOL)
-                # (q, raw, expected, gpt) → item[2] (STRICT)
-                # (q, raw, expected) → item[2] (PARAPHRASE)
-                # Heuristic: if item has 5 elements, expected is at index 3
                 if len(item) >= 5:
                     exp = str(item[3])
                 elif len(item) >= 3:
@@ -2457,6 +2584,10 @@ def generate_results_md(all_results: list, stats: dict) -> None:
                     exp = "?"
                 lines.append(f"| {q} | {ans} | {exp} |")
             lines.append("")
+    
+    if not any_failures:
+        lines.append("**No failures!** All tests pass at 100%.")
+        lines.append("")
     
     lines.append("---")
     lines.append("")

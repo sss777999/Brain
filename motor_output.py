@@ -269,9 +269,17 @@ def generate_from_population(
         primary_answer_words = list(primary_episode.input_words)
     
     # 2. Collect secondary contributions from competing attractors
-    # BIOLOGY: CA1 blending — weaker attractors contribute if they pass threshold
-    # Threshold: secondary score must be >= 50% of primary score
-    # (weaker patterns are suppressed by lateral inhibition)
+    # BIOLOGY (CA1 Readout, Amaral & Witter 1989; Lateral Inhibition, Rolls 2013):
+    # CA1 receives from ALL top-K CA3 attractors via Schaffer collaterals.
+    # Biological filtering is continuous, not discrete:
+    #   - Lateral inhibition threshold (score >= 60% of primary) suppresses weak patterns
+    #   - _is_relevant_to_query checks MYELINATED connections (only strongly associated words pass)
+    #   - Duplicate episode filter prevents replay copies from stacking
+    # No artificial limits on episode count or word count — the threshold IS the
+    # biological mechanism. If 4 episodes pass threshold, they all contribute.
+    # Answer length is controlled naturally by episode content + threshold + relevance filter.
+    LATERAL_INHIBITION_THRESHOLD = 0.6  # CA1 associative facilitation (Amaral & Witter 1989)
+    
     if top_k_episodes and len(top_k_episodes) > 1:
         primary_score = top_k_episodes[0][1] if top_k_episodes else 1.0
         primary_words_set = set(primary_answer_words) | {w.lower() for w in query_words}
@@ -279,11 +287,11 @@ def generate_from_population(
         secondary_words: List[str] = []
         
         for episode, score in top_k_episodes[1:]:  # Skip primary (already used)
-            # BIOLOGY: Lateral inhibition threshold — weak attractors suppressed
-            if score < primary_score * 0.5:
-                break  # Below threshold, remaining are even weaker
+            # BIOLOGY: Lateral inhibition — weak attractors suppressed (Rolls 2013)
+            if score < primary_score * LATERAL_INHIBITION_THRESHOLD:
+                break  # Below threshold, remaining are even weaker (sorted by score)
             
-            # Skip if this is the SAME episode content (duplicate from replay)
+            # Skip if this is the SAME episode content (duplicate from consolidation/replay)
             if episode.input_neurons == primary_episode.input_neurons:
                 continue
             
@@ -291,8 +299,9 @@ def generate_from_population(
             episode_answer = _get_answer_words(episode, query_words)
             for word in episode_answer:
                 if word not in primary_words_set and word not in secondary_words:
-                    # BIOLOGY: Only add if connected to query via relevant relation
-                    # This prevents random noise from entering the answer
+                    # BIOLOGY: Only add if connected to query via MYELINATED relation
+                    # Top-down modulation (Desimone & Duncan 1995) — only strongly
+                    # associated concepts pass through to motor output
                     if _is_relevant_to_query(word, query_words, word_to_neuron, query_connector):
                         secondary_words.append(word)
                         primary_words_set.add(word)
