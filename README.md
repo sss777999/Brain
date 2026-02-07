@@ -250,13 +250,13 @@ Example:
 
 ```
 Training pipeline: curriculum → preschool → grade1 → bAbI → FineWeb-Edu (1000 articles, 40K sentences)
-Neurons: 48,312
-Connections: 1,471,237
+Neurons: 48,318
+Connections: 1,471,243
 MYELINATED: 23,792 (1.6%)
-USED: 76,369 (5.2%)
+USED: 76,375 (5.2%)
 NEW: 1,371,076
-Episodes: 76,678
-  - NEW: 35,076
+Episodes: 76,688
+  - NEW: 35,086
   - REPLAYED: 2,185
   - CONSOLIDATED: 38,065
   - DECAYING: 1,352
