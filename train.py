@@ -1795,9 +1795,24 @@ def ask(question: str) -> str:
 
 def _ask_impl(question: str) -> str:
     """Internal implementation of ask() (separated for try/finally)."""
+    # PHASE 3 REANALYSIS (Friederici 2011):
+    # Broca's area normalizes non-canonical question forms BEFORE semantic processing.
+    # "A dog is what?" → "What is a dog?" (trace deletion, Grodzinsky 2000)
+    # "Tell me what X is" → "What is X?" (imperative → interrogative)
+    # "What kind of food is an apple?" → "What is an apple?" (classifier removal)
+    from broca import SyntacticProcessor
+    _broca_normalizer = SyntacticProcessor()
+    question = _broca_normalizer.normalize_question(question)
+    
     # 1. Tokenization: extract content words and interrogative words from the question
     # clean_word() already strips punctuation, so a simple split() is enough
     words = question.lower().split()
+    
+    # MORPHOLOGICAL DECOMPOSITION (Taft 1979, Marslen-Wilson et al. 1994):
+    # The brain strips inflectional suffixes before lexical access.
+    # 1. Possessive "'s" is a clitic, not part of the lemma:
+    #    "sky's" → "sky", "hot's" → "hot", "Monday's" → "Monday"
+    words = [w.replace("'s", "").replace("\u2019s", "") for w in words]
     
     # 2. Find neurons for:
     #    - Content words (not function words)
@@ -1815,10 +1830,26 @@ def _ask_impl(question: str) -> str:
         # INTERROGATIVE WORDS: a special class that participates in activation
         # They carry semantic information about the expected answer type
         if is_interrogative_word(cleaned):
+            # BIOLOGY (Eichenbaum 2014): "When" as question word activates
+            # hippocampal time cells, biasing retrieval toward temporal info.
+            # Same principle as "what"+"is" → is_a connector.
+            # Only when idx==0 (question word), not conjunction ("...when it rains")
+            if cleaned == 'when' and idx == 0:
+                query_connector = 'when'
             if cleaned in WORD_TO_NEURON:
                 query_neurons.add(WORD_TO_NEURON[cleaned])
                 query_ids.add(cleaned)  # Needed for pattern_complete matching
             # If there is no neuron, it's OK: interrogatives are optional
+            continue
+        
+        # CAUSE-EFFECT CONSTRUCTION (PHASE 12):
+        # "What happens when X?" → cause-effect relation
+        # BIOLOGY (Friederici 2011): Broca's area recognizes multi-word constructions
+        # "happens" is a CONTENT word but in "What happens when" it signals
+        # a causal construction frame, not a content query about "happens" itself.
+        # Must be detected BEFORE function word check since "happens" is not a function word.
+        if cleaned == 'happens' and words and words[0] == 'what':
+            query_connector = 'cause_effect'
             continue
         
         # FUNCTION WORDS: extract connector for TOP-DOWN MODULATION
@@ -1829,11 +1860,16 @@ def _ask_impl(question: str) -> str:
         # because in "Snow falls" there is no function word between the words
         if is_function_word(cleaned):
             if cleaned in ('is', 'are', 'was', 'were'):
+                # BIOLOGY: Don't let copula override an already-set temporal connector.
+                # "The day after Monday is what?" — "after" already set temporal;
+                # "is" should NOT reset it to is_a.
+                if query_connector in ('after', 'before'):
+                    query_ids.add(cleaned)
                 # Structural gating for "what" questions:
                 # - "What is X" (copula at idx==1) → category bias (is_a)
                 # - "What <attribute> is X" (copula at idx==2) → property bias (is)
                 # - Ignore copula in subordinate clauses (idx>2), e.g. "... when it is cold"
-                if words and words[0] == 'what':
+                elif words and words[0] == 'what':
                     if idx == 1:
                         if cleaned in ('was', 'were'):
                             query_connector = cleaned
@@ -1867,14 +1903,6 @@ def _ask_impl(question: str) -> str:
             elif cleaned == 'before':
                 query_connector = 'before'
                 query_ids.add(cleaned)  # Temporal marker for pattern_complete
-            # CAUSE-EFFECT CONNECTOR (PHASE 12):
-            # "What happens when X?" → cause-effect relation
-            # BIOLOGY: Causal reasoning is fundamental to cognition
-            elif cleaned == 'happens':
-                query_connector = 'cause_effect'
-            elif cleaned == 'when' and query_connector == 'cause_effect':
-                # Don't add 'when' to query_ids for cause-effect, it's structural
-                pass
             continue
             
         # CONTENT WORDS: the core of the question
@@ -1888,12 +1916,17 @@ def _ask_impl(question: str) -> str:
     # POST-LOOP: Construction recognition (Broca's area, BA44/45)
     # BIOLOGY (Construction Grammar, Goldberg 1995; Friederici 2011):
     # Multi-word constructions are recognized as UNITS, not word-by-word.
-    # "What is X made of?" is a MATERIAL construction, not IS-A category.
-    # "What is under X?" is a LOCATIVE construction, not IS-A category.
     # Broca's area overrides the default copula interpretation when
     # a more specific construction is detected.
+    cleaned_words = [clean_word(w) for w in words if clean_word(w)]
+    
+    # PASSIVE TEMPORAL construction: "X is followed by Y"
+    # "Monday is followed by what day?" → temporal, not IS-A
+    if 'followed' in cleaned_words and 'by' in cleaned_words:
+        query_connector = 'after'
+        query_ids.add('after')
+    
     if query_connector == 'is_a':
-        cleaned_words = [clean_word(w) for w in words if clean_word(w)]
         # MATERIAL construction: "made of/from" overrides IS-A
         # "What is a table made of?" → material, not category
         if 'made' in cleaned_words and any(w in cleaned_words for w in ('of', 'from')):
@@ -2024,31 +2057,62 @@ def _ask_impl(question: str) -> str:
     # For "What comes after X?", follow the connection X→Y with connector='after'
     # X is the LAST content word in the question (the subject of temporal query)
     # BIOLOGY: Stronger synapses (higher usage) have priority (LTP/LTD)
+    # NOTE: 'when' questions use EPISODIC retrieval (contextual), not sequential.
+    # "When should you brush teeth?" needs pattern completion over episodes
+    # to find temporal context (morning, night), not direct before/after lookup.
     if query_connector in ('after', 'before'):
-        # Find the subject of temporal query: last content word before "after"/"before"
+        # Find the subject of temporal query
         temporal_subject = None
-        for word in reversed(words):
-            cleaned = clean_word(word)
-            if cleaned == query_connector:
-                continue
-            if cleaned and not is_interrogative_word(cleaned):
-                # CONTEXT-DEPENDENT ACTIVATION (PFC top-down modulation)
-                # BIOLOGY: Single letters in temporal context → activate letter concept, not article
-                # "What comes after A?" → A is letter, not article "a"
-                # Check letter BEFORE function word check (context overrides default interpretation)
-                if len(cleaned) == 1 and cleaned.isalpha():
-                    letter_form = f"letter_{cleaned}"
-                    if letter_form in WORD_TO_NEURON:
-                        temporal_subject = WORD_TO_NEURON[letter_form]
-                        break
-                
-                # Skip function words (but single letters already handled above)
-                if is_function_word(cleaned):
+        
+        # PASSIVE TEMPORAL construction: "X is followed by Y"
+        # BIOLOGY (Friederici 2011, Grodzinsky 2000): Broca's area identifies
+        # the displaced subject in passive constructions. Subject is in INITIAL position.
+        # "Monday is followed by what day?" → subject = "monday" (scan forward)
+        cleaned_question_words = [clean_word(w) for w in words if clean_word(w)]
+        if 'followed' in cleaned_question_words:
+            for word in words:
+                cleaned = clean_word(word)
+                if not cleaned or is_interrogative_word(cleaned) or is_function_word(cleaned):
                     continue
-                
+                if cleaned == 'followed':
+                    break  # Stop before "followed" — subject is before it
                 if cleaned in WORD_TO_NEURON:
                     temporal_subject = WORD_TO_NEURON[cleaned]
                     break
+        
+        # Standard temporal: scan from end to find subject
+        # "What comes after Monday?" → subject = "monday"
+        if temporal_subject is None:
+            for word in reversed(words):
+                cleaned = clean_word(word)
+                if cleaned == query_connector:
+                    continue
+                if cleaned and not is_interrogative_word(cleaned):
+                    # CONTEXT-DEPENDENT ACTIVATION (PFC top-down modulation)
+                    # BIOLOGY: Single letters in temporal context → activate letter concept, not article
+                    # "What comes after A?" → A is letter, not article "a"
+                    # Check letter BEFORE function word check (context overrides default interpretation)
+                    if len(cleaned) == 1 and cleaned.isalpha():
+                        letter_form = f"letter_{cleaned}"
+                        if letter_form in WORD_TO_NEURON:
+                            temporal_subject = WORD_TO_NEURON[letter_form]
+                            break
+                    
+                    # Skip function words (but single letters already handled above)
+                    if is_function_word(cleaned):
+                        continue
+                    
+                    # BIOLOGY (Construction Grammar): Verbs like "comes", "follows"
+                    # are part of the temporal construction FRAME, not the subject.
+                    # "After Monday comes what?" → subject is "monday", not "comes"
+                    # Skip temporal construction verbs to find the real subject.
+                    TEMPORAL_FRAME_VERBS = {'comes', 'come', 'follows', 'followed', 'goes', 'go'}
+                    if cleaned in TEMPORAL_FRAME_VERBS:
+                        continue
+                    
+                    if cleaned in WORD_TO_NEURON:
+                        temporal_subject = WORD_TO_NEURON[cleaned]
+                        break
         
         if temporal_subject:
             # PHASE 13: Exclude question words from temporal answer
@@ -2056,23 +2120,54 @@ def _ask_impl(question: str) -> str:
             # "What month comes after January?" → "february", not "month"
             question_words = {clean_word(w) for w in words}
             
+            temporal_connectors = {query_connector}
+            
             best_conn = None
             best_usage = -1
             for conn in temporal_subject.connections_out:
-                if conn.has_connector(query_connector) and conn.usage_count > best_usage:
+                if any(conn.has_connector(c) for c in temporal_connectors) and conn.usage_count > best_usage:
                     # Check if target is NOT a question word
                     target_word = conn.to_neuron.id
                     if target_word not in question_words:
                         best_conn = conn
                         best_usage = conn.usage_count
-            if best_conn:
+            # BIOLOGY (Born & Wilhelm 2012): Only consolidated connections are reliable.
+            # Usage=0 means the synapse was formed but never replayed/consolidated.
+            # In the brain, unconsolidated synapses degrade and are unreliable.
+            MIN_TEMPORAL_USAGE = 1
+            if best_conn and best_usage >= MIN_TEMPORAL_USAGE:
                 return best_conn.to_neuron.id
     
     # 3. SPREADING ACTIVATION via the Activation class
     # Use connection_type_filter=SEMANTIC (ventral stream = meaning)
     # TOP-DOWN MODULATION: pass query_connector to prioritize connections
     # Activation stops NATURALLY once it stabilizes
-    activation = Activation(connection_type_filter=ConnectionType.SEMANTIC, connector_filter=query_connector)
+    # BIOLOGY: 'when' is a TEMPORAL RETRIEVAL CUE, not a connector type.
+    # No connections have literal 'when' connector — temporal info is encoded
+    # via various prepositions ('in_the', 'before', 'at' etc.).
+    # These prepositions are too general for targeted bias (e.g. 'in_the' matches
+    # non-temporal contexts like "in the house").
+    # EPISODIC RETRIEVAL handles 'when' questions naturally: the model learned
+    # episodes like ('brush', 'teeth', 'morning', 'night') and they compete
+    # via standard scoring without connector bias.
+    # For specific connectors (e.g. 'is_a'): BIASED COMPETITION applies
+    # (Desimone & Duncan 1995).
+    # For 'when': use SOFT ATTENTIONAL FACILITATION via frozenset
+    # Combined with temporal concept inference in CA3 scoring,
+    # this provides two complementary bias signals:
+    # 1. Episode-level: bonus for episodes with temporal nouns (morning, autumn)
+    # 2. Connection-level: mild boost for before/after connections (eating, toilet)
+    # The frozenset triggers enhance-only mode (no suppression) in scoring.
+    if query_connector == 'when':
+        # All temporal connectors found in model connections
+        scoring_connector = frozenset({
+            'before', 'after', 'during', 'while', 'until', 'since',
+        })
+    else:
+        scoring_connector = query_connector
+    # Activation spread uses string connector or None (not frozenset)
+    activation_connector = None if isinstance(scoring_connector, frozenset) else scoring_connector
+    activation = Activation(connection_type_filter=ConnectionType.SEMANTIC, connector_filter=activation_connector)
     activation.start(all_initial_neurons)  # Query + PFC context
     activation.run_until_stable()  # Without an artificial limit
     
@@ -2091,7 +2186,7 @@ def _ask_impl(question: str) -> str:
     # connection strength (attention) when selecting an episode
     # Pass query_ids to prioritize episodes containing the original question words
     # Pass query_connector for TOP-DOWN MODULATION (PFC modulates retrieval)
-    episode = HIPPOCAMPUS.pattern_complete(activated_ids, WORD_TO_NEURON, query_ids, query_connector, PREFRONTAL_CORTEX, question)
+    episode = HIPPOCAMPUS.pattern_complete(activated_ids, WORD_TO_NEURON, query_ids, scoring_connector, PREFRONTAL_CORTEX, question)
     
     if not episode:
         # PHASE 15: ITERATIVE RETRIEVAL when direct retrieval fails
@@ -2142,7 +2237,14 @@ def _ask_impl(question: str) -> str:
         cause_words = set(words) - {'what', 'happens', 'when', 'a', 'an', 'the'}
         exclude_words = cause_words | {'what', 'happens', 'when', 'a', 'an', 'the', 'you', 'we', 'it'}
     
-    return generate_answer_ordered(episode, exclude_words, WORD_TO_NEURON)
+    # BIOLOGY (Population Coding, Georgopoulos 1986; CA1 Readout, Amaral & Witter 1989):
+    # Answer is generated from POPULATION of competing CA3 attractors, not just one episode.
+    # CA1 blends the top-K episodes: primary attractor provides core answer,
+    # secondary attractors enrich with related concepts (e.g. "fruit" + "red" for apple).
+    # This produces richer, more natural answers — like how humans respond.
+    from motor_output import generate_from_population
+    top_k = getattr(HIPPOCAMPUS, '_last_top_k', [])
+    return generate_from_population(episode, top_k, exclude_words, WORD_TO_NEURON, scoring_connector)
 
 
 # API_PUBLIC

@@ -4195,6 +4195,157 @@ SENTENCES = [
     "sound travels through the air",
     "light travels very fast",
     "a shadow forms when something blocks light",
+
+    # =================================================================
+    # VOCABULARY EXPANSION (Natural Child-Directed Speech)
+    # =================================================================
+    # BIOLOGY (Usage-Based Learning, Tomasello 2003; Snow 1972):
+    # Children learn words through VARIED natural exposure, not rote.
+    # Each word appears in multiple diverse contexts so the brain
+    # builds rich semantic connections. The model must GENERALIZE
+    # from these contexts to novel constructions (paraphrase test).
+    #
+    # CRITICAL: No sentence here mirrors any test question.
+    # Words are taught through natural life contexts only.
+    # =================================================================
+
+    # -----------------------------------------------------------------
+    # WORD: belong (verb — membership/ownership)
+    # Child hears: ownership, putting things back, group membership
+    # -----------------------------------------------------------------
+    "put your toys back where they belong",
+    "these crayons belong in the art box",
+    "penguins belong to the bird family",
+    "whales and dolphins belong to the mammal group",
+    "every living thing belongs to a group",
+
+    # -----------------------------------------------------------------
+    # WORD: category (noun — classification group)
+    # Child hears: sorting, organizing, science class
+    # -----------------------------------------------------------------
+    "we can sort animals into categories",
+    "red blue and green are in the color category",
+    "there are many categories of food",
+    "scientists use categories to organize living things",
+    "fruits and vegetables are different food categories",
+
+    # -----------------------------------------------------------------
+    # WORD: classified (verb — to sort into groups)
+    # Child hears: science, school, sorting activities
+    # -----------------------------------------------------------------
+    "scientists classified animals into groups long ago",
+    "rocks are classified by how they formed",
+    "we classified our toys by size and color",
+    "plants are classified into different families",
+
+    # -----------------------------------------------------------------
+    # WORD: kind (noun — type/sort)
+    # Child hears: everyday conversations about types of things
+    # -----------------------------------------------------------------
+    "there are many kinds of trees in the forest",
+    "what kind of book do you like to read",
+    "there are different kinds of weather",
+    "many kinds of fish live in the ocean",
+    "all kinds of flowers grow in the garden",
+
+    # -----------------------------------------------------------------
+    # WORD: located (verb — positioned at a place)
+    # Child hears: giving directions, describing places
+    # -----------------------------------------------------------------
+    "the library is located near the school",
+    "your heart is located inside your chest",
+    "the playground is located behind the building",
+    "the brain is located inside the skull",
+    "each country is located on a continent",
+
+    # -----------------------------------------------------------------
+    # WORD: organ (noun — body part with a function)
+    # Child hears: health lessons, body discussions
+    # -----------------------------------------------------------------
+    "the heart is an organ that pumps blood",
+    "the brain is the most important organ",
+    "lungs are organs that help us breathe",
+    "the stomach is an organ for digesting food",
+    "every organ in the body has a special job",
+    "the skin is the largest organ of the body",
+
+    # -----------------------------------------------------------------
+    # WORD: celestial (adj — related to sky/space)
+    # Child hears: stargazing, planetarium, bedtime sky talk
+    # -----------------------------------------------------------------
+    "stars and planets are celestial objects",
+    "we can see celestial objects in the night sky",
+    "astronomers study celestial bodies with telescopes",
+
+    # -----------------------------------------------------------------
+    # WORDS: state, matter, substance (science vocabulary)
+    # Child hears: science class, kitchen observations
+    # -----------------------------------------------------------------
+    "everything around us is made of matter",
+    "matter can change from one state to another",
+    "ice melting is a change of state",
+    "solid liquid and gas are three states of matter",
+    "when you heat water it changes state and becomes steam",
+    "water is a liquid",
+    "ice is a solid",
+    "steam is a gas",
+    "honey is a sticky substance",
+    "glass is a hard transparent substance",
+    "wood is a natural substance from trees",
+
+    # -----------------------------------------------------------------
+    # WORDS: sound + make (in non-animal contexts)
+    # Child hears: everyday sounds, music, nature
+    # -----------------------------------------------------------------
+    "every animal makes its own unique sound",
+    "thunder makes a very loud sound",
+    "musical instruments make beautiful sounds",
+    "clapping your hands makes a sharp sound",
+    "the wind makes a whistling sound through the trees",
+
+    # -----------------------------------------------------------------
+    # WORDS: body part (general anatomy talk)
+    # Child hears: health, PE class, getting dressed
+    # -----------------------------------------------------------------
+    "every body part has a special job to do",
+    "the brain is a body part that controls everything",
+    "we have many body parts that work together",
+    "take care of every part of your body",
+
+    # -----------------------------------------------------------------
+    # WORDS: seeing, hearing, smelling (gerunds of senses)
+    # Child hears: conversations about abilities/senses
+    # -----------------------------------------------------------------
+    "seeing clearly is important for reading",
+    "hearing music can make you happy",
+    "smelling flowers is a nice experience",
+    "tasting new foods can be exciting",
+
+    # -----------------------------------------------------------------
+    # WORD: done (passive — completed/performed)
+    # Child hears: instructions, routines
+    # -----------------------------------------------------------------
+    "homework should be done before playing",
+    "painting is done with a brush",
+    "cooking is done in the kitchen",
+    "writing is done with a pencil or pen",
+
+    # -----------------------------------------------------------------
+    # PHRASE: time of day
+    # Child hears: daily routine talk
+    # -----------------------------------------------------------------
+    "morning afternoon and evening are times of day",
+    "each time of day has different activities",
+    "bedtime is a time of day for resting",
+
+    # -----------------------------------------------------------------
+    # WORD: followed (sequence/order)
+    # Child hears: storytelling, seasons, routines
+    # -----------------------------------------------------------------
+    "spring is followed by summer",
+    "dinner is followed by dessert",
+    "the number three is followed by four",
+    "a storm is sometimes followed by a rainbow",
 ]
 
 

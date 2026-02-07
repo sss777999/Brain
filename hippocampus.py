@@ -308,6 +308,12 @@ class Hippocampus:
         self._timestamp: int = 0
         self._context_buffer: Set[str] = set()  # Current context (active neurons)
         
+        # BIOLOGY (Population Coding, Georgopoulos 1986):
+        # After pattern completion, CA3 doesn't just have one winner —
+        # multiple attractors compete. The top-K are stored here for
+        # CA1 readout blending (Amaral & Witter 1989).
+        self._last_top_k: List[Tuple['Episode', float]] = []
+        
         # ANCHOR: DG_DEPENDENCY - explicit dependency for pattern separation
         # BIOLOGY: DG performs pattern separation via sparse coding + WTA
         self._dg: DentateGyrus = DentateGyrus()
@@ -512,6 +518,7 @@ class Hippocampus:
         
         best_episode: Optional[Episode] = None
         best_score: float = 0.0
+        scored_candidates: List[Tuple[Episode, float]] = []  # For population coding
         
         # OPTIMIZATION: Use inverted index for fast filtering
         # BIOLOGY: Parallel associative activation: a word activates
@@ -723,13 +730,25 @@ class Hippocampus:
                             # - apple→fruit (is_a) gets *5.0 enhancement (relevant)
                             # - apple→sandra (no connector) gets *0.2 suppression (irrelevant)
                             if query_connector:
-                                if conn.has_connector(query_connector):
-                                    if other_id not in content_query:
-                                        base_strength *= 5.0  # Enhancement of relevant connections
+                                if isinstance(query_connector, (set, frozenset)):
+                                    # SOFT ATTENTIONAL FACILITATION (Miller & Cohen 2001)
+                                    # PFC sends broad goal (e.g. "temporal context")
+                                    # Enhancement of matching connections, NO suppression
+                                    # Biology: broad attention boosts relevant without
+                                    # actively suppressing — differs from Biased Competition
+                                    if any(conn.has_connector(tc) for tc in query_connector):
+                                        if other_id not in content_query:
+                                            base_strength *= 2.0  # Mild boost (soft facilitation)
+                                    # No suppression — soft facilitation only
                                 else:
-                                    # Biased Competition: irrelevant connections are SUPPRESSED
-                                    # This is lateral inhibition from PFC (Desimone & Duncan 1995)
-                                    base_strength *= 0.2  # Suppression of irrelevant connections
+                                    # BIASED COMPETITION (Desimone & Duncan 1995)
+                                    # Specific connector: enhance matching, suppress non-matching
+                                    if conn.has_connector(query_connector):
+                                        if other_id not in content_query:
+                                            base_strength *= 5.0  # Enhancement of relevant connections
+                                    else:
+                                        # Lateral inhibition from PFC
+                                        base_strength *= 0.2  # Suppression of irrelevant connections
                         
                         # 2-hop: query -> intermediate -> other (within episode)
                         for intermediate_id in episode.input_neurons:
@@ -767,8 +786,10 @@ class Hippocampus:
                             # TOP-DOWN MODULATION (Zanto et al. 2011, Desimone & Duncan 1995):
                             # Apply same multiplicative modulation to reverse connections
                             if query_connector:
-                                if conn_rev.has_connector(query_connector):
-                                    base_strength *= 5.0  # Enhancement of relevant
+                                if query_connector in conn_rev.connectors:
+                                    base_strength *= 5.0  # EXACT match
+                                elif conn_rev.has_connector(query_connector):
+                                    base_strength *= 2.5  # FAMILY match (e.g. with/with_my)
                                 else:
                                     base_strength *= 0.2  # Suppression of irrelevant
                             
@@ -871,6 +892,19 @@ class Hippocampus:
             if score >= best_score:
                 best_score = score
                 best_episode = episode
+            
+            # BIOLOGY (Population Coding, Georgopoulos 1986):
+            # CA3 attractor dynamics involve MULTIPLE competing patterns.
+            # Not just the winner — the top-K patterns all contribute to
+            # the CA1 readout (Amaral & Witter 1989: CA1 blends CA3 + EC input).
+            # Store scored candidates for population-based answer generation.
+            if score > 0:
+                scored_candidates.append((episode, score))
+        
+        # Store top-K for population coding (CA1 readout)
+        # BIOLOGY: CA1 receives from multiple CA3 attractors via Schaffer collaterals
+        scored_candidates.sort(key=lambda x: x[1], reverse=True)
+        self._last_top_k = scored_candidates[:5]  # Top 5 competing attractors
         
         # Deterministic selection of the best episode
         # BIOLOGY: Competitive dynamics in CA3 via lateral inhibition
@@ -1010,6 +1044,30 @@ class Hippocampus:
             verb_forms=self.VERB_FORMS,
             question=question
         )
+        
+        # BIOLOGY (Population Coding, Georgopoulos 1986):
+        # Collect scored candidates from CA3 for CA1 readout blending
+        scored_from_ca3 = getattr(self._ca3, '_last_scored_candidates', [])
+        if scored_from_ca3:
+            scored_from_ca3.sort(key=lambda x: x[1], reverse=True)
+            # DEDUPLICATION: consolidated copies of same memory strengthen ONE
+            # attractor, not separate ones (Born & Wilhelm 2012).
+            # Keep only highest-scoring copy of each unique episode content.
+            seen_content = set()
+            deduped = []
+            for idx, score in scored_from_ca3:
+                if idx >= len(candidate_episodes):
+                    continue
+                ep = candidate_episodes[idx]
+                content_key = ep.input_words if hasattr(ep, 'input_words') else tuple(sorted(ep.input_neurons))
+                if content_key not in seen_content:
+                    seen_content.add(content_key)
+                    deduped.append((ep, score))
+                    if len(deduped) >= 5:
+                        break
+            self._last_top_k = deduped
+        else:
+            self._last_top_k = []
         
         if best_idx >= 0 and best_idx < len(candidate_episodes):
             best_episode = candidate_episodes[best_idx]

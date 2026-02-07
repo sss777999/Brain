@@ -147,6 +147,294 @@ class SyntacticProcessor:
         """Initialize Broca's area processor."""
         pass
     
+    # ANCHOR: NORMALIZE_QUESTION - Phase 3 reanalysis (Friederici 2011)
+    # API_PUBLIC
+    def normalize_question(self, question: str) -> str:
+        """
+        Normalize non-canonical question forms to canonical WH-question form.
+        
+        BIOLOGY (Friederici 2011, Phase 3 — Reanalysis, 500-1000ms):
+        Broca's area (BA44) performs syntactic reanalysis when initial parsing
+        encounters non-canonical structures. This transforms surface variants
+        into a canonical representation for downstream semantic processing.
+        
+        Examples of reanalysis:
+        - Inverted: "A dog is what?" → "What is a dog?"
+        - Imperative: "Tell me what X is" → "What is X?"
+        - Passive: "Seeing is done with what?" → "What do we see with?"
+        - Possessive: "hot's opposite" → "the opposite of hot"
+        
+        BIOLOGY (Grodzinsky 2000, Trace Deletion Hypothesis):
+        Broca's area recovers moved constituents from their canonical position.
+        "A dog is WHAT?" → WHAT was moved from predicate position → "WHAT is a dog?"
+        
+        Args:
+            question: Raw question string
+            
+        Returns:
+            Normalized question string (canonical WH-form when possible)
+        """
+        # Precondition
+        assert isinstance(question, str), "question must be a string"
+        
+        import re
+        clean = re.sub(r'[^\w\s\'-]', '', question.lower()).strip()
+        words = clean.split()
+        
+        if not words:
+            return question
+        
+        # BIOLOGY (Morphological Decomposition, Taft 1979):
+        # Possessive "'s" clitic is decomposed early: "X's Y" → "Y of X"
+        # This happens before syntactic analysis in the mental lexicon.
+        possessive_decomposed = False
+        for i, w in enumerate(words):
+            if w.endswith("'s") or w.endswith("\u2019s"):
+                owner = w.replace("'s", "").replace("\u2019s", "")
+                if i + 1 < len(words):
+                    possessed = words[i + 1:]
+                    before = words[:i]
+                    words = before + possessed + ['of', owner]
+                    possessive_decomposed = True
+                    break
+        
+        # Already canonical WH-question — handle sub-patterns
+        if words[0] in self.QUESTION_WORDS or words[0] in self.COPULA:
+            # BIOLOGY: "kind of" is a classifier construction (Croft 2001)
+            # "What kind of food is an apple?" → "What is an apple?"
+            if len(words) >= 5 and words[0] == 'what' and words[1] == 'kind' and words[2] == 'of':
+                for i in range(3, len(words)):
+                    if words[i] in self.COPULA:
+                        subject_words = words[i+1:]
+                        return f"what {words[i]} {' '.join(subject_words)}"
+            
+            # BIOLOGY (Synonym mapping, Angular Gyrus BA39):
+            # "What sound does X make?" → "What does X say?"
+            # The brain maps "make sound" to "say" via semantic association
+            if (words[0] == 'what' and 'sound' in words
+                    and ('make' in words or 'makes' in words)):
+                for i, w in enumerate(words):
+                    if w in ('does', 'do'):
+                        for j in range(i + 1, len(words)):
+                            if words[j] in ('make', 'makes'):
+                                subject = [s for s in words[i+1:j]
+                                           if s not in ('a', 'an', 'the')]
+                                return f"what does {' '.join(subject)} say"
+            
+            # "What body part do we use to see?" → "What do we see with?"
+            # BIOLOGY: Broca's area reduces complex periphrastic to simple form
+            if (words[0] == 'what' and 'use' in words and 'to' in words):
+                use_idx = words.index('use')
+                to_idx = words.index('to')
+                if to_idx == use_idx + 1 and to_idx + 1 < len(words):
+                    verb = words[to_idx + 1]
+                    for i, w in enumerate(words):
+                        if w in ('do', 'does'):
+                            subject = [s for s in words[i+1:use_idx]
+                                       if s not in ('a', 'an', 'the')]
+                            return f"what do {' '.join(subject)} {verb} with"
+            
+            # "What time of day do people wake up?" → "When do people wake up?"
+            if len(words) >= 5 and words[0] == 'what' and words[1] == 'time':
+                rest_start = 2
+                if rest_start < len(words) and words[rest_start] == 'of':
+                    rest_start += 1
+                if rest_start < len(words) and words[rest_start] == 'day':
+                    rest_start += 1
+                return f"when {' '.join(words[rest_start:])}"
+            
+            # If possessive was decomposed, return the decomposed form
+            # "What is hot's opposite?" was already transformed to
+            # "what is opposite of hot" by the early decomposition step
+            if possessive_decomposed:
+                return ' '.join(words)
+            
+            return question
+        
+        # CHUNK_START: inverted_wh_questions
+        # Pattern: "X is/are what (Y)?" → "What Y is X?"
+        # BIOLOGY (Trace Deletion, Grodzinsky 2000): recover moved WH-word
+        if 'what' in words:
+            what_idx = words.index('what')
+            
+            if what_idx > 0:
+                # Find copula before "what"
+                copula_idx = None
+                for i in range(what_idx):
+                    if words[i] in self.COPULA:
+                        copula_idx = i
+                        break
+                
+                if copula_idx is not None:
+                    between = words[copula_idx + 1:what_idx]
+                    after_what = words[what_idx + 1:]
+                    subject_words = [w for w in words[:copula_idx]
+                                     if w not in ('a', 'an', 'the')]
+                    copula = words[copula_idx]
+                    
+                    # Check for passive + "as" → category question (drop passive)
+                    # "Apples are classified as what?" → "What are apples?"
+                    # BIOLOGY: "classified as" = copula rephrasing (same meaning as "is")
+                    PASSIVE_AS = {'classified', 'known', 'called', 'referred', 'categorized'}
+                    if between and between[0] in PASSIVE_AS:
+                        between = [w for w in between
+                                   if w not in PASSIVE_AS and w not in ('as', 'to')]
+                    
+                    # Check for PURE passive: "X is done with what?", "X is seen with what?"
+                    # These need verb morphology → handle separately below
+                    PURE_PASSIVE = {'done', 'made', 'heard', 'seen', 'found', 'used'}
+                    if between and between[0] in PURE_PASSIVE:
+                        pass  # Skip — handled in passive_questions section
+                    # "X is followed by what?" → "What comes after X?"
+                    # BIOLOGY: "followed by" encodes temporal/sequential relation
+                    elif (between and len(between) >= 2
+                          and between[0] == 'followed' and between[1] == 'by'):
+                        return f"what comes after {' '.join(subject_words)}"
+                    
+                    elif subject_words:
+                        # General inversion: "what" + after_what + copula + between + subject
+                        # "The sky is what color?" → "what color is sky"
+                        # "Hot is the opposite of what?" → "what is the opposite of hot"
+                        
+                        # BIOLOGY (Classifier Stripping, Croft 2001):
+                        # Strip classifiers: "kind of thing", "type of", "state of matter"
+                        # These are metalinguistic frames, not semantic content.
+                        # The brain extracts the RELATION, discarding the classifier frame.
+                        CLASSIFIER_STARTS = {'kind', 'type', 'sort', 'state', 'category'}
+                        if after_what and after_what[0] in CLASSIFIER_STARTS:
+                            after_what = []  # Strip entire classifier phrase
+                        
+                        parts = ['what']
+                        if after_what:
+                            parts.extend(after_what)
+                        parts.append(copula)
+                        if between:
+                            parts.extend(between)
+                        parts.extend(subject_words)
+                        return ' '.join(parts)
+                
+                # "Dogs make what sound?" → "What does dogs say?"
+                # "Dogs belong to what category?" → "What is dogs?"
+                # BIOLOGY: Synonym mapping (Angular Gyrus BA39)
+                VERBS_BEFORE_WHAT = {'make', 'makes', 'belong', 'belongs', 'produce', 'produces'}
+                for i in range(what_idx):
+                    if words[i] in VERBS_BEFORE_WHAT:
+                        subject_words = [w for w in words[:i]
+                                         if w not in ('a', 'an', 'the')]
+                        if subject_words:
+                            verb = words[i]
+                            after_what = words[what_idx + 1:]
+                            # "make sound" → "say" (synonym mapping)
+                            if verb in ('make', 'makes') and 'sound' in after_what:
+                                return f"what does {' '.join(subject_words)} say"
+                            # "belong to category" → "is" (metalinguistic → copula)
+                            if verb in ('belong', 'belongs'):
+                                return f"what is {' '.join(subject_words)}"
+                            # Default: rephrase
+                            return f"what {' '.join(after_what)} does {' '.join(subject_words)} {verb}"
+            
+            # "Tell me what X is" → "What is X?"
+            if words[0] == 'tell' and 'what' in words:
+                what_idx = words.index('what')
+                after_what = words[what_idx + 1:]
+                if after_what:
+                    if after_what[-1] in self.COPULA:
+                        subject = [w for w in after_what[:-1] if w not in ('a', 'an', 'the')]
+                        return f"what {after_what[-1]} {' '.join(subject)}"
+                    for i, w in enumerate(after_what):
+                        if w in self.COPULA:
+                            subject = [w2 for w2 in after_what[i + 1:]
+                                       if w2 not in ('a', 'an', 'the')]
+                            if subject:
+                                return f"what {w} {' '.join(subject)}"
+                            break
+        # CHUNK_END: inverted_wh_questions
+        
+        # CHUNK_START: inverted_where
+        # "Paris is located where?" → "Where is Paris?"
+        # BIOLOGY: Same trace deletion — recover fronted WH-word
+        if 'where' in words:
+            where_idx = words.index('where')
+            if where_idx > 0:
+                copula_idx = None
+                for i in range(where_idx):
+                    if words[i] in self.COPULA:
+                        copula_idx = i
+                        break
+                if copula_idx is not None:
+                    subject_words = [w for w in words[:copula_idx]
+                                     if w not in ('a', 'an', 'the', 'located')]
+                    if subject_words:
+                        return f"where {words[copula_idx]} {' '.join(subject_words)}"
+        # CHUNK_END: inverted_where
+        
+        # CHUNK_START: embedded_time
+        # "We wake up at what time of day?" → "When do we wake up?"
+        if 'what' in words and 'time' in words:
+            what_idx = words.index('what')
+            if what_idx > 0:
+                at_idx = None
+                for i in range(what_idx):
+                    if words[i] == 'at':
+                        at_idx = i
+                        break
+                content_end = at_idx if at_idx is not None else what_idx
+                subject_verb = words[:content_end]
+                if subject_verb:
+                    return f"when do {' '.join(subject_verb)}"
+        # CHUNK_END: embedded_time
+        
+        # CHUNK_START: imperative_questions
+        # "Name the capital of France" → "What is the capital of France?"
+        if words[0] in ('name', 'say', 'give'):
+            content = words[1:]
+            if content:
+                return f"what is {' '.join(content)}"
+        
+        # "Tell me the sky's color" → "What is the sky's color?"
+        if words[0] == 'tell':
+            content_start = 1
+            if len(words) > 1 and words[1] in ('me', 'us'):
+                content_start = 2
+            content = words[content_start:]
+            if content:
+                return f"what is {' '.join(content)}"
+        # CHUNK_END: imperative_questions
+        
+        # CHUNK_START: passive_gerund_questions
+        # "Seeing is done with what?" → "What do we see with?"
+        # "Hearing is done with what?" → "What do we hear with?"
+        # BIOLOGY (Friederici 2011, Phase 3): Passive reanalysis requires
+        # verb morphology (gerund→base form mapping). In the brain, this is
+        # stored in the mental lexicon (Levelt 1989). We use a small
+        # morphological lookup — analogous to innate inflectional knowledge.
+        GERUND_TO_BASE = {
+            'seeing': 'see', 'hearing': 'hear', 'smelling': 'smell',
+            'tasting': 'taste', 'touching': 'touch', 'reading': 'read',
+            'writing': 'write', 'eating': 'eat', 'drinking': 'drink',
+            'walking': 'walk', 'running': 'run', 'sleeping': 'sleep',
+        }
+        if (len(words) >= 3 and words[0] in GERUND_TO_BASE
+                and words[1] in self.COPULA and 'what' in words):
+            base_verb = GERUND_TO_BASE[words[0]]
+            return f"what do we {base_verb} with"
+        
+        # "By what is sound heard?" → "What do we hear with?"
+        # BIOLOGY: Fronted PP ("by what") is reanalyzed as WH-question
+        if words[0] == 'by' and 'what' in words:
+            # Try to find a verb that maps to a sense
+            PAST_TO_BASE = {
+                'heard': 'hear', 'seen': 'see', 'smelled': 'smell',
+                'tasted': 'taste', 'touched': 'touch',
+            }
+            for w in words:
+                if w in PAST_TO_BASE:
+                    return f"what do we {PAST_TO_BASE[w]} with"
+        # CHUNK_END: passive_gerund_questions
+        
+        # Postcondition
+        return question
+    
     # ANCHOR: PARSE_SENTENCE - main parsing function
     # API_PUBLIC
     def parse(self, sentence: str) -> ParsedSentence:

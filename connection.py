@@ -535,8 +535,16 @@ class Connection:
         if connector in self.connectors:
             return True
 
-        # Prefix match MUST be limited to true connector families.
-        # Example: 'with' is a family ('with_my', 'with_our'), but 'is' must NOT match 'is_a'.
+        # CONNECTOR FAMILY MATCHING — limited to true connector families only.
+        #
+        # BIOLOGY (Patterson et al. 2007, Martin 2007):
+        # 'is' (property attribution: "apple is red") and 'is_a' (category membership:
+        # "apple is a fruit") are DIFFERENT semantic relations processed by different
+        # neural pathways. They must NOT be merged.
+        #
+        # 'with' family: 'with', 'with_my', 'with_our' — all encode the same
+        # instrumental relation (Fillmore 1968, Case Grammar). The pronoun is
+        # syntactic, not semantic. E.g. "see with eyes" = "see with our eyes".
         if connector == 'with':
             result = any(c.startswith(connector + '_') for c in self.connectors)
             # Postcondition
