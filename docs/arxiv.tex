@@ -15,7 +15,10 @@ in a Biologically Grounded System}
   Vitalii Belyi\thanks{Independent researcher. Correspondence: aiops9a1@protonmail.com}
 }
 
-\date{}
+\date{
+  \vspace{0.5em}
+  \normalsize{DOI: \href{https://doi.org/10.5281/zenodo.18704593}{10.5281/zenodo.18704593}}
+}
 
 \begin{document}
 \maketitle
@@ -577,7 +580,7 @@ Beyond simple working memory (Task~1), the full bAbI benchmark \citep{weston2015
 \textbf{Phase 22: Coreference Resolution.} Broca's area maintains a discourse model of active referents \citep{hagoort2005broca}. Pronouns (he/she/they) are bound to antecedents via gamma-band synchronization between Broca's area and temporal cortex \citep{fries2005mechanism}. The resolver tracks the most recently mentioned male, female, and plural entities---consistent with recency-based discourse models \citep{howard2002distributed}. This enables Tasks 11 (basic coreference) and 13 (compound coreference).
 
 \textbf{Phase 23: PFC Situation Model.} The prefrontal cortex maintains a structured situation model---a mental representation of ``who is where'' and ``who has what'' \citep{baddeley2000episodic, goldman1995cellular}. This is implemented as a Working Memory State Tracker that incrementally updates entity states from context sentences, modeling the visuospatial sketchpad and central executive of Baddeley's working memory model. The tracker supports:
-\begin{itemize}[nosep]
+\begin{itemize}
   \item Entity location tracking (PFC spatial register, \citealt{goldman1995cellular})
   \item Object possession and transfer tracking (visuospatial sketchpad, \citealt{baddeley2000episodic})
   \item Negation processing (PFC inhibitory control, \citealt{miller2001integrative})
