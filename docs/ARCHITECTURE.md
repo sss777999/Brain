@@ -440,6 +440,13 @@ the KNOWLEDGE is real, only the INTERFACE is simplified.
 - ✅ **Serotonin (5-HT)** — Impulse Control. Regulates PFC gate threshold (low 5-HT = impulsive, high 5-HT = strict).
 - ✅ **Global Chemical Bath** — `neuromodulation.py` tracks state and applies multiplicative effects globally.
 
+### Sparse Distributed Representations (Hawkins HTM)
+- ✅ **SDR Encoding** — `sdr.py` encodes words as sparse binary vectors (2048 bits, ~40 active = 2% sparsity).
+- ✅ **SDR Overlap** — Semantic similarity via bit intersection. Similar concepts share active bits.
+- ✅ **Neuron.sdr** — Lazy property computes SDR representation per neuron.
+- ✅ **CA3 SDR Scoring** — SDR overlap bonus added to episode scoring (parallel to string-based).
+- ✅ **Learned Overlap** — `SDREncoder.learn_overlap()` increases bit sharing between co-occurring words (Hebbian).
+
 ### Forgetting & Synaptic Homeostasis (Tononi & Cirelli 2006)
 - ✅ **LTD (Long-Term Depression)** — Episodes gradually lose `strength` if not accessed or replayed.
 - ✅ **Synaptic Downscaling** — NREM sleep globally scales down connections (preserves signal-to-noise ratio).

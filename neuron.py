@@ -27,6 +27,7 @@ from typing import TYPE_CHECKING, Set, Dict, List, Optional
 
 if TYPE_CHECKING:
     from connection import Connection
+    from sdr import SDR
 
 
 # ============================================================================
@@ -156,6 +157,54 @@ class Neuron:
         self._myelinated_out_count: int = 0
         self._myelinated_in_count: int = 0
         self._activation_count: int = 0
+        
+        # SDR: Sparse Distributed Representation (Hawkins HTM)
+        self._sdr_cache: Optional["SDR"] = None
+    
+    # ========================================================================
+    # ANCHOR: SDR_SUPPORT - Sparse Distributed Representations
+    # ========================================================================
+    
+    @property
+    def sdr(self) -> "SDR":
+        """
+        Get SDR representation of this neuron.
+        
+        BIOLOGY (Hawkins 2004):
+        Each concept is represented as a sparse binary pattern in cortex.
+        Similar concepts share active bits (semantic similarity via overlap).
+        
+        Returns:
+            SDR encoding of the neuron's id
+        """
+        if self._sdr_cache is None:
+            from sdr import GLOBAL_SDR_ENCODER
+            self._sdr_cache = GLOBAL_SDR_ENCODER.encode(self.id)
+        return self._sdr_cache
+    
+    def sdr_overlap(self, other: "Neuron") -> int:
+        """
+        Compute SDR overlap with another neuron.
+        
+        Args:
+            other: Another neuron
+            
+        Returns:
+            Number of shared active bits
+        """
+        return self.sdr.overlap(other.sdr)
+    
+    def sdr_similarity(self, other: "Neuron") -> float:
+        """
+        Compute SDR similarity score with another neuron.
+        
+        Args:
+            other: Another neuron
+            
+        Returns:
+            Normalized overlap score (0.0 to 1.0)
+        """
+        return self.sdr.overlap_score(other.sdr)
     
     # ========================================================================
     # ANCHOR: HODGKIN_HUXLEY_DYNAMICS - Membrane potential dynamics
