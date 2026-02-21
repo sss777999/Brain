@@ -41,7 +41,15 @@ This is **THE** diagram showing how the model answers questions. Read this FIRST
 ║         │                                                                     ║
 ║         ▼                                                                     ║
 ║  ┌─────────────────────────────────────────────────────────────────────────┐ ║
-║  │ 3. BASAL GANGLIA: ACTION SELECTION (basal_ganglia.py)                   │ ║
+║  │ 3. NEUROMODULATOR UPDATES (neuromodulation.py)                          │ ║
+║  │    • NE (Norepinephrine): spikes on novel query → alertness             │ ║
+║  │    • ACh (Acetylcholine): drops → shifts from encoding to retrieval     │ ║
+║  │    • DA (Dopamine): stable until answer is evaluated                    │ ║
+║  └─────────────────────────────────────────────────────────────────────────┘ ║
+║         │                                                                     ║
+║         ▼                                                                     ║
+║  ┌─────────────────────────────────────────────────────────────────────────┐ ║
+║  │ 4. BASAL GANGLIA: ACTION SELECTION (basal_ganglia.py)                   │ ║
 ║  │    • Competing actions: ["retrieve", "multi_hop"]                       │ ║
 ║  │    • D1 pathway (Go): activates selected action                         │ ║
 ║  │    • D2 pathway (NoGo): inhibits alternatives                           │ ║
@@ -53,7 +61,7 @@ This is **THE** diagram showing how the model answers questions. Read this FIRST
 ║         │                                                                     ║
 ║         ▼                                                                     ║
 ║  ┌─────────────────────────────────────────────────────────────────────────┐ ║
-║  │ 4. SPREADING ACTIVATION (activation.py → Activation class)              │ ║
+║  │ 5. SPREADING ACTIVATION (activation.py → Activation class)              │ ║
 ║  │    • Start with query neurons: {capital, france, what}                  │ ║
 ║  │    • Spread through SEMANTIC connections only                           │ ║
 ║  │    • MYELINATED paths conduct first (priority)                          │ ║
@@ -66,13 +74,15 @@ This is **THE** diagram showing how the model answers questions. Read this FIRST
 ║         │                                                                     ║
 ║         ▼                                                                     ║
 ║  ┌─────────────────────────────────────────────────────────────────────────┐ ║
-║  │ 5. HIPPOCAMPUS: PATTERN COMPLETION (hippocampus.py + ca3.py)            │ ║
+║  │ 6. HIPPOCAMPUS: PATTERN COMPLETION (hippocampus.py + ca3.py)            │ ║
 ║  │                                                                          │ ║
-║  │    5a. CANDIDATE SELECTION (inverted index)                             │ ║
+║  │    6a. CANDIDATE SELECTION (inverted index)                             │ ║
 ║  │        • _word_to_episodes[word] → episodes containing word             │ ║
 ║  │        • Expand query with VERB_FORMS: give→gives, fall→falls           │ ║
 ║  │                                                                          │ ║
-║  │    5b. CA3 ATTRACTOR DYNAMICS (ca3.py → CA3 class)                      │ ║
+║  │    6b. CA3 ATTRACTOR DYNAMICS (ca3.py → CA3 class)                      │ ║
+║  │        • NE (Norepinephrine) controls INHIBITION_K (focus)              │ ║
+║  │        • DA (Dopamine) controls CONNECTOR_BOOST                         │ ║
 ║  │        • Initial activation: cue_neurons = 1.0                          │ ║
 ║  │        • ITERATE until stable (max 10 iterations):                      │ ║
 ║  │          ┌───────────────────────────────────────────────────────────┐  │ ║
@@ -80,33 +90,34 @@ This is **THE** diagram showing how the model answers questions. Read this FIRST
 ║  │          │   - MYELINATED: 0.8 strength                              │  │ ║
 ║  │          │   - USED: 0.4 strength                                    │  │ ║
 ║  │          │   - NEW: 0.1 strength                                     │  │ ║
-║  │          │   - Connector match (top-down): ×5.0 boost                │  │ ║
-║  │          │ • _apply_inhibition(): WTA, keep top-K (K=20)             │  │ ║
+║  │          │   - Connector match (top-down): DA-boosted strength       │  │ ║
+║  │          │ • _apply_inhibition(): WTA, keep top-K                    │  │ ║
 ║  │          │ • Check stability: if same as previous → STOP             │  │ ║
 ║  │          └───────────────────────────────────────────────────────────┘  │ ║
 ║  │        • completed_pattern = {capital, france, paris}                   │ ║
 ║  │                                                                          │ ║
-║  │    5c. EPISODE SCORING (_score_episodes)                                │ ║
+║  │    6c. EPISODE SCORING (_score_episodes)                                │ ║
 ║  │        • Source filter: preferred sources + selective inclusion          │ ║
-║  │          (MEDIA only if ALL content query words match) (Phase 21)      │ ║
+║  │          (MEDIA only if ALL content query words match)                   │ ║
+║  │        • Narrative filter: suppress NARRATIVE (fables) for facts         │ ║
 ║  │        • Query overlap: episodes with query words score highest         │ ║
 ║  │        • Connection strength: MYELINATED > USED > NEW                   │ ║
 ║  │        • Context multiplier: context words get ×3 bonus                 │ ║
 ║  │        • Top-down connector modulation:                                 │ ║
 ║  │          - String connector: ×5.0 enhance / ×0.2 suppress (biased)    │ ║
 ║  │          - Frozenset (temporal): ×2.0 boost only (soft facilitation)  │ ║
-║  │        • Temporal concept bonus: for 'when' questions (Phase 19)       │ ║
+║  │        • Temporal concept bonus: for 'when' questions                   │ ║
 ║  │        • Recency: working memory episodes get timestamp bonus           │ ║
 ║  │        • Subject bonus: episode contains question subject               │ ║
 ║  │        • Source trust: trust_multiplier per source type                  │ ║
 ║  │        • Unconnected context filter: lateral inhibition (hard skip)    │ ║
-║  │        • Episode deduplication in top-K (Phase 20)                      │ ║
+║  │        • Episode deduplication in top-K                                 │ ║
 ║  │        • Best episode: Episode(input_words=("capital","france","paris"))│ ║
 ║  └─────────────────────────────────────────────────────────────────────────┘ ║
 ║         │                                                                     ║
 ║         ▼                                                                     ║
 ║  ┌─────────────────────────────────────────────────────────────────────────┐ ║
-║  │ 6. CA1 OUTPUT LAYER (ca1.py → CA1 class)                                │ ║
+║  │ 7. CA1 OUTPUT LAYER (ca1.py → CA1 class)                                │ ║
 ║  │    • Receives: Schaffer collaterals from CA3 (70%)                      │ ║
 ║  │    • Receives: Direct temporoammonic from EC (30%)                      │ ║
 ║  │    • Feedforward readout of completed pattern                           │ ║
@@ -115,7 +126,7 @@ This is **THE** diagram showing how the model answers questions. Read this FIRST
 ║         │                                                                     ║
 ║         ▼                                                                     ║
 ║  ┌─────────────────────────────────────────────────────────────────────────┐ ║
-║  │ 7. ANSWER GENERATION (motor_output.py → SequenceGenerator)              │ ║
+║  │ 8. ANSWER GENERATION (motor_output.py → SequenceGenerator)              │ ║
 ║  │    • Get episode.input_words (CONTENT words from hippocampal memory)    │ ║
 ║  │    • Filter out question words (lateral inhibition)                     │ ║
 ║  │    • BROCA'S FORMULATOR: restore function words from connectors         │ ║
@@ -125,7 +136,15 @@ This is **THE** diagram showing how the model answers questions. Read this FIRST
 ║         │                                                                     ║
 ║         ▼                                                                     ║
 ║  ┌─────────────────────────────────────────────────────────────────────────┐ ║
-║  │ 8. OPTIONAL: LLM POSTPROCESSING (llm_postprocess.py)                    │ ║
+║  │ 9. EVALUATION & NEUROMODULATOR UPDATE                                   │ ║
+║  │    • If success: DA burst (reward), 5-HT boosts confidence              │ ║
+║  │    • If fail: DA dip, NE spike (frustration/alertness)                  │ ║
+║  │    • Modulators decay back to baseline                                  │ ║
+║  └─────────────────────────────────────────────────────────────────────────┘ ║
+║         │                                                                     ║
+║         ▼                                                                     ║
+║  ┌─────────────────────────────────────────────────────────────────────────┐ ║
+║  │ 10. OPTIONAL: LLM POSTPROCESSING (llm_postprocess.py)                   │ ║
 ║  │    • Broca's area analogue for grammatical speech                       │ ║
 ║  │    • Input: raw answer "paris"                                          │ ║
 ║  │    • Output: "Paris" (capitalized, grammatical)                         │ ║
@@ -265,6 +284,22 @@ If direct retrieval fails (no episode found), the system uses `IterativeRetrieve
 ║  └─────────────────────────────────────────────────────────────────────────┘ ║
 ║         │                                                                    ║
 ║         ▼                                                                    ║
+║  ┌─────────────────────────────────────────────────────────────────────────┐ ║
+║  │ 6. NEUROMODULATOR EFFECTS                                               │ ║
+║  │    • DA: Reward signal (if successful previous learning)                │ ║
+║  │    • ACh: High during encoding → promotes new episode creation          │ ║
+║  │    • NE: High if novel stimulus → boosts STDP window and eligibility    │ ║
+║  └─────────────────────────────────────────────────────────────────────────┘ ║
+║         │                                                                    ║
+║         ▼                                                                    ║
+║  ┌─────────────────────────────────────────────────────────────────────────┐ ║
+║  │ 7. CONSOLIDATION / SYNAPTIC HOMEOSTASIS (hippocampus.py)                │ ║
+║  │    • NREM Sleep: Downscaling (LTD) for rarely used connections          │ ║
+║  │    • REM Sleep: Random replay, cross-episode linking                    │ ║
+║  │    • Forgetting: Pruning connections with strength < 0.1                │ ║
+║  └─────────────────────────────────────────────────────────────────────────┘ ║
+║         │                                                                    ║
+║         ▼                                                                    ║
 ║  STORED: Episode in HIPPOCAMPUS.episodes, connections strengthened           ║
 ║                                                                              ║
 ╚══════════════════════════════════════════════════════════════════════════════╝
@@ -388,7 +423,7 @@ the KNOWLEDGE is real, only the INTERFACE is simplified.
 - ✅ **Explicit dependency** — Hippocampus._ca3 (not singleton)
 
 ### Source Memory System (Johnson et al., 1993)
-- ✅ **SourceType enum** — LEARNING / EXPERIENCE / CONVERSATION / MEDIA / WORKING_MEMORY
+- ✅ **SourceType enum** — LEARNING / EXPERIENCE / CONVERSATION / MEDIA / NARRATIVE / WORKING_MEMORY
 - ✅ **QuestionType enum** — SEMANTIC_FACT / EXPERIENCE / LOCATION / TEMPORAL / UNKNOWN
 - ✅ **SOURCE_TRUST** — trust levels per source type (config.py)
 - ✅ **QUESTION_TYPE_SOURCES** — question type → preferred source types mapping
@@ -396,6 +431,20 @@ the KNOWLEDGE is real, only the INTERFACE is simplified.
 - ✅ **PFC routing** — classify_question() + get_preferred_sources()
 - ✅ **Selective Inclusion (Phase 21)** — preferred sources always included; non-preferred (MEDIA) included ONLY when ALL content query words present in episode (highly specific match)
 - ✅ **Unconnected Context Filter** — lateral inhibition silences episodes where key content query words have no structural connections to episode words (anti-hallucination)
+- ✅ **Narrative Filtering** — suppresses NARRATIVE (stories, fables) associations during factual retrieval to prevent contamination (Tulving 1972)
+
+### Neuromodulator System (Hasselmo, Schultz, Gerstner)
+- ✅ **Dopamine (DA)** — Reward Prediction Error. Lowers threshold for LTP/myelination, strengthens Target Pathways in CA3.
+- ✅ **Norepinephrine (NE)** — Alertness/Novelty. Narrows attention focus (WTA threshold `INHIBITION_K` in CA3).
+- ✅ **Acetylcholine (ACh)** — Encoding vs Retrieval. High ACh promotes episode creation; Low ACh suppresses encoding during recall.
+- ✅ **Serotonin (5-HT)** — Impulse Control. Regulates PFC gate threshold (low 5-HT = impulsive, high 5-HT = strict).
+- ✅ **Global Chemical Bath** — `neuromodulation.py` tracks state and applies multiplicative effects globally.
+
+### Forgetting & Synaptic Homeostasis (Tononi & Cirelli 2006)
+- ✅ **LTD (Long-Term Depression)** — Episodes gradually lose `strength` if not accessed or replayed.
+- ✅ **Synaptic Downscaling** — NREM sleep globally scales down connections (preserves signal-to-noise ratio).
+- ✅ **Episodic Pruning** — Connections with `context_diversity=1` (purely episodic) decay faster than semantic ones.
+- ✅ **Physical Deletion** — Episodes with strength < 0.1 are physically removed, maintaining memory boundaries.
 - ✅ **Source Preference Bonus** — preferred-source episodes get additive scoring bonus (stronger engrams via LTP)
 
 ### Neuromodulation System

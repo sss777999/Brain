@@ -59,7 +59,14 @@ class CA3:
     @property
     def INHIBITION_K(self) -> int:
         """Number of neurons remaining after lateral inhibition."""
-        return CONFIG.get("CA3_INHIBITION_K", 20)
+        base_k = CONFIG.get("CA3_INHIBITION_K", 20)
+        # BIOLOGY: Norepinephrine (NE) narrows attention focus
+        from neuromodulation import GLOBAL_MODULATORS, ModulatorType
+        ne_level = GLOBAL_MODULATORS.get_level(ModulatorType.NOREPINEPHRINE)
+        # Higher NE -> smaller K (more focused/tighter WTA)
+        # Baseline NE is 0.3. If NE=1.0, K reduces by up to 50%
+        focus_factor = 1.0 - (max(0, ne_level - 0.3) * 0.7)
+        return max(5, int(base_k * focus_factor))
     
     @property
     def ACTIVATION_THRESHOLD(self) -> float:
@@ -69,7 +76,13 @@ class CA3:
     @property
     def CONNECTOR_BOOST(self) -> float:
         """Multiplicative boost for connections matching query_connector."""
-        return CONFIG.get("CA3_CONNECTOR_BOOST", 5.0)
+        base_boost = CONFIG.get("CA3_CONNECTOR_BOOST", 5.0)
+        # BIOLOGY: Dopamine (DA) strengthens task-relevant pathways
+        from neuromodulation import GLOBAL_MODULATORS, ModulatorType
+        da_level = GLOBAL_MODULATORS.get_level(ModulatorType.DOPAMINE)
+        # Baseline DA is 0.5. If DA=1.0, boost increases
+        da_multiplier = 1.0 + (max(0, da_level - 0.5) * 1.0)
+        return base_boost * da_multiplier
     
     @property
     def RECENCY_WEIGHT(self) -> float:

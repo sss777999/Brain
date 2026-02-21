@@ -86,19 +86,22 @@ INPUT: "What is the capital of France?"
 ┌──────────────────────────────────────────────────────────────────────────┐
 │ 1. BROCA (broca.py): Parse question → subject="france", connector="is_a" │
 │ 2. PFC (pfc.py): Set goal, load context, classify question type          │
-│ 3. BASAL GANGLIA (basal_ganglia.py): Select action (retrieve vs multi_hop)│
-│ 4. ACTIVATION (activation.py): Spread through SEMANTIC connections        │
+│ 3. NEUROMODULATORS: NE spikes (alertness), ACh drops (retrieval mode)    │
+│ 4. BASAL GANGLIA (basal_ganglia.py): Select action (retrieve vs multi_hop)│
+│ 5. ACTIVATION (activation.py): Spread through SEMANTIC connections        │
 │    - MYELINATED paths conduct first, lateral inhibition, hub penalty     │
-│ 5. HIPPOCAMPUS (hippocampus.py + ca3.py): Pattern completion             │
-│    - CA3 attractor dynamics: spread → WTA → stability check              │
+│ 6. HIPPOCAMPUS (hippocampus.py + ca3.py): Pattern completion             │
+│    - CA3 attractor dynamics: spread → WTA (focused by NE) → stable       │
 │    - Source filter: preferred + selective inclusion (Phase 21)           │
-│    - Score: query overlap, connections, temporal bonus (P19), roles     │
-│    - Connector: string ×5/×0.2 (biased), frozenset ×2 (soft)           │
-│    - Unconnected context filter, dedup top-K (Phase 20)                 │
+│    - Narrative filter: suppress NARRATIVE (fables) for factual queries   │
+│    - Score: query overlap, connections, temporal bonus (P19), roles      │
+│    - Connector: DA-boosted string ×5/×0.2 (biased), frozenset ×2 (soft)  │
+│    - Unconnected context filter, dedup top-K (Phase 20)                  │
 │    - Best episode: ("capital", "france", "paris")                        │
-│ 6. CA1 (ca1.py): Output layer, projects to PFC                           │
-│ 7. MOTOR OUTPUT (motor_output.py): Filter question words → ["paris"]     │
-│ 8. LLM (optional): Grammatical verbalization → "Paris"                   │
+│ 7. CA1 (ca1.py): Output layer, projects to PFC                           │
+│ 8. MOTOR OUTPUT (motor_output.py): Filter question words → ["paris"]     │
+│ 9. EVALUATION: Success → DA burst (reward), 5-HT boost (confidence)      │
+│ 10. LLM (optional): Grammatical verbalization → "Paris"                  │
 └──────────────────────────────────────────────────────────────────────────┘
        │
        ▼
@@ -215,6 +218,8 @@ Example:
 | Synaptic Scaling | ✅ | Homeostatic plasticity, stable activity level |
 | Competitive Learning | ✅ | Winner-Take-All in DG, experienced neurons win |
 | Predictive Coding | ✅ | MYELINATED connections do not strengthen (already predictable) |
+| Long-Term Depression | ✅ | Episodes lose strength if not replayed, physical pruning |
+| Episodic Pruning | ✅ | Fast decay for connections with low context diversity |
 | **SPIKING NEURAL NETWORK** | | |
 | Hodgkin-Huxley Model | ✅ | Biologically accurate membrane potential dynamics |
 | Real STDP | ✅ | Spike-timing dependent plasticity based on spike_history |
@@ -227,16 +232,18 @@ Example:
 | Three-Factor Learning | ✅ | Eligibility traces + neuromodulation |
 | **NEUROMODULATION** | | |
 | BrainOscillator | ✅ | Theta (6Hz) and Gamma (40Hz) oscillations |
-| Dopamine System | ✅ | Novelty → DA release → boosted STDP |
-| Acetylcholine | ✅ | Attention gate, modulates learning |
-| Norepinephrine | ✅ | Arousal/surprise, increases excitability |
-| Serotonin | ✅ | Behavioral inhibition, patience |
+| Global Chemical Bath | ✅ | Real-time state tracking of DA, NE, ACh, 5-HT |
+| Dopamine (DA) | ✅ | Lowers myelination threshold, boosts target paths |
+| Norepinephrine (NE) | ✅ | Narrows attention focus (WTA k) during stress/novelty |
+| Acetylcholine (ACh) | ✅ | Modulates encode/retrieve modes in hippocampus |
+| Serotonin (5-HT) | ✅ | Regulates impulse control (PFC gating threshold) |
 | **SOURCE MEMORY** | | |
-| SourceType enum | ✅ | LEARNING / EXPERIENCE / CONVERSATION / MEDIA |
+| SourceType enum | ✅ | LEARNING / EXPERIENCE / CONVERSATION / MEDIA / NARRATIVE |
 | QuestionType enum | ✅ | SEMANTIC_FACT / EXPERIENCE / LOCATION / TEMPORAL |
 | Episode.trust | ✅ | Trust level based on source type |
 | PFC routing | ✅ | classify_question() + get_preferred_sources() |
 | CA3 filtering | ✅ | Selective inclusion: preferred always + MEDIA only if ALL query words match |
+| Narrative filter | ✅ | Suppresses story/fable associations during factual retrieval |
 | Unconnected context filter | ✅ | Lateral inhibition: hard skip for structurally unconnected episodes |
 | Source preference bonus | ✅ | Preferred-source episodes get additive scoring advantage |
 | **CA3 ATTRACTOR DYNAMICS** | | |
@@ -296,6 +303,23 @@ AVERAGE       100.0%   51.1%    57.3%    N/A     N/A
 📊 **[Full results with analysis](docs/RESULTS.md)**
 
 **New mechanisms (February 2026):**
+- **Synaptic Homeostasis & Forgetting (PHASE 25)** — LTD and global downscaling (Tononi & Cirelli 2006)
+  - NREM sleep globally scales down synaptic weights, preserving signal-to-noise ratio
+  - Episodes not accessed or replayed gradually lose `strength` via Long-Term Depression (LTD)
+  - Purely episodic traces (low context diversity) decay faster than semantic ones
+  - Physical pruning: episodes with strength < 0.1 are removed, bounding memory growth
+  - Result: Prevents saturation, naturally clears obsolete memories, improves retrieval speed
+- **Global Neuromodulator System (PHASE 24)** — dynamic chemical state (Hasselmo, Schultz, Gerstner)
+  - `NeuromodulatorSystem` tracks global levels of DA, NE, ACh, and 5-HT
+  - Dopamine (DA): Reward Prediction Error. Drops threshold for myelination, boosts CA3 target pathways on successful answers.
+  - Norepinephrine (NE): Novelty/Alertness. Narrows CA3 attention focus (WTA `INHIBITION_K`) during new or stressful queries.
+  - Acetylcholine (ACh): Encode vs Retrieve. High ACh promotes episode creation; low ACh during retrieval suppresses new encoding.
+  - Serotonin (5-HT): Impulse Control. Regulates PFC gating threshold — low 5-HT makes the system impulsive.
+  - Biology: Validates Hiersche et al. 2026 (connectivity-function coupling via receptor density).
+- **Narrative Source Filtering** — episodic contamination prevention (Tulving 1972)
+  - Stories and fables (McGuffey, Aesop) are stored with `source="NARRATIVE"` (trust=0.4)
+  - PFC top-down modulation suppresses NARRATIVE associations during factual retrieval
+  - Prevents story elements (e.g., Lion and Mouse fable) from polluting factual answers about animals
 - **Broca's Area Phase 3 Reanalysis (PHASE 17)** — paraphrase normalization (Friederici 2011)
   - Transforms non-canonical question forms to canonical WH-questions
   - Inverted questions: "The sky is what color?" → "What color is the sky?"
