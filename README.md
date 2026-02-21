@@ -246,6 +246,11 @@ Example:
 | Narrative filter | ✅ | Suppresses story/fable associations during factual retrieval |
 | Unconnected context filter | ✅ | Lateral inhibition: hard skip for structurally unconnected episodes |
 | Source preference bonus | ✅ | Preferred-source episodes get additive scoring advantage |
+| **SPARSE DISTRIBUTED REPRESENTATIONS** | | |
+| SDR Encoding | ✅ | Words → sparse binary vectors (2048 bits, ~40 active) |
+| SDR Overlap Scoring | ✅ | Semantic similarity via bit overlap (Hawkins HTM) |
+| Neuron.sdr property | ✅ | Lazy SDR encoding per neuron |
+| Parallel Integration | ✅ | SDR scoring runs alongside string-based (no regression) |
 | **CA3 ATTRACTOR DYNAMICS** | | |
 | CA3 class | ✅ | Separate recurrent module for pattern completion |
 | Iterative dynamics | ✅ | Spread activation + WTA + stability check |
@@ -316,6 +321,12 @@ AVERAGE       100.0%   51.1%    57.3%    N/A     N/A
   - Acetylcholine (ACh): Encode vs Retrieve. High ACh promotes episode creation; low ACh during retrieval suppresses new encoding.
   - Serotonin (5-HT): Impulse Control. Regulates PFC gating threshold — low 5-HT makes the system impulsive.
   - Biology: Validates Hiersche et al. 2026 (connectivity-function coupling via receptor density).
+- **Sparse Distributed Representations (PHASE 26)** — semantic generalization (Hawkins HTM)
+  - `sdr.py` encodes words as sparse binary vectors (2048 bits, ~40 active = 2% sparsity)
+  - SDR overlap captures semantic similarity: similar words share active bits
+  - `Neuron.sdr` property provides lazy SDR encoding per neuron
+  - CA3 scoring uses SDR overlap as bonus component (parallel to string-based)
+  - Enables natural generalization: learning "dog" partially activates "puppy" via bit overlap
 - **Narrative Source Filtering** — episodic contamination prevention (Tulving 1972)
   - Stories and fables (McGuffey, Aesop) are stored with `source="NARRATIVE"` (trust=0.4)
   - PFC top-down modulation suppresses NARRATIVE associations during factual retrieval

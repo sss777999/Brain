@@ -137,6 +137,13 @@ Working Memory Baselines (MemNet, NTM): tested ONLY on bAbI Task 1
     - Episodic Pruning: Low context diversity connections decay faster than semantic ones
     - Synaptic Downscaling: NREM sleep globally scales down weights
     - Physical Deletion: Episodes with strength < 0.1 are physically removed
+    
+    PHASE 26: Sparse Distributed Representations (Hawkins HTM)
+    - sdr.py encodes words as sparse binary vectors (2048 bits, ~40 active)
+    - SDR overlap captures semantic similarity via bit intersection
+    - Neuron.sdr property provides lazy encoding per neuron
+    - CA3 scoring uses SDR overlap as bonus (parallel to string-based)
+    - Enables natural generalization: "dog" partially activates "puppy"
     - ⚠️ KNOWN LIMITATION: LOCATIONS/OBJECTS vocabulary sets are domain-specific
       world knowledge that would ideally be learned from semantic memory.
       The MECHANISM is biological, the VOCABULARY is explicitly provided.

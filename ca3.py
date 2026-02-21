@@ -597,7 +597,42 @@ class CA3:
             # Final score with trust weighting and source preference
             # BROCA'S AREA: subject_bonus adds weight for episodes with question subject
             base_score = (query_overlap + subject_bonus + source_bonus) * w1 + avg_strength * w2 + overlap * w3 + consolidation_bonus + recency_bonus + role_bonus
-            score = base_score * trust_multiplier
+            
+            # SDR OVERLAP BONUS (Hawkins HTM Theory)
+            # BIOLOGY: Sparse Distributed Representations capture semantic similarity
+            # via bit overlap. Words with shared features have overlapping SDRs,
+            # enabling generalization: knowing about "dog" helps retrieve "puppy".
+            # This runs in PARALLEL with string-based scoring (Phase 6 migration).
+            sdr_bonus = 0.0
+            if word_to_neuron and query_words and CONFIG.get("USE_SDR_SCORING", True):
+                try:
+                    from sdr import GLOBAL_SDR_ENCODER, union_sdr
+                    
+                    # Encode query as union SDR
+                    query_sdrs = [GLOBAL_SDR_ENCODER.encode(w) for w in query_words if w]
+                    if query_sdrs:
+                        query_union = query_sdrs[0]
+                        for sdr in query_sdrs[1:]:
+                            query_union = query_union.union(sdr)
+                        
+                        # Encode episode as union SDR
+                        ep_sdrs = [GLOBAL_SDR_ENCODER.encode(w) for w in engram if w]
+                        if ep_sdrs:
+                            ep_union = ep_sdrs[0]
+                            for sdr in ep_sdrs[1:]:
+                                ep_union = ep_union.union(sdr)
+                            
+                            # Compute overlap score
+                            sdr_overlap_score = query_union.match_score(ep_union)
+                            
+                            # Add bonus proportional to SDR similarity
+                            # Scale: 10% of w1 at full overlap
+                            sdr_bonus = sdr_overlap_score * w1 * 0.1
+                except Exception:
+                    # SDR not available or error — graceful degradation
+                    pass
+            
+            score = (base_score + sdr_bonus) * trust_multiplier
             
             if score >= best_score:
                 best_score = score

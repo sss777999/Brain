@@ -1,0 +1,3519 @@
+Log file: logs/test_results_21.02.2026_18-52-02.txt
+
+
+======================================================================
+TESTS CURRICULUM
+======================================================================
+✅ PASS | Q: What is a dog?
+         ✅ Brain  [1.011s]: animal and a pet that loves to play says bow wow which means puppy is a baby
+         ❌ TF-IDF [0.165s]: dog is dog food
+         ❌ BM25   [0.100s]: what is puppy baby dog
+         Expected: ['animal', 'pet', 'mammal']
+
+✅ PASS | Q: What is a cat?
+         ✅ Brain  [1.279s]: animal and a pet that catches eats fish and meat kitten is a baby
+         ❌ TF-IDF [0.161s]: cat is cat food
+         ❌ BM25   [0.100s]: what is kitten baby cat
+         Expected: ['animal', 'pet', 'mammal']
+
+✅ PASS | Q: What is a lion?
+         ✅ Brain  [1.292s]: animal cub is a baby laid his huge paw on the tiny creature says roar mouse
+         ✅ TF-IDF [0.162s]: lion is animal
+         ✅ BM25   [0.100s]: lion is animal
+         Expected: ['animal', 'wild', 'predator']
+
+✅ PASS | Q: What is a whale?
+         ✅ Brain  [0.990s]: mammal large at animal biggest is the ocean
+         ✅ TF-IDF [0.165s]: whale is animal
+         ✅ BM25   [0.100s]: a whale is a mammal
+         Expected: ['animal', 'mammal', 'ocean']
+
+✅ PASS | Q: What is an apple?
+         ✅ Brain  [1.162s]: fruit apple red or green leaves tree apples grow trees
+         ✅ TF-IDF [0.169s]: an apple is a fruit
+         ✅ BM25   [0.111s]: an apple is a fruit
+         Expected: ['fruit']
+
+✅ PASS | Q: What is a carrot?
+         ✅ Brain  [1.267s]: vegetable orange
+         ❌ TF-IDF [0.160s]: carrot is orange
+         ✅ BM25   [0.099s]: a carrot is a vegetable
+         Expected: ['vegetable']
+
+✅ PASS | Q: What is a car?
+         ✅ Brain  [1.207s]: vehicle car four wheels driver made of metal wear a seatbelt
+         ❌ TF-IDF [0.162s]: car is fast
+         ✅ BM25   [0.099s]: a car is a vehicle
+         Expected: ['vehicle']
+
+✅ PASS | Q: What is a piano?
+         ✅ Brain  [0.676s]: instrument
+         ✅ TF-IDF [0.161s]: piano is instrument
+         ✅ BM25   [0.099s]: piano is instrument
+         Expected: ['instrument']
+
+✅ PASS | Q: What color is the sky?
+         ✅ Brain  [0.762s]: blue gray rainy day
+         ✅ TF-IDF [0.178s]: blue is the color of the sky
+         ✅ BM25   [0.123s]: blue is the color of the sky
+         Expected: ['blue']
+
+✅ PASS | Q: What color is grass?
+         ✅ Brain  [0.962s]: green grows on the ground cows eat dew forms morning cow eats
+         ✅ TF-IDF [0.170s]: green is the color of grass
+         ✅ BM25   [0.111s]: grass is green in color
+         Expected: ['green']
+
+✅ PASS | Q: What color is the sun?
+         ✅ Brain  [0.979s]: yellow and bright round in another up
+         ✅ TF-IDF [0.179s]: yellow is the color of the sun
+         ✅ BM25   [0.122s]: yellow is the color of the sun
+         Expected: ['yellow']
+
+✅ PASS | Q: What color is snow?
+         ✅ Brain  [1.014s]: white and cold
+         ✅ TF-IDF [0.169s]: the color of snow is white
+         ✅ BM25   [0.111s]: the color of snow is white
+         Expected: ['white']
+
+✅ PASS | Q: What color is a banana?
+         ✅ Brain  [0.922s]: yellow banana fruit
+         ✅ TF-IDF [0.171s]: yellow is the color of a banana
+         ✅ BM25   [0.112s]: yellow is the color of a banana
+         Expected: ['yellow']
+
+✅ PASS | Q: What color is an orange?
+         ✅ Brain  [1.934s]: orange is the color rainbow has seven colors red and yellow leaves green and blue indigo fruit pumpkin leaves to turn
+         ✅ TF-IDF [0.179s]: orange is the color of an orange
+         ✅ BM25   [0.123s]: orange is the color of an orange
+         Expected: ['orange']
+
+✅ PASS | Q: What does a dog say?
+         ✅ Brain  [1.042s]: woof says bow wow thank animal and a pet
+         ❌ TF-IDF [0.169s]: dog food dog
+         ✅ BM25   [0.111s]: a dog say woof
+         Expected: ['woof', 'bark']
+
+✅ PASS | Q: What does a cat say?
+         ✅ Brain  [0.751s]: says meow meow polly poor poll wants mew like of which is not a good friends catch pastry she heard loudly and scratch
+         ❌ TF-IDF [0.170s]: cat food cat
+         ❌ BM25   [0.114s]: what is kitten baby cat
+         Expected: ['meow', 'purr']
+
+✅ PASS | Q: What does a cow say?
+         ✅ Brain  [0.966s]: says moo
+         ❌ TF-IDF [0.167s]: animal cow
+         ❌ BM25   [0.110s]: what is calf baby cow
+         Expected: ['moo']
+
+✅ PASS | Q: What does a duck say?
+         ✅ Brain  [0.807s]: says quack quack
+         ❌ TF-IDF [0.168s]: duck donald duck
+         ❌ BM25   [0.112s]: duck donald duck
+         Expected: ['quack']
+
+✅ PASS | Q: What does a lion say?
+         ✅ Brain  [0.854s]: says roar mouse quickly found struggling in the net see us help amused
+         ❌ TF-IDF [0.170s]: animal lion
+         ❌ BM25   [0.112s]: We express ourselves by what we do, by what we say, and by w
+         Expected: ['roar']
+
+✅ PASS | Q: What is the opposite of hot?
+         ✅ Brain  [0.000s]: cold
+         ✅ TF-IDF [0.181s]: hot is the opposite of cold
+         ✅ BM25   [0.134s]: hot is the opposite of cold
+         Expected: ['cold']
+
+✅ PASS | Q: What is the opposite of big?
+         ✅ Brain  [0.000s]: small
+         ✅ TF-IDF [0.181s]: big is the opposite of small
+         ✅ BM25   [0.135s]: big is the opposite of small
+         Expected: ['small', 'little']
+
+✅ PASS | Q: What is the opposite of fast?
+         ✅ Brain  [0.000s]: slow
+         ✅ TF-IDF [0.181s]: fast is the opposite of slow
+         ✅ BM25   [0.136s]: fast is the opposite of slow
+         Expected: ['slow']
+
+✅ PASS | Q: What is the opposite of up?
+         ✅ Brain  [0.001s]: down
+         ✅ TF-IDF [0.180s]: up is the opposite of down
+         ✅ BM25   [0.135s]: up is the opposite of down
+         Expected: ['down']
+
+✅ PASS | Q: What is the opposite of happy?
+         ✅ Brain  [0.000s]: sad
+         ✅ TF-IDF [0.182s]: happy is the opposite of sad
+         ✅ BM25   [0.134s]: happy is the opposite of sad
+         Expected: ['sad']
+
+✅ PASS | Q: What is the opposite of day?
+         ✅ Brain  [0.000s]: night
+         ✅ TF-IDF [0.187s]: the opposite of day is night
+         ✅ BM25   [0.135s]: day is the opposite of night
+         Expected: ['night']
+
+✅ PASS | Q: What is the capital of France?
+         ✅ Brain  [0.825s]: paris berlin is germany beijing is china moscow is russia tokyo is japan
+         ✅ TF-IDF [0.181s]: the capital of france is paris
+         ✅ BM25   [0.135s]: paris is the capital of france
+         Expected: ['paris']
+
+✅ PASS | Q: What is the capital of England?
+         ✅ Brain  [0.804s]: london rome is italy paris is france tokyo is japan beijing is china
+         ✅ TF-IDF [0.183s]: london is the capital of england
+         ✅ BM25   [0.136s]: london is the capital of england
+         Expected: ['london']
+
+✅ PASS | Q: What is the capital of Japan?
+         ✅ Brain  [0.820s]: tokyo moscow is russia paris is france rome is italy london is england
+         ✅ TF-IDF [0.181s]: tokyo is the capital of japan
+         ✅ BM25   [0.134s]: tokyo is the capital of japan
+         Expected: ['tokyo']
+
+✅ PASS | Q: Where is Paris?
+         ✅ Brain  [0.715s]: capital of france
+         ❌ TF-IDF [0.162s]: paris is capital
+         ❌ BM25   [0.100s]: paris is capital
+         Expected: ['france']
+
+✅ PASS | Q: Where is London?
+         ✅ Brain  [0.705s]: capital of england
+         ❌ TF-IDF [0.162s]: london is capital
+         ❌ BM25   [0.101s]: london is capital
+         Expected: ['england', 'uk']
+
+✅ PASS | Q: What is the sun?
+         ✅ Brain  [1.086s]: star big opposites hot sky only in the not a planet earth goes what down at night
+         ❌ TF-IDF [0.172s]: the sun is up
+         ❌ BM25   [0.118s]: the sun is round
+         Expected: ['star']
+
+✅ PASS | Q: What is the Earth?
+         ✅ Brain  [1.156s]: planet earth goes around the sun is round circle like a ball spins top moon
+         ❌ TF-IDF [0.173s]: earth is life
+         ❌ BM25   [0.112s]: it hasn't
+Unfortunately this is not what old earth scientist
+         Expected: ['planet']
+
+✅ PASS | Q: What is the moon?
+         ✅ Brain  [1.041s]: stars appear in the sky at night when they would come out to see shines goes around the earth
+         ✅ TF-IDF [0.171s]: night is moon
+         ✅ BM25   [0.112s]: the moon is round
+         Expected: ['satellite', 'round', 'night']
+
+✅ PASS | Q: What is water?
+         ✅ Brain  [1.359s]: liquid plants that need sunlight and soil to grow drink instead of sweet drinks cannot birds live wash your hands with soap
+         ❌ TF-IDF [0.164s]: What Is It
+         ❌ BM25   [0.100s]: Water retains its inherent properties of emissivity regardle
+         Expected: ['liquid', 'h2o', 'drink']
+
+✅ PASS | Q: What is ice?
+         ✅ Brain  [1.200s]: solid melts when it gets warm ice cream is cold and sweet get melt
+         ❌ TF-IDF [0.164s]: ice skating is ice
+         ❌ BM25   [0.100s]: ice skating is ice
+         Expected: ['solid', 'cold', 'frozen']
+
+✅ PASS | Q: What is a puppy?
+         ✅ Brain  [0.651s]: baby dog
+         ✅ TF-IDF [0.166s]: what is puppy baby dog
+         ✅ BM25   [0.100s]: what is puppy baby dog
+         Expected: ['baby', 'dog']
+
+✅ PASS | Q: What is a kitten?
+         ✅ Brain  [0.885s]: baby cat
+         ✅ TF-IDF [0.162s]: what is kitten baby cat
+         ✅ BM25   [0.100s]: what is kitten baby cat
+         Expected: ['baby', 'cat']
+
+✅ PASS | Q: What is a calf?
+         ✅ Brain  [0.789s]: baby cow
+         ✅ TF-IDF [0.162s]: what is calf baby cow
+         ✅ BM25   [0.100s]: what is calf baby cow
+         Expected: ['baby', 'cow']
+
+✅ PASS | Q: What is a chick?
+         ✅ Brain  [0.830s]: baby chicken bird egg becomes become
+         ✅ TF-IDF [0.162s]: A chick is a baby bird
+         ✅ BM25   [0.100s]: a chick is a baby chicken
+         Expected: ['baby', 'chicken']
+
+✅ PASS | Q: What do we see with?
+         ✅ Brain  [1.265s]: eyes our use paragraphs two resolve help colors and shapes and movement
+         ❌ TF-IDF [0.178s]: We express ourselves by what we do, by what we say, and by w
+         ❌ BM25   [0.124s]: We express ourselves by what we do, by what we say, and by w
+         Expected: ['eyes']
+
+✅ PASS | Q: What do we hear with?
+         ✅ Brain  [1.322s]: ears to use paragraphs two resolve help sounds and music comes fanny to see stand men play
+         ✅ TF-IDF [0.181s]: we hear with our ears
+         ✅ BM25   [0.125s]: we hear with our ears
+         Expected: ['ears']
+
+✅ PASS | Q: What do we smell with?
+         ✅ Brain  [1.133s]: nose our use lexicography sense uses
+         ✅ TF-IDF [0.178s]: we smell with nose
+         ✅ BM25   [0.125s]: we smell with nose
+         Expected: ['nose']
+
+✅ PASS | Q: When do we wake up?
+         ✅ Brain  [1.370s]: morning afternoon eat breakfast time to go to bed early
+         ✅ TF-IDF [0.182s]: morning is when we wake up
+         ✅ BM25   [0.125s]: morning is when we wake up
+         Expected: ['morning']
+
+✅ PASS | Q: When do we sleep?
+         ✅ Brain  [1.440s]: night is dark people
+         ✅ TF-IDF [0.170s]: night is when we sleep
+         ❌ BM25   [0.113s]: we dream when we sleep
+         Expected: ['night']
+
+✅ PASS | Q: What comes after Monday?
+         ✅ Brain  [0.000s]: tuesday
+         ❌ TF-IDF [0.170s]: monday comes after sunday
+         ✅ BM25   [0.113s]: tuesday comes after monday
+         Expected: ['tuesday']
+
+✅ PASS | Q: What shape is a ball?
+         ✅ Brain  [0.848s]: round is earth the like its big called a planet
+         ✅ TF-IDF [0.171s]: the shape of a ball is round
+         ✅ BM25   [0.112s]: the shape of a ball is round
+         Expected: ['round', 'circle', 'sphere']
+
+✅ PASS | Q: How many sides does a triangle have?
+         ✅ Brain  [1.306s]: three four rectangle has two long and short rectangle four has square equal
+         ✅ TF-IDF [0.182s]: three sides triangle
+         ✅ BM25   [0.135s]: three sides triangle
+         Expected: ['three', '3']
+
+✅ PASS | Q: How many sides does a square have?
+         ✅ Brain  [1.337s]: four equal sides rectangle triangle has three four two long and short box
+         ✅ TF-IDF [0.184s]: four sides square
+         ✅ BM25   [0.135s]: four sides square
+         Expected: ['four', '4']
+
+✅ PASS | Q: What comes after one?
+         ✅ Brain  [0.001s]: two
+         ✅ TF-IDF [0.170s]: two comes after one
+         ✅ BM25   [0.112s]: two comes after one
+         Expected: ['two', '2', 'after one comes two']
+
+✅ PASS | Q: What comes after five?
+         ✅ Brain  [0.000s]: six
+         ❌ TF-IDF [0.170s]: five comes after four
+         ❌ BM25   [0.112s]: five comes after four
+         Expected: ['six', '6', 'after five comes six']
+
+======================================================================
+RESULT CURRICULUM: 50/50 (100.0%) | Brain: 42.77s | GPT: 0.00s
+BASELINES: TFIDF: 64% (8.59s) | BM25: 70% (5.76s)
+======================================================================
+
+======================================================================
+TESTS STRICT
+======================================================================
+✅ PASS | Q: What is the meaning of life?
+         ✅ Brain  [1.491s]: love
+         ✅ TF-IDF [0.184s]: the meaning of life is love
+         ✅ BM25   [0.138s]: the meaning of life is love
+         Expected: ['love', 'happiness']
+
+✅ PASS | Q: Who wrote Hamlet?
+         ✅ Brain  [1.143s]: I do not know
+         ❌ TF-IDF [0.163s]: Read them anonymously afterwards and get the class to guess 
+         ❌ BM25   [0.103s]: Read them anonymously afterwards and get the class to guess 
+         Expected: ['not know', "don't know", 'unknown']
+
+✅ PASS | Q: Who is the president of Mars?
+         ✅ Brain  [1.737s]: I do not know
+         ❌ TF-IDF [0.183s]: earth is mars
+         ❌ BM25   [0.139s]: mars is planet
+         Expected: ['not know', "don't know", 'unknown']
+
+======================================================================
+RESULT STRICT: 3/3 (100.0%) | Brain: 4.37s
+BASELINES: TFIDF: 33% (0.53s) | BM25: 33% (0.38s)
+======================================================================
+
+======================================================================
+TESTS - PRESCHOOL (preschool knowledge 3-6 years)
+======================================================================
+✅ Q: What is a puppy?
+   ✅ Brain  [0.631s]: baby dog
+   ✅ TF-IDF [0.164s]: what is puppy baby dog
+   ✅ BM25   [0.103s]: what is puppy baby dog
+   Expected: ['baby dog', 'young dog', 'dog']
+
+✅ Q: What is a kitten?
+   ✅ Brain  [0.926s]: baby cat
+   ✅ TF-IDF [0.165s]: what is kitten baby cat
+   ✅ BM25   [0.103s]: what is kitten baby cat
+   Expected: ['baby cat', 'young cat', 'cat']
+
+✅ Q: What is a calf?
+   ✅ Brain  [0.802s]: baby cow
+   ✅ TF-IDF [0.165s]: what is calf baby cow
+   ✅ BM25   [0.102s]: what is calf baby cow
+   Expected: ['baby cow', 'young cow', 'cow']
+
+✅ Q: What does a tadpole become?
+   ✅ Brain  [0.829s]: frog egg starts baby becomes caterpillar turns
+   ✅ TF-IDF [0.172s]: tadpole become frog
+   ✅ BM25   [0.114s]: tadpole become frog
+   Expected: ['frog']
+
+✅ Q: What does a caterpillar become?
+   ✅ Brain  [0.902s]: butterfly egg cocoon becomes caterpillar turns
+   ✅ TF-IDF [0.171s]: caterpillar become butterfly
+   ✅ BM25   [0.114s]: caterpillar become butterfly
+   Expected: ['butterfly']
+
+✅ Q: What is a group of fish called?
+   ✅ Brain  [1.450s]: school extinct birds flock dogs pack lions pride
+   ✅ TF-IDF [0.185s]: A group of fish is called a school
+   ✅ BM25   [0.137s]: A group of fish is called a school
+   Expected: ['school']
+
+✅ Q: What is a group of wolves called?
+   ✅ Brain  [1.339s]: pack birds flock dogs
+   ✅ TF-IDF [0.185s]: A group of wolves is called a pack
+   ✅ BM25   [0.136s]: A group of wolves is called a pack
+   Expected: ['pack']
+
+✅ Q: What is a group of birds called?
+   ✅ Brain  [1.327s]: flock fish school play dogs pack sheep
+   ✅ TF-IDF [0.191s]: A group of birds is called a flock
+   ✅ BM25   [0.136s]: A group of birds is called a flock
+   Expected: ['flock']
+
+✅ Q: What is a group of lions called?
+   ✅ Brain  [1.286s]: pride birds flock wolves pack
+   ✅ TF-IDF [0.184s]: A group of lions is called a pride
+   ✅ BM25   [0.136s]: A group of lions is called a pride
+   Expected: ['pride']
+
+✅ Q: What is a table made of?
+   ✅ Brain  [0.918s]: wood chair piece of furniture chair plate help set
+   ✅ TF-IDF [0.182s]: a table is made of wood
+   ✅ BM25   [0.126s]: a table is made of wood
+   Expected: ['wood']
+
+✅ Q: What is a window made of?
+   ✅ Brain  [0.857s]: glass window lets in light
+   ✅ TF-IDF [0.181s]: a window is made of glass
+   ✅ BM25   [0.125s]: a window is made of glass
+   Expected: ['glass']
+
+✅ Q: What is a tire made of?
+   ✅ Brain  [0.894s]: rubber
+   ✅ TF-IDF [0.181s]: a tire is made of rubber
+   ✅ BM25   [0.125s]: a tire is made of rubber
+   Expected: ['rubber']
+
+✅ Q: What is a shirt made of?
+   ✅ Brain  [0.886s]: cotton shirt goes on your body put
+   ✅ TF-IDF [0.182s]: a shirt is made of cotton
+   ✅ BM25   [0.125s]: a shirt is made of cotton
+   Expected: ['cotton', 'fabric']
+
+✅ Q: What happens when you touch fire?
+   ✅ Brain  [1.057s]: fire can burn not fire hot fire things oven
+   ✅ TF-IDF [0.186s]: when you touch fire you burn
+   ✅ BM25   [0.135s]: when you touch fire you burn
+   Expected: ['burn', 'hurt', 'pain']
+
+✅ Q: What happens when ice gets warm?
+   ✅ Brain  [0.721s]: warm it melts melt get frozen water
+   ✅ TF-IDF [0.183s]: ice melts when it gets warm
+   ✅ BM25   [0.135s]: ice melts when it gets warm
+   Expected: ['melt', 'melts']
+
+✅ Q: What happens when you fall?
+   ✅ Brain  [1.274s]: fall down you can get hurt leaves off trees in autumn change color yolk tree
+   ❌ TF-IDF [0.181s]: What happens when you choose to buy Green Power
+   ❌ BM25   [0.125s]: What happens when you choose to buy Green Power
+   Expected: ['hurt', 'pain']
+
+✅ Q: Is fire dangerous?
+   ✅ Brain  [0.885s]: hot and red is the color truck burn things do not play
+   ✅ TF-IDF [0.164s]: fire is dangerous
+   ✅ BM25   [0.104s]: fire is dangerous
+   Expected: ['yes', 'dangerous', 'hot']
+
+✅ Q: Is a knife sharp?
+   ✅ Brain  [0.997s]: cut use pennies food knife fork is next
+   ✅ TF-IDF [0.164s]: knife is sharp
+   ✅ BM25   [0.101s]: knife is sharp
+   Expected: ['yes', 'sharp', 'cut']
+
+✅ Q: When should you wash your hands?
+   ✅ Brain  [1.218s]: eating toilet soap eat it or use of water
+   ❌ TF-IDF [0.183s]: hands wash
+   ❌ BM25   [0.137s]: Wash your hands before you eat.
+   Expected: ['before eating', 'after toilet', 'eating']
+
+✅ Q: When should you brush your teeth?
+   ✅ Brain  [1.356s]: day breakfast morning and at night in your bed toothbrush keep them clean
+   ❌ TF-IDF [0.184s]: teeth brush
+   ❌ BM25   [0.137s]: Turn off the tap when you brush your teeth.
+   Expected: ['morning', 'night', 'day', 'every']
+
+✅ Q: What do you use to wash hands?
+   ✅ Brain  [1.263s]: use soap and water hands
+   ✅ TF-IDF [0.192s]: use water wash hands
+   ✅ BM25   [0.146s]: use soap wash hands
+   Expected: ['soap', 'water']
+
+✅ Q: What do you say when you ask for something?
+   ✅ Brain  [0.879s]: please when we want please thank you when we get receive
+   ✅ TF-IDF [0.196s]: When you ask for something say please
+   ✅ BM25   [0.168s]: When you ask for something say please
+   Expected: ['please']
+
+✅ Q: What do you say when you receive something?
+   ✅ Brain  [0.859s]: thank you when we get you to ask when we please
+   ✅ TF-IDF [0.192s]: When you receive something say thank you
+   ✅ BM25   [0.157s]: When you receive something say thank you
+   Expected: ['thank you', 'thank']
+
+✅ Q: What do you say when you make a mistake?
+   ✅ Brain  [0.788s]: good friends sorry when_we mistakes morning no narratives words
+   ✅ TF-IDF [0.191s]: we say sorry when we make a mistake
+   ✅ BM25   [0.159s]: we say sorry when we make a mistake
+   Expected: ['sorry']
+
+✅ Q: What comes after A?
+   ✅ Brain  [0.000s]: letter_b
+   ❌ TF-IDF [0.164s]: two comes after one
+   ✅ BM25   [0.102s]: what comes after letter_a letter_b
+   Expected: ['b', 'letter_b']
+
+✅ Q: What is the first letter?
+   ✅ Brain  [1.598s]: letter_a monday on day of the week first breakfast meal at the same time he jumped long way january after month
+   ✅ TF-IDF [0.182s]: a is letter
+   ✅ BM25   [0.125s]: The first letter is letter_a
+   Expected: ['a', 'letter_a']
+
+✅ Q: What is the last letter?
+   ✅ Brain  [1.193s]: letter_z wake you up near not narratives away for the winter what in the world summer is usually the time pennies food managed to scramble out december month
+   ✅ TF-IDF [0.181s]: the last letter is Z
+   ✅ BM25   [0.126s]: the last letter is Z
+   Expected: ['z', 'letter_z']
+
+✅ Q: What comes after ten?
+   ✅ Brain  [0.000s]: eleven
+   ❌ TF-IDF [0.171s]: ten comes after nine
+   ❌ BM25   [0.114s]: ten comes after nine
+   Expected: ['eleven']
+
+✅ Q: What comes after nineteen?
+   ✅ Brain  [0.000s]: twenty
+   ✅ TF-IDF [0.172s]: Twenty comes after nineteen
+   ✅ BM25   [0.113s]: Twenty comes after nineteen
+   Expected: ['twenty']
+
+✅ Q: Is an elephant bigger than a mouse?
+   ✅ Brain  [0.857s]: elephant is bigger than a mouse
+   ✅ TF-IDF [0.186s]: An elephant is bigger than a mouse
+   ✅ BM25   [0.138s]: An elephant is bigger than a mouse
+   Expected: ['yes', 'bigger']
+
+✅ Q: Is a turtle faster than a rabbit?
+   ✅ Brain  [0.875s]: slower not
+   ❌ TF-IDF [0.180s]: rabbit faster than turtle
+   ❌ BM25   [0.123s]: rabbit faster than turtle
+   Expected: ['no', 'slower']
+
+✅ Q: Is a feather heavier than a rock?
+   ✅ Brain  [0.789s]: rock is heavier than a feather is lighter
+   ✅ TF-IDF [0.182s]: A rock is heavier than a feather
+   ✅ BM25   [0.125s]: A rock is heavier than a feather
+   Expected: ['no', 'lighter', 'rock', 'heavier']
+
+✅ Q: What does a seed become?
+   ✅ Brain  [0.959s]: plant then sprout grows flower then fruit starts
+   ✅ TF-IDF [0.173s]: seed become plant
+   ✅ BM25   [0.113s]: seed become plant
+   Expected: ['plant', 'sprout']
+
+✅ Q: What is under the ground?
+   ✅ Brain  [0.973s]: root grass grows below rains gets wet snows turns white
+   ✅ TF-IDF [0.184s]: root under ground
+   ✅ BM25   [0.125s]: root under ground
+   Expected: ['root', 'roots']
+
+✅ Q: What does an egg become?
+   ✅ Brain  [0.879s]: bird chick animal tadpole then frog becomes caterpillar then cocoon then butterfly
+   ✅ TF-IDF [0.184s]: egg become animal
+   ✅ BM25   [0.126s]: egg become chick
+   Expected: ['chick', 'bird', 'animal']
+
+✅ Q: What comes from a cocoon?
+   ✅ Brain  [1.014s]: butterfly come out letter_a after letter_b
+   ✅ TF-IDF [0.173s]: A butterfly comes out of the cocoon
+   ✅ BM25   [0.113s]: A butterfly comes out of the cocoon
+   Expected: ['butterfly']
+
+✅ Q: What comes after Monday?
+   ✅ Brain  [0.000s]: tuesday
+   ❌ TF-IDF [0.171s]: monday comes after sunday
+   ✅ BM25   [0.113s]: tuesday comes after monday
+   Expected: ['tuesday']
+
+✅ Q: What month comes after January?
+   ✅ Brain  [0.000s]: february
+   ❌ TF-IDF [0.180s]: month january
+   ✅ BM25   [0.124s]: month after January February
+   Expected: ['february']
+
+✅ Q: When does the sun rise?
+   ✅ Brain  [1.543s]: morning in the rises goes what down at night dinner evening
+   ✅ TF-IDF [0.182s]: when sun rise morning
+   ✅ BM25   [0.125s]: when sun rise morning
+   Expected: ['morning']
+
+✅ Q: When do stars appear?
+   ✅ Brain  [1.171s]: night at moon is in the sky come out shine
+   ✅ TF-IDF [0.171s]: stars appear at night
+   ✅ BM25   [0.114s]: stars appear at night
+   Expected: ['night']
+
+✅ Q: What do we see with?
+   ✅ Brain  [1.223s]: eyes our use paragraphs two resolve help colors and shapes and movement
+   ❌ TF-IDF [0.181s]: We express ourselves by what we do, by what we say, and by w
+   ❌ BM25   [0.126s]: We express ourselves by what we do, by what we say, and by w
+   Expected: ['eyes']
+
+✅ Q: What do we hear with?
+   ✅ Brain  [1.273s]: ears to use paragraphs two resolve help sounds and music comes fanny to see stand men play
+   ✅ TF-IDF [0.183s]: we hear with our ears
+   ✅ BM25   [0.127s]: we hear with our ears
+   Expected: ['ears']
+
+✅ Q: How many fingers on one hand?
+   ✅ Brain  [1.839s]: five school is where we learn other things that use hold left opposite right
+   ✅ TF-IDF [0.184s]: A hand has five fingers
+   ✅ BM25   [0.137s]: A hand has five fingers
+   Expected: ['five', '5']
+
+✅ Q: What is the opposite of up?
+   ✅ Brain  [0.001s]: down
+   ✅ TF-IDF [0.184s]: up is the opposite of down
+   ✅ BM25   [0.137s]: up is the opposite of down
+   Expected: ['down']
+
+✅ Q: What is the opposite of in?
+   ✅ Brain  [0.002s]: out
+   ✅ TF-IDF [0.183s]: in is the opposite of out
+   ✅ BM25   [0.138s]: in is the opposite of out
+   Expected: ['out']
+
+✅ Q: What is the opposite of left?
+   ✅ Brain  [0.000s]: right
+   ✅ TF-IDF [0.185s]: left is the opposite of right
+   ✅ BM25   [0.138s]: left is the opposite of right
+   Expected: ['right']
+
+✅ Q: What sense uses the nose?
+   ✅ Brain  [0.726s]: smell tongue to taste use
+   ✅ TF-IDF [0.183s]: what sense uses nose smell
+   ✅ BM25   [0.126s]: what sense uses nose smell
+   Expected: ['smell']
+
+✅ Q: What sense uses the tongue?
+   ✅ Brain  [0.680s]: taste nose to smell
+   ✅ TF-IDF [0.183s]: what sense uses tongue taste
+   ✅ BM25   [0.125s]: what sense uses tongue taste
+   Expected: ['taste']
+
+======================================================================
+RESULT PRESCHOOL: 48/48 (100.0%) | Brain: 41.94s | GPT: 0.00s
+BASELINES: TF-IDF 39/48 (81.2%) | BM25 42/48 (87.5%)
+Brain advantage: vs TF-IDF +18.8% | vs BM25 +12.5%
+======================================================================
+Episodes: 76679
+
+======================================================================
+TESTS - GRADE 1 "WORLD AROUND"
+======================================================================
+✅ Q: Is a tree alive?
+   ✅ Brain  [1.053s]: grows pine maple oak big plant
+   ✅ TF-IDF [0.165s]: tree is alive
+   ✅ BM25   [0.102s]: tree is alive
+   Expected: ['alive', 'yes', 'grows']
+
+✅ Q: Is a stone alive?
+   ✅ Brain  [1.208s]: not not because they are grow hard and heavy statue is made of cast ant stung dove wood
+   ✅ TF-IDF [0.165s]: stone is not alive
+   ✅ BM25   [0.102s]: stone is not alive
+   Expected: ['not alive', 'no']
+
+✅ Q: Is a bird alive?
+   ✅ Brain  [1.005s]: move less and eat and have baby birds animal penguin tree cannot fly
+   ✅ TF-IDF [0.165s]: bird is alive
+   ✅ BM25   [0.102s]: bird is alive
+   Expected: ['alive', 'yes', 'move', 'eat', 'baby']
+
+✅ Q: When does snow fall?
+   ✅ Brain  [1.461s]: falls in winter sky ice cold covers the ground
+   ❌ TF-IDF [0.171s]: fall snow
+   ❌ BM25   [0.112s]: fall snow
+   Expected: ['winter']
+
+✅ Q: When do flowers bloom?
+   ✅ Brain  [1.282s]: spring is warm open during the day flowers petals
+   ✅ TF-IDF [0.174s]: flowers bloom spring
+   ✅ BM25   [0.114s]: flowers bloom spring
+   Expected: ['spring']
+
+✅ Q: When do leaves fall?
+   ✅ Brain  [1.509s]: autumn in trees tree change color winter no
+   ✅ TF-IDF [0.174s]: leaves fall
+   ✅ BM25   [0.114s]: leaves fall fall
+   Expected: ['autumn', 'fall']
+
+✅ Q: Is winter cold or hot?
+   ✅ Brain  [1.094s]: cold with snow snows animals rest
+   ✅ TF-IDF [0.181s]: winter is cold
+   ✅ BM25   [0.126s]: winter is cold
+   Expected: ['cold', 'snow']
+
+✅ Q: Is summer cold or hot?
+   ✅ Brain  [1.079s]: hot and sunny we wear light clothes in winter is colder hotter
+   ✅ TF-IDF [0.182s]: summer is hot
+   ✅ BM25   [0.126s]: summer is hot
+   Expected: ['hot', 'warm', 'opposite']
+
+✅ Q: What is a dog?
+   ✅ Brain  [0.891s]: animal and a pet that loves to play says bow wow which means puppy is a baby
+   ❌ TF-IDF [0.165s]: dog is dog food
+   ❌ BM25   [0.102s]: what is puppy baby dog
+   Expected: ['pet', 'animal']
+
+✅ Q: What is a cow?
+   ✅ Brain  [0.807s]: animal farm gives us milk calf is a baby cow says moo
+   ✅ TF-IDF [0.166s]: cow is animal
+   ❌ BM25   [0.104s]: what is calf baby cow
+   Expected: ['farm animal', 'animal']
+
+✅ Q: What is a wolf?
+   ✅ Brain  [1.103s]: wild in the animal that lives in the forest great killed a great many sheep boy village ran toward the village shouting villagers not run to help looked at me like a top of his voice expected work
+   ✅ TF-IDF [0.167s]: wolf is animal
+   ✅ BM25   [0.102s]: wolf is animal
+   Expected: ['wild animal', 'animal']
+
+✅ Q: What does a cow eat?
+   ✅ Brain  [0.768s]: eats grass calf is a baby see how still she stands the dear old gives us sweet ice milk to drink
+   ❌ TF-IDF [0.176s]: animal cow
+   ❌ BM25   [0.115s]: what is calf baby cow
+   Expected: ['grass']
+
+✅ Q: What does a rabbit eat?
+   ✅ Brain  [0.903s]: eats carrots and other vegetables bunny is a baby turtle is slower not faster pet
+   ❌ TF-IDF [0.174s]: fast rabbit
+   ❌ BM25   [0.115s]: What does this mean
+   Expected: ['carrots', 'carrot']
+
+✅ Q: Where does a fish live?
+   ✅ Brain  [0.817s]: water frog lives in the ocean fish cannot land on his trees flowers birds dogs and cats are all living
+   ✅ TF-IDF [0.173s]: fish live in water
+   ✅ BM25   [0.113s]: fish live in water
+   Expected: ['water']
+
+✅ Q: Where does a bear live?
+   ✅ Brain  [0.712s]: lives in the forest bear animal mouse eats berries and fish and honey big wild
+   ❌ TF-IDF [0.172s]: and to live
+   ❌ BM25   [0.114s]: home is where we live and sleep
+   Expected: ['forest']
+
+✅ Q: What does a plant need?
+   ✅ Brain  [1.560s]: plants water to grow to sun sunlight and soil
+   ❌ TF-IDF [0.175s]: What does this mean
+   ❌ BM25   [0.114s]: What does this mean
+   Expected: ['water', 'sunlight', 'soil']
+
+✅ Q: What does a tree have?
+   ✅ Brain  [0.934s]: roots branches and trunk leaves
+   ❌ TF-IDF [0.176s]: tree orange tree
+   ❌ BM25   [0.114s]: - Other symptoms
+- What other symptoms does the person have
+   Expected: ['roots', 'trunk', 'branches', 'leaves']
+
+✅ Q: Where do apples grow?
+   ✅ Brain  [0.902s]: apple trees people harvest vegetables and fruits like oranges have vitamins bananas are fruit apple red
+   ✅ TF-IDF [0.174s]: Apples grow on apple trees.
+   ✅ BM25   [0.115s]: Apples grow on apple trees.
+   Expected: ['tree', 'apple tree']
+
+✅ Q: Is an apple a fruit?
+   ✅ Brain  [0.696s]: apple is a fruit apple tree red letter_a eat
+   ✅ TF-IDF [0.175s]: an apple is a fruit
+   ✅ BM25   [0.113s]: an apple is a fruit
+   Expected: ['fruit', 'yes']
+
+✅ Q: Is a carrot a vegetable?
+   ✅ Brain  [0.674s]: carrot is a vegetable orange
+   ✅ TF-IDF [0.167s]: a carrot is a vegetable
+   ✅ BM25   [0.108s]: a carrot is a vegetable
+   Expected: ['vegetable', 'yes']
+
+✅ Q: What color is grass?
+   ✅ Brain  [0.916s]: green grows on the ground cows eat dew forms morning cow eats
+   ✅ TF-IDF [0.173s]: green is the color of grass
+   ✅ BM25   [0.114s]: grass is green in color
+   Expected: ['green']
+
+✅ Q: What color is the sky?
+   ✅ Brain  [0.682s]: blue gray rainy day
+   ✅ TF-IDF [0.184s]: blue is the color of the sky
+   ✅ BM25   [0.126s]: blue is the color of the sky
+   Expected: ['blue']
+
+✅ Q: What color is snow?
+   ✅ Brain  [0.996s]: white and cold
+   ✅ TF-IDF [0.173s]: the color of snow is white
+   ✅ BM25   [0.113s]: the color of snow is white
+   Expected: ['white']
+
+✅ Q: What color is the sun?
+   ✅ Brain  [1.837s]: yellow and bright round in another up
+   ✅ TF-IDF [0.185s]: yellow is the color of the sun
+   ✅ BM25   [0.126s]: yellow is the color of the sun
+   Expected: ['yellow']
+
+✅ Q: What do we see with?
+   ✅ Brain  [1.236s]: eyes our use paragraphs two resolve help colors and shapes and movement
+   ❌ TF-IDF [0.183s]: We express ourselves by what we do, by what we say, and by w
+   ❌ BM25   [0.125s]: We express ourselves by what we do, by what we say, and by w
+   Expected: ['eyes']
+
+✅ Q: What do we hear with?
+   ✅ Brain  [1.244s]: ears to use paragraphs two resolve help sounds and music comes fanny to see stand men play
+   ✅ TF-IDF [0.184s]: we hear with our ears
+   ✅ BM25   [0.126s]: we hear with our ears
+   Expected: ['ears']
+
+✅ Q: How many hands does a human have?
+   ✅ Brain  [1.657s]: two legs eyes human feet ears
+   ✅ TF-IDF [0.186s]: a human has two hands
+   ❌ BM25   [0.138s]: How many hands have touched a coin in your pocket or your pu
+   Expected: ['two', '2']
+
+✅ Q: How many legs does a human have?
+   ✅ Brain  [1.499s]: two and hands and two and arms walk and run walk feet
+   ✅ TF-IDF [0.186s]: human has two legs
+   ✅ BM25   [0.136s]: human has two legs
+   Expected: ['two', '2']
+
+✅ Q: When does the sun shine?
+   ✅ Brain  [1.619s]: shines during the day brightly shining sky goes what down at night
+   ❌ TF-IDF [0.183s]: shine sun
+   ❌ BM25   [0.125s]: shine sun
+   Expected: ['day']
+
+✅ Q: When do stars appear?
+   ✅ Brain  [1.118s]: night at moon is in the sky come out shine
+   ✅ TF-IDF [0.173s]: stars appear at night
+   ✅ BM25   [0.113s]: stars appear at night
+   Expected: ['night']
+
+✅ Q: When do people sleep?
+   ✅ Brain  [1.966s]: night drink their water every day where they live at home at help you need friends play like
+   ✅ TF-IDF [0.174s]: People sleep at night.
+   ✅ BM25   [0.114s]: People sleep at night.
+   Expected: ['night']
+
+✅ Q: Where does a car drive?
+   ✅ Brain  [0.876s]: drives on the road and can take you to different places driver car vehicle car engine
+   ❌ TF-IDF [0.176s]: drive car
+   ❌ BM25   [0.115s]: drive car
+   Expected: ['road']
+
+✅ Q: Where does a train ride?
+   ✅ Brain  [0.885s]: tracks train stops at the station subway goes underground trains rails
+   ❌ TF-IDF [0.171s]: ride train
+   ❌ BM25   [0.113s]: ride train
+   Expected: ['rails', 'tracks']
+
+✅ Q: Where do airplanes fly?
+   ✅ Brain  [0.820s]: sky airplanes pilots take you to other countries
+   ✅ TF-IDF [0.171s]: airplanes fly in the sky
+   ✅ BM25   [0.113s]: pilots fly airplanes
+   Expected: ['sky', 'air']
+
+✅ Q: What does a cow give?
+   ✅ Brain  [0.825s]: gives us milk cows farm animal see how still she stands the dear old sweet
+   ❌ TF-IDF [0.173s]: animal cow
+   ❌ BM25   [0.113s]: what is calf baby cow
+   Expected: ['milk']
+
+✅ Q: What does a chicken lay?
+   ✅ Brain  [0.885s]: lays eggs farm animal
+   ❌ TF-IDF [0.174s]: chicken chicken nuggets
+   ❌ BM25   [0.114s]: chicken chicken nuggets
+   Expected: ['eggs']
+
+✅ Q: Where does a duck swim?
+   ✅ Brain  [0.720s]: pond in the swims duck duckling is a baby cow says quack goose is bigger
+   ❌ TF-IDF [0.172s]: swim duck
+   ❌ BM25   [0.112s]: swim duck
+   Expected: ['pond', 'water']
+
+✅ Q: Where do birds live?
+   ✅ Brain  [0.814s]: nests trees flowers fish dogs and cats are all living eat and have baby feathers seeds
+   ✅ TF-IDF [0.174s]: birds live in nests
+   ✅ BM25   [0.113s]: birds live in nests
+   Expected: ['nest', 'tree', 'nests']
+
+✅ Q: What covers the ground in winter?
+   ✅ Brain  [0.742s]: snow is cold and falls spring after comes
+   ✅ TF-IDF [0.185s]: Snow covers the ground in winter.
+   ✅ BM25   [0.137s]: Snow covers the ground in winter.
+   Expected: ['snow', 'ice']
+
+✅ Q: What falls from clouds?
+   ✅ Brain  [0.869s]: rain cover the sky in the float snow
+   ✅ TF-IDF [0.178s]: snow falls from clouds
+   ✅ BM25   [0.115s]: rain falls from clouds
+   Expected: ['rain', 'snow']
+
+✅ Q: What makes trees move?
+   ✅ Brain  [0.787s]: wind windy whistling sound grow in the park sailboat uses
+   ✅ TF-IDF [0.173s]: Wind makes the trees move.
+   ✅ BM25   [0.113s]: Wind makes the trees move.
+   Expected: ['wind']
+
+✅ Q: What do we wear when it is cold?
+   ✅ Brain  [0.819s]: coats and hats winter when snow
+   ✅ TF-IDF [0.199s]: when it is cold we wear coats
+   ✅ BM25   [0.157s]: when it is cold we wear coats
+   Expected: ['coat', 'hat', 'coats']
+
+✅ Q: What do all living things need?
+   ✅ Brain  [0.823s]: water is not sergeant alive water to survive plants to grow or breathe eat it or use categories to organize flowers cats
+   ❌ TF-IDF [0.184s]: Plants are living things.
+   ✅ BM25   [0.136s]: Water is not alive but all living things need water to survi
+   Expected: ['water']
+
+✅ Q: Where does water come from?
+   ✅ Brain  [0.841s]: comes from rain and snow for not waste drinking makes thirsty salt drinkable alive but all living and things need to survive
+   ❌ TF-IDF [0.182s]: Where has it come from
+   ❌ BM25   [0.124s]: Where has it come from
+   Expected: ['rain', 'clouds']
+
+✅ Q: Can we drink salt water?
+   ✅ Brain  [1.150s]: cannot fish ocean not drinkable animals instead of sweet drinks
+   ✅ TF-IDF [0.180s]: we cannot drink salt water
+   ✅ BM25   [0.124s]: we cannot drink salt water
+   Expected: ['no']
+
+✅ Q: What is the Earth?
+   ✅ Brain  [1.096s]: planet earth goes around the sun is round circle like a ball spins top moon
+   ❌ TF-IDF [0.175s]: earth is life
+   ❌ BM25   [0.114s]: it hasn't
+Unfortunately this is not what old earth scientist
+   Expected: ['planet']
+
+✅ Q: What does the Earth go around?
+   ✅ Brain  [0.977s]: goes around the sun or moon one was year home round circle like a ball
+   ✅ TF-IDF [0.186s]: It takes one year for the Earth to go around the Sun.
+   ✅ BM25   [0.137s]: It takes one year for the Earth to go around the Sun.
+   Expected: ['sun']
+
+✅ Q: What orbits the Earth?
+   ✅ Brain  [0.886s]: moon earth planet home goes around the sun
+   ✅ TF-IDF [0.175s]: the moon orbits the earth
+   ✅ BM25   [0.115s]: the moon orbits the earth
+   Expected: ['moon']
+
+✅ Q: When can we see the Moon?
+   ✅ Brain  [0.985s]: night at bright stars appear in the sky is dark hard shines
+   ✅ TF-IDF [0.184s]: We can see the Moon at night.
+   ✅ BM25   [0.137s]: We can see the Moon at night.
+   Expected: ['night']
+
+✅ Q: What do we need for strong bones?
+   ✅ Brain  [0.760s]: milk body good kept food to grow iron help some people hold up
+   ✅ TF-IDF [0.192s]: We need milk for strong bones.
+   ✅ BM25   [0.149s]: We need milk for strong bones.
+   Expected: ['milk']
+
+✅ Q: What gives us energy?
+   ✅ Brain  [0.844s]: eating bread and rice give sun from the light and heat warmth cow milk
+   ✅ TF-IDF [0.172s]: Eating gives you energy
+   ✅ BM25   [0.114s]: Eating gives you energy
+   Expected: ['bread', 'rice', 'food', 'eating']
+
+✅ Q: What is not good for teeth?
+   ✅ Brain  [2.348s]: sweets up tree admiringly he cried morning beautiful creature the crow closed on the cheese return his greeting sport to watch the big play on the wet sand polly and the cat friends stored anything away for the winter what in the world last summer is usually the time to store at the food
+   ✅ TF-IDF [0.187s]: Sweets are not good for our teeth.
+   ✅ BM25   [0.137s]: Sweets are not good for our teeth.
+   Expected: ['candy', 'sweets']
+
+✅ Q: What keeps our body healthy?
+   ✅ Brain  [0.807s]: exercise vegetables healthy feel good fruit means being strong
+   ✅ TF-IDF [0.181s]: Exercise keeps our body healthy.
+   ✅ BM25   [0.125s]: Exercise keeps our body healthy.
+   Expected: ['exercise', 'sleep']
+
+✅ Q: When should we brush teeth?
+   ✅ Brain  [1.272s]: day breakfast morning and at night in your bed toothbrush keep them clean
+   ❌ TF-IDF [0.178s]: teeth brush
+   ✅ BM25   [0.125s]: we brush our teeth every day
+   Expected: ['morning', 'night', 'day', 'every']
+
+✅ Q: When should we wash hands?
+   ✅ Brain  [1.137s]: eating toilet soap eat it or use of water
+   ❌ TF-IDF [0.179s]: hands wash
+   ✅ BM25   [0.127s]: should wash hands before eating
+   Expected: ['before eating', 'eat']
+
+✅ Q: Where can we borrow books?
+   ✅ Brain  [0.939s]: library has many burners read and learn new things
+   ✅ TF-IDF [0.180s]: We can borrow books from the library.
+   ✅ BM25   [0.127s]: We can borrow books from the library.
+   Expected: ['library']
+
+✅ Q: What can we learn from books?
+   ✅ Brain  [1.065s]: read before the new things carries many yoga school is where children
+   ✅ TF-IDF [0.187s]: We can learn many things from books.
+   ✅ BM25   [0.138s]: We can learn many things from books.
+   Expected: ['many', 'things', 'stories']
+
+✅ Q: What should we say when we make a mistake?
+   ✅ Brain  [0.756s]: good friends sorry when_we mistakes morning no narratives words
+   ✅ TF-IDF [0.190s]: we say sorry when we make a mistake
+   ✅ BM25   [0.159s]: we say sorry when we make a mistake
+   Expected: ['sorry']
+
+✅ Q: Who helps us learn at school?
+   ✅ Brain  [1.554s]: teachers can help go kilter children math
+   ❌ TF-IDF [0.184s]: i learn at school
+   ✅ BM25   [0.137s]: Teachers help us learn at school.
+   Expected: ['teacher']
+
+✅ Q: What do we learn in math class?
+   ✅ Brain  [0.690s]: numbers backpacks school pearsall world in science taught
+   ✅ TF-IDF [0.191s]: We learn numbers in math class.
+   ✅ BM25   [0.149s]: We learn numbers in math class.
+   Expected: ['numbers']
+
+✅ Q: Is helping others good?
+   ✅ Brain  [1.129s]: makes you feel helping right thing
+   ✅ TF-IDF [0.173s]: Helping others makes us feel good.
+   ✅ BM25   [0.114s]: Helping others makes us feel good.
+   Expected: ['yes', 'good', 'feel']
+
+✅ Q: What do we say when we ask for something?
+   ✅ Brain  [0.797s]: please when we want please thank you when we get receive
+   ✅ TF-IDF [0.197s]: we say please when we ask for something
+   ✅ BM25   [0.170s]: we say please when we ask for something
+   Expected: ['please']
+
+✅ Q: What do we say when someone gives us something?
+   ✅ Brain  [0.794s]: thank you when we get you helps receive ask when we please
+   ✅ TF-IDF [0.203s]: We say thank you when someone gives us something.
+   ✅ BM25   [0.172s]: We say thank you when someone gives us something.
+   Expected: ['thank', 'thank you']
+
+✅ Q: What do we say when we bump into someone?
+   ✅ Brain  [0.802s]: excuse thank helps gives us something hello when we meet not interrupt speaking
+   ✅ TF-IDF [0.198s]: We say excuse me when we bump into someone.
+   ✅ BM25   [0.169s]: We say excuse me when we bump into someone.
+   Expected: ['excuse', 'sorry']
+
+======================================================================
+RESULT GRADE1: 64/64 (100.0%) | Brain: 66.72s | GPT: 0.00s
+BASELINES: TF-IDF 44/64 (68.8%) | BM25 46/64 (71.9%)
+Brain advantage: vs TF-IDF +31.2% | vs BM25 +28.1%
+======================================================================
+Episodes: 76679
+
+======================================================================
+TESTS FineWeb-Edu (direct facts from texts)
+======================================================================
+✅ Q: Who shot Lincoln?
+   ✅ Brain  [0.546s]: president john wilkes booth was 26 years old and one of the nations most famous actors
+   ❌ TF-IDF [0.166s]: Lincoln was intended
+   ❌ BM25   [0.104s]: That night, he crept into Lincoln’s theater box and shot him
+   Expected: ['booth']
+
+✅ Q: How old was Booth?
+   ✅ Brain  [1.340s]: shot president lincoln john wilkes 26 years collapsed one of the nations most famous actors no minuscule first
+   ❌ TF-IDF [0.175s]: old new
+   ✅ BM25   [0.113s]: When he shot President Lincoln, John Wilkes Booth was 26 yea
+   Expected: ['26', 'years']
+
+✅ Q: What was Booth?
+   ✅ Brain  [0.656s]: shot president lincoln john wilkes 26 years old and one of the nations most famous actors learned far narratives country peculiarly first
+   ❌ TF-IDF [0.165s]: Ruffin’s act is not so disgusting as Booth’s; but of the two
+   ✅ BM25   [0.101s]: When he shot President Lincoln, John Wilkes Booth was 26 yea
+   Expected: ['actor', 'famous']
+
+✅ Q: What color is chlorophyll?
+   ✅ Brain  [0.869s]: green disappears from the leaves water bottle light reading certain purple black
+   ❌ TF-IDF [0.176s]: What about women of color
+   ❌ BM25   [0.113s]: What about women of color
+   Expected: ['green']
+
+✅ Q: What disappears from leaves?
+   ✅ Brain  [0.903s]: green chlorophyll
+   ✅ TF-IDF [0.173s]: The green chlorophyll disappears from the leaves
+   ✅ BM25   [0.113s]: The green chlorophyll disappears from the leaves
+   Expected: ['chlorophyll', 'green']
+
+✅ Q: What is sedimentary rock made of?
+   ✅ Brain  [0.793s]: sedimentary rock is made of rocks many how layers shells sea animals formed sand plants
+   ❌ TF-IDF [0.186s]: This is how sedimentary rock is made.
+   ❌ BM25   [0.135s]: This is how sedimentary rock is made.
+   Expected: ['bones', 'shells', 'organic', 'sandstone', 'limestone', 'shale']
+
+✅ Q: What is the origin of species?
+   ✅ Brain  [0.793s]: darwin however thought that variation had no iona limits when he proposed his theory267 and he depicted various examples of variation as the most important evidence for evolution in his book short or one at the right in the first minuscule means of natural
+   ❌ TF-IDF [0.186s]: Origin of Species
+   ❌ BM25   [0.137s]: Origin of Species
+   Expected: ['darwin', 'selection']
+
+✅ Q: Who invented the telephone?
+   ✅ Brain  [1.507s]: I do not know
+   ❌ TF-IDF [0.174s]: ___ Post emergency telephone numbers near each telephone in 
+   ❌ BM25   [0.115s]: Who knows, maybe humans would have invented roller coasters 
+   Expected: ['not know']
+
+✅ Q: Who discovered America?
+   ✅ Brain  [1.274s]: I do not know
+   ❌ TF-IDF [0.166s]: america english
+   ❌ BM25   [0.104s]: He discovered this great manuscript in the hands of a Jew, w
+   Expected: ['not know']
+
+======================================================================
+RESULT FineWeb-Edu: 9/9 (100.0%) | Brain: 8.68s | GPT: 0.00s
+BASELINES: TF-IDF 1/9 (11.1%) | BM25 3/9 (33.3%)
+Brain advantage: vs TF-IDF +88.9% | vs BM25 +66.7%
+======================================================================
+
+======================================================================
+PARAPHRASE ROBUSTNESS TESTS
+======================================================================
+Testing same knowledge with alternative phrasings...
+
+✅ Q: A dog is what kind of thing?
+   ✅ Brain  [0.809s]: animal and a pet that loves to play says bow wow which means puppy is a baby
+   ❌ TF-IDF [0.186s]: what is thing
+   ❌ BM25   [0.135s]: what is thing
+   Expected: ['animal', 'pet', 'mammal']
+
+✅ Q: Dogs belong to what category?
+   ✅ Brain  [0.914s]: bark and say woof cats are animals wag like to run and play pets
+   ❌ TF-IDF [0.183s]: Because I don't see terms so important to determine a person
+   ❌ BM25   [0.125s]: Because I don't see terms so important to determine a person
+   Expected: ['animal', 'pet', 'mammal']
+
+✅ Q: Tell me what a dog is
+   ✅ Brain  [0.815s]: animal and a pet that loves to play says bow wow which means puppy is a baby
+   ❌ TF-IDF [0.187s]: dog is dog food
+   ❌ BM25   [0.126s]: Host: Tell me about what the Molecular Imaging Center itself
+   Expected: ['animal', 'pet', 'mammal']
+
+✅ Q: What category does a dog belong to?
+   ✅ Brain  [1.253s]: mammal says saw food
+   ❌ TF-IDF [0.186s]: Because I don't see terms so important to determine a person
+   ❌ BM25   [0.139s]: Because I don't see terms so important to determine a person
+   Expected: ['animal', 'pet', 'mammal']
+
+✅ Q: An apple is a type of what?
+   ✅ Brain  [1.385s]: fruit
+   ✅ TF-IDF [0.189s]: an apple is a fruit
+   ✅ BM25   [0.141s]: an apple is a fruit
+   Expected: ['fruit']
+
+✅ Q: Apples are classified as what?
+   ✅ Brain  [1.032s]: grow on apple trees bananas are fruit apple red fruits like oranges have vitamins people harvest vegetables
+   ✅ TF-IDF [0.184s]: apples are red fruit
+   ✅ BM25   [0.126s]: apples are red fruit
+   Expected: ['fruit']
+
+✅ Q: What kind of food is an apple?
+   ✅ Brain  [1.100s]: fruit apple red or green leaves tree apples grow trees
+   ✅ TF-IDF [0.193s]: an apple is a fruit
+   ✅ BM25   [0.147s]: an apple is a fruit
+   Expected: ['fruit']
+
+✅ Q: The sky is what color?
+   ✅ Brain  [0.683s]: blue gray rainy day
+   ✅ TF-IDF [0.184s]: blue is the color of the sky
+   ✅ BM25   [0.125s]: blue is the color of the sky
+   Expected: ['blue']
+
+✅ Q: What is the color of the sky?
+   ✅ Brain  [0.831s]: blue gray rainy
+   ✅ TF-IDF [0.187s]: blue is the color of the sky
+   ✅ BM25   [0.147s]: blue is the color of the sky
+   Expected: ['blue']
+
+✅ Q: Tell me the sky's color
+   ✅ Brain  [0.850s]: blue gray rainy
+   ✅ TF-IDF [0.183s]: blue is the color of the sky
+   ❌ BM25   [0.124s]: Tell me, Fleest thou the Lord
+   Expected: ['blue']
+
+✅ Q: The color of the sky is what?
+   ✅ Brain  [0.833s]: blue gray rainy
+   ✅ TF-IDF [0.187s]: blue is the color of the sky
+   ✅ BM25   [0.150s]: blue is the color of the sky
+   Expected: ['blue']
+
+✅ Q: Grass is what color?
+   ✅ Brain  [0.915s]: green grows on the ground cows eat dew forms morning cow eats
+   ✅ TF-IDF [0.173s]: green is the color of grass
+   ✅ BM25   [0.114s]: grass is green in color
+   Expected: ['green']
+
+✅ Q: What is the color of grass?
+   ✅ Brain  [1.099s]: green white to red and orange
+   ✅ TF-IDF [0.186s]: green is the color of grass
+   ✅ BM25   [0.136s]: green is the color of grass
+   Expected: ['green']
+
+✅ Q: Hot is the opposite of what?
+   ✅ Brain  [0.000s]: cold
+   ✅ TF-IDF [0.187s]: hot is the opposite of cold
+   ✅ BM25   [0.137s]: hot is the opposite of cold
+   Expected: ['cold']
+
+✅ Q: What word is opposite to hot?
+   ✅ Brain  [0.000s]: cold
+   ✅ TF-IDF [0.185s]: hot is the opposite of cold
+   ✅ BM25   [0.136s]: hot is the opposite of cold
+   Expected: ['cold']
+
+✅ Q: The opposite of hot is what?
+   ✅ Brain  [0.000s]: cold
+   ✅ TF-IDF [0.187s]: hot is the opposite of cold
+   ✅ BM25   [0.136s]: hot is the opposite of cold
+   Expected: ['cold']
+
+✅ Q: What is hot's opposite?
+   ✅ Brain  [0.000s]: cold
+   ✅ TF-IDF [0.174s]: hot is the opposite of cold
+   ✅ BM25   [0.115s]: hot is the opposite of cold
+   Expected: ['cold']
+
+✅ Q: Big is the opposite of what?
+   ✅ Brain  [0.000s]: small
+   ✅ TF-IDF [0.186s]: big is the opposite of small
+   ✅ BM25   [0.137s]: big is the opposite of small
+   Expected: ['small', 'little']
+
+✅ Q: What word means the opposite of big?
+   ✅ Brain  [0.000s]: small
+   ✅ TF-IDF [0.194s]: big is the opposite of small
+   ✅ BM25   [0.148s]: big is the opposite of small
+   Expected: ['small', 'little']
+
+✅ Q: France has what capital?
+   ✅ Brain  [0.723s]: paris
+   ✅ TF-IDF [0.173s]: the capital of france is paris
+   ✅ BM25   [0.113s]: paris is the capital of france
+   Expected: ['paris']
+
+✅ Q: The capital of France is what?
+   ✅ Brain  [0.840s]: paris berlin is germany beijing is china moscow is russia tokyo is japan
+   ✅ TF-IDF [0.187s]: the capital of france is paris
+   ✅ BM25   [0.137s]: paris is the capital of france
+   Expected: ['paris']
+
+✅ Q: Which city is the capital of France?
+   ✅ Brain  [1.300s]: paris berlin is germany beijing is china london is england rome is italy
+   ✅ TF-IDF [0.194s]: paris is the capital of france
+   ✅ BM25   [0.148s]: paris is the capital of france
+   Expected: ['paris']
+
+✅ Q: Name the capital of France
+   ✅ Brain  [0.855s]: paris berlin is germany beijing is china moscow is russia tokyo is japan
+   ✅ TF-IDF [0.188s]: the capital of france is paris
+   ✅ BM25   [0.128s]: paris is the capital of france
+   Expected: ['paris']
+
+✅ Q: Paris is located where?
+   ✅ Brain  [0.833s]: capital of france
+   ❌ TF-IDF [0.175s]: Where are Records Located
+   ❌ BM25   [0.119s]: Where are Records Located
+   Expected: ['france']
+
+✅ Q: In what country is Paris?
+   ✅ Brain  [1.467s]: capital of france
+   ❌ TF-IDF [0.185s]: paris is capital
+   ❌ BM25   [0.126s]: "What thy country
+   Expected: ['france']
+
+✅ Q: Paris is in what country?
+   ✅ Brain  [0.788s]: capital of france
+   ❌ TF-IDF [0.185s]: paris is capital
+   ❌ BM25   [0.126s]: "What thy country
+   Expected: ['france']
+
+✅ Q: The sun is a type of what?
+   ✅ Brain  [1.665s]: star not a planet plants that need much water to grow takes one each of earth to go evening setting a wolf really did spring and fall upon the sheep
+   ❌ TF-IDF [0.187s]: the sun is up
+   ❌ BM25   [0.137s]: yellow is the color of the sun
+   Expected: ['star']
+
+✅ Q: What kind of celestial body is the sun?
+   ✅ Brain  [1.057s]: star big opposites hot sky only in the not a planet earth goes what down at night
+   ✅ TF-IDF [0.200s]: stars and planets are celestial objects
+   ❌ BM25   [0.159s]: Ask questions like: What kind of book is it
+   Expected: ['star']
+
+✅ Q: Tell me what the sun is
+   ✅ Brain  [1.076s]: star big opposites hot sky only in the not a planet earth goes what down at night
+   ❌ TF-IDF [0.190s]: I will tell you
+   ❌ BM25   [0.137s]: Host: Tell me about what the Molecular Imaging Center itself
+   Expected: ['star']
+
+✅ Q: Water is what state of matter?
+   ✅ Brain  [1.364s]: liquid plants that need sunlight and soil to grow drink instead of sweet drinks cannot birds live wash your hands with soap
+   ❌ TF-IDF [0.189s]: matter can change from one state to another
+   ❌ BM25   [0.139s]: matter can change from one state to another
+   Expected: ['liquid']
+
+✅ Q: What kind of substance is water?
+   ✅ Brain  [1.335s]: liquid plants that need sunlight and soil to grow drink instead of sweet drinks cannot birds live wash your hands with soap
+   ❌ TF-IDF [0.187s]: help is kind
+   ❌ BM25   [0.139s]: Ask questions like: What kind of book is it
+   Expected: ['liquid', 'drink']
+
+✅ Q: What sound does a dog make?
+   ✅ Brain  [1.066s]: woof says bow wow thank animal and a pet
+   ❌ TF-IDF [0.183s]: - What does the wheezing sound like
+   ❌ BM25   [0.126s]: - What does the wheezing sound like
+   Expected: ['woof', 'bark']
+
+✅ Q: A dog says what?
+   ✅ Brain  [0.918s]: say woof bow wow which means animal and a pet
+   ❌ TF-IDF [0.166s]: dog food dog
+   ✅ BM25   [0.104s]: a dog says woof woof
+   Expected: ['woof', 'bark']
+
+✅ Q: Dogs make what sound?
+   ✅ Brain  [0.918s]: bark woof bark animals mammals wag
+   ❌ TF-IDF [0.175s]: What sound is orange
+   ❌ BM25   [0.115s]: What sound is orange
+   Expected: ['woof', 'bark']
+
+✅ Q: What sound does a cat make?
+   ✅ Brain  [0.815s]: says meow meow polly poor poll wants mew like of which is not a good friends catch pastry she heard loudly and scratch
+   ❌ TF-IDF [0.184s]: - What does the wheezing sound like
+   ❌ BM25   [0.125s]: - What does the wheezing sound like
+   Expected: ['meow', 'purr']
+
+✅ Q: A cat says what?
+   ✅ Brain  [0.893s]: meow meow polly can say mew like of which is not catch mat animal
+   ❌ TF-IDF [0.166s]: cat food cat
+   ✅ BM25   [0.105s]: a cat says meow meow
+   Expected: ['meow', 'purr']
+
+✅ Q: A puppy is what kind of animal?
+   ✅ Brain  [0.640s]: baby dog
+   ✅ TF-IDF [0.187s]: what is puppy baby dog
+   ✅ BM25   [0.137s]: what is puppy baby dog
+   Expected: ['baby', 'dog', 'young']
+
+✅ Q: What is a puppy called?
+   ✅ Brain  [1.766s]: baby dog infant
+   ✅ TF-IDF [0.173s]: what is puppy baby dog
+   ✅ BM25   [0.115s]: what is puppy baby dog
+   Expected: ['baby', 'dog', 'young']
+
+✅ Q: We see using what?
+   ✅ Brain  [1.037s]: eyes our use paragraphs two foggy we cannot far moon at night
+   ❌ TF-IDF [0.172s]: See also F
+   ❌ BM25   [0.115s]: Facts are not pure and unsullied bits of information; cultur
+   Expected: ['eyes']
+
+✅ Q: What body part do we use to see?
+   ✅ Brain  [1.222s]: eyes our use paragraphs two resolve help colors and shapes and movement
+   ❌ TF-IDF [0.200s]: Do your part
+   ❌ BM25   [0.159s]: every body part has a special job to do
+   Expected: ['eyes']
+
+✅ Q: Seeing is done with what?
+   ✅ Brain  [1.270s]: eyes our use paragraphs two resolve help colors and shapes and movement
+   ✅ TF-IDF [0.183s]: eyes are for seeing
+   ❌ BM25   [0.125s]: painting is done with a brush
+   Expected: ['eyes']
+
+✅ Q: We hear using what?
+   ✅ Brain  [1.095s]: ears to use would help sounds and music two four comes fanny to see stand men play
+   ✅ TF-IDF [0.172s]: we hear with our ears
+   ✅ BM25   [0.115s]: we hear with our ears
+   Expected: ['ears']
+
+✅ Q: Hearing is done with what?
+   ✅ Brain  [1.297s]: ears to use paragraphs two resolve help sounds and music comes fanny to see stand men play
+   ❌ TF-IDF [0.182s]: hearing is hear
+   ❌ BM25   [0.125s]: painting is done with a brush
+   Expected: ['ears']
+
+✅ Q: By what is sound heard?
+   ✅ Brain  [1.279s]: ears to use paragraphs two resolve help sounds and music comes fanny to see stand men play
+   ❌ TF-IDF [0.182s]: What sound is orange
+   ❌ BM25   [0.126s]: What sound is orange
+   Expected: ['ears']
+
+✅ Q: By what organ do we smell?
+   ✅ Brain  [1.365s]: food flowers nose taste
+   ❌ TF-IDF [0.184s]: the brain is the most important organ
+   ❌ BM25   [0.137s]: We express ourselves by what we do, by what we say, and by w
+   Expected: ['nose']
+
+✅ Q: We wake up at what time of day?
+   ✅ Brain  [1.362s]: morning afternoon eat breakfast time to go to bed early
+   ❌ TF-IDF [0.199s]: time to wake up
+   ❌ BM25   [0.159s]: time to wake up
+   Expected: ['morning']
+
+✅ Q: What time of day do people wake up?
+   ✅ Brain  [1.481s]: morning afternoon eat breakfast time to go to bed early
+   ❌ TF-IDF [0.199s]: time to wake up
+   ❌ BM25   [0.158s]: time to wake up
+   Expected: ['morning']
+
+✅ Q: After Monday comes what?
+   ✅ Brain  [0.000s]: tuesday
+   ❌ TF-IDF [0.178s]: monday comes after sunday
+   ✅ BM25   [0.119s]: tuesday comes after monday
+   Expected: ['tuesday']
+
+✅ Q: Monday is followed by what day?
+   ✅ Brain  [0.000s]: tuesday
+   ❌ TF-IDF [0.189s]: “on the day of” Monday)
+   ❌ BM25   [0.139s]: monday is first day
+   Expected: ['tuesday']
+
+✅ Q: The day after Monday is what?
+   ✅ Brain  [0.000s]: tuesday
+   ❌ TF-IDF [0.189s]: “on the day of” Monday)
+   ❌ BM25   [0.138s]: monday is first day
+   Expected: ['tuesday']
+
+======================================================================
+RESULT PARAPHRASE: 50/50 (100.0%)
+Baseline (original questions): 98.8%
+Degradation: -1.2% (lower is better)
+Brain: 44.25s
+BASELINES: TF-IDF 24/50 (48.0%) | BM25 24/50 (48.0%)
+Brain advantage: vs TF-IDF +52.0% | vs BM25 +52.0%
+======================================================================
+
+======================================================================
+TESTS bAbI Tasks 1-20 (working memory + cognitive abilities)
+======================================================================
+Note: TF-IDF/BM25 = 0% (no working memory support)
+      MemNet/NTM support working memory via answer_with_context()
+
+--- bAbI Task 1: single-supporting-fact ---
+✅ PASS | Q: Where is Mary?
+         ✅ Brain  [0.000s]: bathroom
+         Expected: bathroom
+
+✅ PASS | Q: Where is Daniel?
+         ✅ Brain  [0.000s]: hallway
+         Expected: hallway
+
+✅ PASS | Q: Where is Daniel?
+         ✅ Brain  [0.000s]: hallway
+         Expected: hallway
+
+✅ PASS | Q: Where is Daniel?
+         ✅ Brain  [0.000s]: office
+         Expected: office
+
+✅ PASS | Q: Where is Sandra?
+         ✅ Brain  [0.000s]: bathroom
+         Expected: bathroom
+
+✅ PASS | Q: Where is Sandra?
+         ✅ Brain  [0.000s]: bathroom
+         Expected: bathroom
+
+✅ PASS | Q: Where is Sandra?
+         ✅ Brain  [0.000s]: bathroom
+         Expected: bathroom
+
+✅ PASS | Q: Where is Sandra?
+         ✅ Brain  [0.000s]: bathroom
+         Expected: bathroom
+
+✅ PASS | Q: Where is John?
+         ✅ Brain  [0.000s]: office
+         Expected: office
+
+✅ PASS | Q: Where is Daniel?
+         ✅ Brain  [0.000s]: hallway
+         Expected: hallway
+
+✅ PASS | Q: Where is John?
+         ✅ Brain  [0.000s]: bathroom
+         Expected: bathroom
+
+✅ PASS | Q: Where is Mary?
+         ✅ Brain  [0.000s]: bedroom
+         Expected: bedroom
+
+✅ PASS | Q: Where is John?
+         ✅ Brain  [0.000s]: bathroom
+         Expected: bathroom
+
+✅ PASS | Q: Where is John?
+         ✅ Brain  [0.000s]: bathroom
+         Expected: bathroom
+
+✅ PASS | Q: Where is Sandra?
+         ✅ Brain  [0.000s]: bedroom
+         Expected: bedroom
+
+✅ PASS | Q: Where is Daniel?
+         ✅ Brain  [0.000s]: bedroom
+         Expected: bedroom
+
+✅ PASS | Q: Where is Sandra?
+         ✅ Brain  [0.000s]: kitchen
+         Expected: kitchen
+
+✅ PASS | Q: Where is Sandra?
+         ✅ Brain  [0.000s]: hallway
+         Expected: hallway
+
+✅ PASS | Q: Where is Sandra?
+         ✅ Brain  [0.000s]: hallway
+         Expected: hallway
+
+✅ PASS | Q: Where is Daniel?
+         ✅ Brain  [0.000s]: hallway
+         Expected: hallway
+
+✅ PASS | Q: Where is John?
+         ✅ Brain  [0.000s]: bathroom
+         Expected: bathroom
+
+✅ PASS | Q: Where is Mary?
+         ✅ Brain  [0.000s]: garden
+         Expected: garden
+
+✅ PASS | Q: Where is John?
+         ✅ Brain  [0.000s]: kitchen
+         Expected: kitchen
+
+✅ PASS | Q: Where is Sandra?
+         ✅ Brain  [0.000s]: hallway
+         Expected: hallway
+
+✅ PASS | Q: Where is John?
+         ✅ Brain  [0.000s]: office
+         Expected: office
+
+✅ RESULT bAbI-1 (single-supporting-fact): 25/25 (100.0%) | Time: 3.6s
+
+--- bAbI Task 2: two-supporting-facts ---
+✅ PASS | Q: Where is the football?
+         ✅ Brain  [0.000s]: garden
+         Expected: garden
+
+✅ PASS | Q: Where is the football?
+         ✅ Brain  [0.000s]: garden
+         Expected: garden
+
+✅ PASS | Q: Where is the football?
+         ✅ Brain  [0.000s]: hallway
+         Expected: hallway
+
+✅ PASS | Q: Where is the apple?
+         ✅ Brain  [0.000s]: hallway
+         Expected: hallway
+
+✅ PASS | Q: Where is the milk?
+         ✅ Brain  [0.000s]: kitchen
+         Expected: kitchen
+
+✅ PASS | Q: Where is the football?
+         ✅ Brain  [0.000s]: garden
+         Expected: garden
+
+✅ PASS | Q: Where is the milk?
+         ✅ Brain  [0.000s]: bedroom
+         Expected: bedroom
+
+✅ PASS | Q: Where is the milk?
+         ✅ Brain  [0.000s]: bedroom
+         Expected: bedroom
+
+✅ PASS | Q: Where is the milk?
+         ✅ Brain  [0.000s]: bedroom
+         Expected: bedroom
+
+✅ PASS | Q: Where is the apple?
+         ✅ Brain  [0.000s]: hallway
+         Expected: hallway
+
+✅ PASS | Q: Where is the apple?
+         ✅ Brain  [0.000s]: bedroom
+         Expected: bedroom
+
+✅ PASS | Q: Where is the apple?
+         ✅ Brain  [0.000s]: bedroom
+         Expected: bedroom
+
+✅ PASS | Q: Where is the milk?
+         ✅ Brain  [0.000s]: office
+         Expected: office
+
+✅ PASS | Q: Where is the football?
+         ✅ Brain  [0.000s]: office
+         Expected: office
+
+✅ PASS | Q: Where is the football?
+         ✅ Brain  [0.000s]: bedroom
+         Expected: bedroom
+
+✅ PASS | Q: Where is the football?
+         ✅ Brain  [0.000s]: bedroom
+         Expected: bedroom
+
+✅ PASS | Q: Where is the football?
+         ✅ Brain  [0.000s]: kitchen
+         Expected: kitchen
+
+✅ PASS | Q: Where is the football?
+         ✅ Brain  [0.000s]: kitchen
+         Expected: kitchen
+
+✅ PASS | Q: Where is the football?
+         ✅ Brain  [0.000s]: kitchen
+         Expected: kitchen
+
+✅ PASS | Q: Where is the milk?
+         ✅ Brain  [0.000s]: garden
+         Expected: garden
+
+✅ PASS | Q: Where is the football?
+         ✅ Brain  [0.000s]: office
+         Expected: office
+
+✅ PASS | Q: Where is the milk?
+         ✅ Brain  [0.000s]: hallway
+         Expected: hallway
+
+✅ PASS | Q: Where is the milk?
+         ✅ Brain  [0.000s]: hallway
+         Expected: hallway
+
+✅ PASS | Q: Where is the football?
+         ✅ Brain  [0.000s]: office
+         Expected: office
+
+✅ PASS | Q: Where is the milk?
+         ✅ Brain  [0.000s]: bedroom
+         Expected: bedroom
+
+✅ RESULT bAbI-2 (two-supporting-facts): 25/25 (100.0%) | Time: 7.2s
+
+--- bAbI Task 3: three-supporting-facts ---
+✅ PASS | Q: Where was the football before the bathroom?
+         ✅ Brain  [0.000s]: office
+         Expected: office
+
+✅ PASS | Q: Where was the football before the bathroom?
+         ✅ Brain  [0.000s]: office
+         Expected: office
+
+✅ PASS | Q: Where was the apple before the garden?
+         ✅ Brain  [0.000s]: bathroom
+         Expected: bathroom
+
+✅ PASS | Q: Where was the apple before the garden?
+         ✅ Brain  [0.000s]: bathroom
+         Expected: bathroom
+
+✅ PASS | Q: Where was the milk before the kitchen?
+         ✅ Brain  [0.000s]: hallway
+         Expected: hallway
+
+✅ PASS | Q: Where was the apple before the bedroom?
+         ✅ Brain  [0.000s]: bathroom
+         Expected: bathroom
+
+✅ PASS | Q: Where was the apple before the bedroom?
+         ✅ Brain  [0.000s]: bathroom
+         Expected: bathroom
+
+✅ PASS | Q: Where was the apple before the bedroom?
+         ✅ Brain  [0.000s]: bathroom
+         Expected: bathroom
+
+✅ PASS | Q: Where was the apple before the garden?
+         ✅ Brain  [0.000s]: hallway
+         Expected: hallway
+
+✅ PASS | Q: Where was the apple before the bathroom?
+         ✅ Brain  [0.000s]: hallway
+         Expected: hallway
+
+✅ PASS | Q: Where was the apple before the garden?
+         ✅ Brain  [0.000s]: kitchen
+         Expected: kitchen
+
+✅ PASS | Q: Where was the apple before the garden?
+         ✅ Brain  [0.000s]: kitchen
+         Expected: kitchen
+
+✅ PASS | Q: Where was the football before the office?
+         ✅ Brain  [0.000s]: kitchen
+         Expected: kitchen
+
+✅ PASS | Q: Where was the football before the office?
+         ✅ Brain  [0.000s]: kitchen
+         Expected: kitchen
+
+✅ PASS | Q: Where was the milk before the bathroom?
+         ✅ Brain  [0.000s]: office
+         Expected: office
+
+✅ PASS | Q: Where was the football before the kitchen?
+         ✅ Brain  [0.000s]: garden
+         Expected: garden
+
+✅ PASS | Q: Where was the football before the kitchen?
+         ✅ Brain  [0.000s]: garden
+         Expected: garden
+
+✅ PASS | Q: Where was the milk before the hallway?
+         ✅ Brain  [0.000s]: bathroom
+         Expected: bathroom
+
+✅ PASS | Q: Where was the football before the garden?
+         ✅ Brain  [0.000s]: bathroom
+         Expected: bathroom
+
+✅ PASS | Q: Where was the football before the hallway?
+         ✅ Brain  [0.000s]: office
+         Expected: office
+
+✅ PASS | Q: Where was the football before the office?
+         ✅ Brain  [0.000s]: kitchen
+         Expected: kitchen
+
+✅ PASS | Q: Where was the football before the office?
+         ✅ Brain  [0.000s]: kitchen
+         Expected: kitchen
+
+✅ PASS | Q: Where was the apple before the garden?
+         ✅ Brain  [0.000s]: bathroom
+         Expected: bathroom
+
+✅ PASS | Q: Where was the apple before the office?
+         ✅ Brain  [0.000s]: kitchen
+         Expected: kitchen
+
+✅ PASS | Q: Where was the apple before the office?
+         ✅ Brain  [0.000s]: kitchen
+         Expected: kitchen
+
+✅ RESULT bAbI-3 (three-supporting-facts): 25/25 (100.0%) | Time: 29.1s
+
+--- bAbI Task 4: two-arg-relations ---
+✅ PASS | Q: What is north of the kitchen?
+         ✅ Brain  [0.001s]: office
+         Expected: office
+
+✅ PASS | Q: What is the garden east of?
+         ✅ Brain  [0.000s]: kitchen
+         Expected: kitchen
+
+✅ PASS | Q: What is north of the garden?
+         ✅ Brain  [0.000s]: bedroom
+         Expected: bedroom
+
+✅ PASS | Q: What is the hallway east of?
+         ✅ Brain  [0.000s]: bedroom
+         Expected: bedroom
+
+✅ PASS | Q: What is the bedroom east of?
+         ✅ Brain  [0.000s]: kitchen
+         Expected: kitchen
+
+✅ RESULT bAbI-4 (two-arg-relations): 5/5 (100.0%) | Time: 1.1s
+
+--- bAbI Task 5: three-arg-relations ---
+✅ PASS | Q: What did Bill give to Fred?
+         ✅ Brain  [0.000s]: football
+         Expected: football
+
+✅ PASS | Q: Who received the football?
+         ✅ Brain  [0.000s]: bill
+         Expected: Bill
+
+✅ PASS | Q: Who received the football?
+         ✅ Brain  [0.000s]: bill
+         Expected: Bill
+
+✅ PASS | Q: Who did Jeff give the apple to?
+         ✅ Brain  [0.000s]: fred
+         Expected: Fred
+
+✅ PASS | Q: Who received the apple?
+         ✅ Brain  [0.000s]: fred
+         Expected: Fred
+
+✅ PASS | Q: What did Mary give to Jeff?
+         ✅ Brain  [0.000s]: football
+         Expected: football
+
+✅ PASS | Q: What did Mary give to Jeff?
+         ✅ Brain  [0.000s]: football
+         Expected: football
+
+✅ PASS | Q: What did Mary give to Jeff?
+         ✅ Brain  [0.000s]: football
+         Expected: football
+
+✅ PASS | Q: Who gave the milk to Fred?
+         ✅ Brain  [0.000s]: mary
+         Expected: Mary
+
+✅ PASS | Q: Who did Mary give the milk to?
+         ✅ Brain  [0.000s]: fred
+         Expected: Fred
+
+✅ PASS | Q: Who received the milk?
+         ✅ Brain  [0.000s]: bill
+         Expected: Bill
+
+✅ PASS | Q: Who gave the milk?
+         ✅ Brain  [0.000s]: jeff
+         Expected: Jeff
+
+✅ PASS | Q: Who received the milk?
+         ✅ Brain  [0.000s]: jeff
+         Expected: Jeff
+
+✅ PASS | Q: What did Bill give to Jeff?
+         ✅ Brain  [0.000s]: milk
+         Expected: milk
+
+✅ PASS | Q: Who did Jeff give the football to?
+         ✅ Brain  [0.000s]: mary
+         Expected: Mary
+
+✅ PASS | Q: What did Bill give to Jeff?
+         ✅ Brain  [0.000s]: apple
+         Expected: apple
+
+✅ PASS | Q: Who gave the apple?
+         ✅ Brain  [0.000s]: bill
+         Expected: Bill
+
+✅ PASS | Q: What did Jeff give to Bill?
+         ✅ Brain  [0.000s]: apple
+         Expected: apple
+
+✅ PASS | Q: Who did Bill give the apple to?
+         ✅ Brain  [0.000s]: jeff
+         Expected: Jeff
+
+✅ PASS | Q: What did Jeff give to Bill?
+         ✅ Brain  [0.000s]: apple
+         Expected: apple
+
+✅ PASS | Q: Who did Mary give the milk to?
+         ✅ Brain  [0.000s]: jeff
+         Expected: Jeff
+
+✅ PASS | Q: Who gave the milk?
+         ✅ Brain  [0.000s]: mary
+         Expected: Mary
+
+✅ PASS | Q: Who did Fred give the apple to?
+         ✅ Brain  [0.000s]: jeff
+         Expected: Jeff
+
+✅ PASS | Q: Who gave the apple?
+         ✅ Brain  [0.000s]: fred
+         Expected: Fred
+
+✅ PASS | Q: Who did Mary give the milk to?
+         ✅ Brain  [0.000s]: fred
+         Expected: Fred
+
+✅ RESULT bAbI-5 (three-arg-relations): 25/25 (100.0%) | Time: 8.3s
+
+--- bAbI Task 6: yes-no-questions ---
+✅ PASS | Q: Is Sandra in the hallway?
+         ✅ Brain  [0.000s]: no
+         Expected: no
+
+✅ PASS | Q: Is Daniel in the bathroom?
+         ✅ Brain  [0.000s]: no
+         Expected: no
+
+✅ PASS | Q: Is Daniel in the office?
+         ✅ Brain  [0.000s]: no
+         Expected: no
+
+✅ PASS | Q: Is Daniel in the bedroom?
+         ✅ Brain  [0.000s]: yes
+         Expected: yes
+
+✅ PASS | Q: Is Daniel in the bedroom?
+         ✅ Brain  [0.000s]: yes
+         Expected: yes
+
+✅ PASS | Q: Is Mary in the bedroom?
+         ✅ Brain  [0.000s]: yes
+         Expected: yes
+
+✅ PASS | Q: Is Sandra in the office?
+         ✅ Brain  [0.000s]: no
+         Expected: no
+
+✅ PASS | Q: Is Sandra in the bathroom?
+         ✅ Brain  [0.000s]: no
+         Expected: no
+
+✅ PASS | Q: Is Sandra in the bathroom?
+         ✅ Brain  [0.000s]: no
+         Expected: no
+
+✅ PASS | Q: Is Mary in the kitchen?
+         ✅ Brain  [0.000s]: yes
+         Expected: yes
+
+✅ PASS | Q: Is Sandra in the office?
+         ✅ Brain  [0.000s]: yes
+         Expected: yes
+
+✅ PASS | Q: Is Mary in the hallway?
+         ✅ Brain  [0.000s]: yes
+         Expected: yes
+
+✅ PASS | Q: Is Mary in the hallway?
+         ✅ Brain  [0.000s]: yes
+         Expected: yes
+
+✅ PASS | Q: Is Mary in the hallway?
+         ✅ Brain  [0.000s]: no
+         Expected: no
+
+✅ PASS | Q: Is Mary in the garden?
+         ✅ Brain  [0.000s]: yes
+         Expected: yes
+
+✅ PASS | Q: Is Sandra in the office?
+         ✅ Brain  [0.000s]: yes
+         Expected: yes
+
+✅ PASS | Q: Is Sandra in the bathroom?
+         ✅ Brain  [0.000s]: no
+         Expected: no
+
+✅ PASS | Q: Is Sandra in the kitchen?
+         ✅ Brain  [0.000s]: yes
+         Expected: yes
+
+✅ PASS | Q: Is Mary in the bedroom?
+         ✅ Brain  [0.000s]: yes
+         Expected: yes
+
+✅ PASS | Q: Is Mary in the kitchen?
+         ✅ Brain  [0.000s]: yes
+         Expected: yes
+
+✅ PASS | Q: Is Daniel in the bedroom?
+         ✅ Brain  [0.000s]: no
+         Expected: no
+
+✅ PASS | Q: Is Sandra in the bathroom?
+         ✅ Brain  [0.000s]: yes
+         Expected: yes
+
+✅ PASS | Q: Is Sandra in the bedroom?
+         ✅ Brain  [0.000s]: no
+         Expected: no
+
+✅ PASS | Q: Is Daniel in the office?
+         ✅ Brain  [0.000s]: no
+         Expected: no
+
+✅ PASS | Q: Is Daniel in the kitchen?
+         ✅ Brain  [0.000s]: no
+         Expected: no
+
+✅ RESULT bAbI-6 (yes-no-questions): 25/25 (100.0%) | Time: 4.3s
+
+--- bAbI Task 7: counting ---
+✅ PASS | Q: How many objects is Mary carrying?
+         ✅ Brain  [0.000s]: one
+         Expected: one
+
+✅ PASS | Q: How many objects is Mary carrying?
+         ✅ Brain  [0.000s]: one
+         Expected: one
+
+✅ PASS | Q: How many objects is Mary carrying?
+         ✅ Brain  [0.000s]: one
+         Expected: one
+
+✅ PASS | Q: How many objects is Mary carrying?
+         ✅ Brain  [0.000s]: none
+         Expected: none
+
+✅ PASS | Q: How many objects is Mary carrying?
+         ✅ Brain  [0.000s]: one
+         Expected: one
+
+✅ PASS | Q: How many objects is Sandra carrying?
+         ✅ Brain  [0.000s]: one
+         Expected: one
+
+✅ PASS | Q: How many objects is Sandra carrying?
+         ✅ Brain  [0.000s]: none
+         Expected: none
+
+✅ PASS | Q: How many objects is Sandra carrying?
+         ✅ Brain  [0.000s]: none
+         Expected: none
+
+✅ PASS | Q: How many objects is Sandra carrying?
+         ✅ Brain  [0.000s]: none
+         Expected: none
+
+✅ PASS | Q: How many objects is Mary carrying?
+         ✅ Brain  [0.000s]: none
+         Expected: none
+
+✅ PASS | Q: How many objects is Daniel carrying?
+         ✅ Brain  [0.000s]: one
+         Expected: one
+
+✅ PASS | Q: How many objects is Daniel carrying?
+         ✅ Brain  [0.000s]: none
+         Expected: none
+
+✅ PASS | Q: How many objects is Daniel carrying?
+         ✅ Brain  [0.000s]: one
+         Expected: one
+
+✅ PASS | Q: How many objects is Daniel carrying?
+         ✅ Brain  [0.000s]: none
+         Expected: none
+
+✅ PASS | Q: How many objects is Daniel carrying?
+         ✅ Brain  [0.000s]: one
+         Expected: one
+
+✅ PASS | Q: How many objects is Mary carrying?
+         ✅ Brain  [0.000s]: none
+         Expected: none
+
+✅ PASS | Q: How many objects is Mary carrying?
+         ✅ Brain  [0.000s]: none
+         Expected: none
+
+✅ PASS | Q: How many objects is John carrying?
+         ✅ Brain  [0.000s]: one
+         Expected: one
+
+✅ PASS | Q: How many objects is John carrying?
+         ✅ Brain  [0.000s]: one
+         Expected: one
+
+✅ PASS | Q: How many objects is John carrying?
+         ✅ Brain  [0.000s]: two
+         Expected: two
+
+✅ PASS | Q: How many objects is Mary carrying?
+         ✅ Brain  [0.000s]: one
+         Expected: one
+
+✅ PASS | Q: How many objects is Mary carrying?
+         ✅ Brain  [0.000s]: none
+         Expected: none
+
+✅ PASS | Q: How many objects is Mary carrying?
+         ✅ Brain  [0.000s]: none
+         Expected: none
+
+✅ PASS | Q: How many objects is Daniel carrying?
+         ✅ Brain  [0.000s]: none
+         Expected: none
+
+✅ PASS | Q: How many objects is Daniel carrying?
+         ✅ Brain  [0.000s]: one
+         Expected: one
+
+✅ RESULT bAbI-7 (counting): 25/25 (100.0%) | Time: 4.6s
+
+--- bAbI Task 8: lists-sets ---
+✅ PASS | Q: What is Mary carrying?
+         ✅ Brain  [0.000s]: football
+         Expected: football
+
+✅ PASS | Q: What is Mary carrying?
+         ✅ Brain  [0.000s]: nothing
+         Expected: nothing
+
+✅ PASS | Q: What is Mary carrying?
+         ✅ Brain  [0.000s]: football
+         Expected: football
+
+✅ PASS | Q: What is Sandra carrying?
+         ✅ Brain  [0.000s]: milk
+         Expected: milk
+
+✅ PASS | Q: What is Sandra carrying?
+         ✅ Brain  [0.000s]: milk
+         Expected: milk
+
+✅ PASS | Q: What is Daniel carrying?
+         ✅ Brain  [0.000s]: football
+         Expected: football
+
+✅ PASS | Q: What is Mary carrying?
+         ✅ Brain  [0.000s]: milk
+         Expected: milk
+
+✅ PASS | Q: What is Daniel carrying?
+         ✅ Brain  [0.000s]: football
+         Expected: football
+
+✅ PASS | Q: What is John carrying?
+         ✅ Brain  [0.000s]: apple
+         Expected: apple
+
+✅ PASS | Q: What is John carrying?
+         ✅ Brain  [0.000s]: nothing
+         Expected: nothing
+
+✅ PASS | Q: What is Sandra carrying?
+         ✅ Brain  [0.000s]: nothing
+         Expected: nothing
+
+✅ PASS | Q: What is John carrying?
+         ✅ Brain  [0.000s]: milk
+         Expected: milk
+
+✅ PASS | Q: What is Sandra carrying?
+         ✅ Brain  [0.000s]: nothing
+         Expected: nothing
+
+✅ PASS | Q: What is John carrying?
+         ✅ Brain  [0.000s]: nothing
+         Expected: nothing
+
+✅ PASS | Q: What is John carrying?
+         ✅ Brain  [0.000s]: nothing
+         Expected: nothing
+
+✅ PASS | Q: What is Mary carrying?
+         ✅ Brain  [0.000s]: milk
+         Expected: milk
+
+✅ PASS | Q: What is Mary carrying?
+         ✅ Brain  [0.000s]: milk
+         Expected: milk
+
+✅ PASS | Q: What is Mary carrying?
+         ✅ Brain  [0.000s]: nothing
+         Expected: nothing
+
+✅ PASS | Q: What is Mary carrying?
+         ✅ Brain  [0.000s]: nothing
+         Expected: nothing
+
+✅ PASS | Q: What is Sandra carrying?
+         ✅ Brain  [0.000s]: milk
+         Expected: milk
+
+✅ PASS | Q: What is Daniel carrying?
+         ✅ Brain  [0.000s]: nothing
+         Expected: nothing
+
+✅ PASS | Q: What is Mary carrying?
+         ✅ Brain  [0.000s]: milk
+         Expected: milk
+
+✅ PASS | Q: What is Daniel carrying?
+         ✅ Brain  [0.000s]: apple
+         Expected: apple
+
+✅ PASS | Q: What is Mary carrying?
+         ✅ Brain  [0.000s]: milk
+         Expected: milk
+
+✅ PASS | Q: What is Mary carrying?
+         ✅ Brain  [0.000s]: nothing
+         Expected: nothing
+
+✅ RESULT bAbI-8 (lists-sets): 25/25 (100.0%) | Time: 4.0s
+
+--- bAbI Task 9: simple-negation ---
+✅ PASS | Q: Is Mary in the bedroom?
+         ✅ Brain  [0.000s]: no
+         Expected: no
+
+✅ PASS | Q: Is Daniel in the bathroom?
+         ✅ Brain  [0.000s]: no
+         Expected: no
+
+✅ PASS | Q: Is Sandra in the office?
+         ✅ Brain  [0.000s]: no
+         Expected: no
+
+✅ PASS | Q: Is Sandra in the office?
+         ✅ Brain  [0.000s]: no
+         Expected: no
+
+✅ PASS | Q: Is Sandra in the bedroom?
+         ✅ Brain  [0.000s]: no
+         Expected: no
+
+✅ PASS | Q: Is John in the hallway?
+         ✅ Brain  [0.000s]: no
+         Expected: no
+
+✅ PASS | Q: Is Daniel in the garden?
+         ✅ Brain  [0.000s]: no
+         Expected: no
+
+✅ PASS | Q: Is Daniel in the hallway?
+         ✅ Brain  [0.000s]: yes
+         Expected: yes
+
+✅ PASS | Q: Is Daniel in the bedroom?
+         ✅ Brain  [0.000s]: yes
+         Expected: yes
+
+✅ PASS | Q: Is Sandra in the garden?
+         ✅ Brain  [0.000s]: yes
+         Expected: yes
+
+✅ PASS | Q: Is John in the bathroom?
+         ✅ Brain  [0.000s]: no
+         Expected: no
+
+✅ PASS | Q: Is John in the bedroom?
+         ✅ Brain  [0.000s]: yes
+         Expected: yes
+
+✅ PASS | Q: Is John in the kitchen?
+         ✅ Brain  [0.000s]: no
+         Expected: no
+
+✅ PASS | Q: Is John in the hallway?
+         ✅ Brain  [0.000s]: no
+         Expected: no
+
+✅ PASS | Q: Is Sandra in the kitchen?
+         ✅ Brain  [0.000s]: yes
+         Expected: yes
+
+✅ PASS | Q: Is Sandra in the office?
+         ✅ Brain  [0.000s]: no
+         Expected: no
+
+✅ PASS | Q: Is Sandra in the bathroom?
+         ✅ Brain  [0.000s]: yes
+         Expected: yes
+
+✅ PASS | Q: Is Mary in the office?
+         ✅ Brain  [0.000s]: no
+         Expected: no
+
+✅ PASS | Q: Is Daniel in the bathroom?
+         ✅ Brain  [0.000s]: no
+         Expected: no
+
+✅ PASS | Q: Is Daniel in the bathroom?
+         ✅ Brain  [0.000s]: no
+         Expected: no
+
+✅ PASS | Q: Is John in the garden?
+         ✅ Brain  [0.000s]: no
+         Expected: no
+
+✅ PASS | Q: Is Mary in the bathroom?
+         ✅ Brain  [0.000s]: no
+         Expected: no
+
+✅ PASS | Q: Is John in the bathroom?
+         ✅ Brain  [0.000s]: yes
+         Expected: yes
+
+✅ PASS | Q: Is Daniel in the bedroom?
+         ✅ Brain  [0.000s]: no
+         Expected: no
+
+✅ PASS | Q: Is Mary in the hallway?
+         ✅ Brain  [0.000s]: yes
+         Expected: yes
+
+✅ RESULT bAbI-9 (simple-negation): 25/25 (100.0%) | Time: 3.9s
+
+--- bAbI Task 10: indefinite-knowledge ---
+✅ PASS | Q: Is Mary in the office?
+         ✅ Brain  [0.000s]: yes
+         Expected: yes
+
+✅ PASS | Q: Is Fred in the park?
+         ✅ Brain  [0.000s]: no
+         Expected: no
+
+✅ PASS | Q: Is Bill in the cinema?
+         ✅ Brain  [0.000s]: yes
+         Expected: yes
+
+✅ PASS | Q: Is Bill in the office?
+         ✅ Brain  [0.000s]: maybe
+         Expected: maybe
+
+✅ PASS | Q: Is Bill in the park?
+         ✅ Brain  [0.000s]: maybe
+         Expected: maybe
+
+✅ PASS | Q: Is Mary in the school?
+         ✅ Brain  [0.000s]: no
+         Expected: no
+
+✅ PASS | Q: Is Mary in the cinema?
+         ✅ Brain  [0.000s]: no
+         Expected: no
+
+✅ PASS | Q: Is Fred in the school?
+         ✅ Brain  [0.000s]: maybe
+         Expected: maybe
+
+✅ PASS | Q: Is Fred in the cinema?
+         ✅ Brain  [0.000s]: yes
+         Expected: yes
+
+✅ PASS | Q: Is Bill in the bedroom?
+         ✅ Brain  [0.000s]: yes
+         Expected: yes
+
+✅ PASS | Q: Is Mary in the kitchen?
+         ✅ Brain  [0.000s]: no
+         Expected: no
+
+✅ PASS | Q: Is Julie in the kitchen?
+         ✅ Brain  [0.000s]: no
+         Expected: no
+
+✅ PASS | Q: Is Mary in the park?
+         ✅ Brain  [0.000s]: yes
+         Expected: yes
+
+✅ PASS | Q: Is Julie in the park?
+         ✅ Brain  [0.000s]: yes
+         Expected: yes
+
+✅ PASS | Q: Is Bill in the bedroom?
+         ✅ Brain  [0.000s]: no
+         Expected: no
+
+✅ PASS | Q: Is Bill in the school?
+         ✅ Brain  [0.000s]: no
+         Expected: no
+
+✅ PASS | Q: Is Bill in the park?
+         ✅ Brain  [0.000s]: yes
+         Expected: yes
+
+✅ PASS | Q: Is Julie in the school?
+         ✅ Brain  [0.000s]: no
+         Expected: no
+
+✅ PASS | Q: Is Bill in the office?
+         ✅ Brain  [0.000s]: yes
+         Expected: yes
+
+✅ PASS | Q: Is Bill in the school?
+         ✅ Brain  [0.000s]: no
+         Expected: no
+
+✅ PASS | Q: Is Mary in the park?
+         ✅ Brain  [0.000s]: no
+         Expected: no
+
+✅ PASS | Q: Is Mary in the kitchen?
+         ✅ Brain  [0.000s]: no
+         Expected: no
+
+✅ PASS | Q: Is Bill in the cinema?
+         ✅ Brain  [0.000s]: no
+         Expected: no
+
+✅ PASS | Q: Is Bill in the park?
+         ✅ Brain  [0.000s]: yes
+         Expected: yes
+
+✅ PASS | Q: Is Bill in the park?
+         ✅ Brain  [0.000s]: yes
+         Expected: yes
+
+✅ RESULT bAbI-10 (indefinite-knowledge): 25/25 (100.0%) | Time: 4.2s
+
+--- bAbI Task 11: basic-coreference ---
+✅ PASS | Q: Where is Mary?
+         ✅ Brain  [0.000s]: bedroom
+         Expected: bedroom
+
+✅ PASS | Q: Where is Daniel?
+         ✅ Brain  [0.000s]: hallway
+         Expected: hallway
+
+✅ PASS | Q: Where is Daniel?
+         ✅ Brain  [0.000s]: hallway
+         Expected: hallway
+
+✅ PASS | Q: Where is Mary?
+         ✅ Brain  [0.000s]: bedroom
+         Expected: bedroom
+
+✅ PASS | Q: Where is Mary?
+         ✅ Brain  [0.000s]: office
+         Expected: office
+
+✅ PASS | Q: Where is Sandra?
+         ✅ Brain  [0.000s]: office
+         Expected: office
+
+✅ PASS | Q: Where is John?
+         ✅ Brain  [0.000s]: bedroom
+         Expected: bedroom
+
+✅ PASS | Q: Where is Mary?
+         ✅ Brain  [0.000s]: garden
+         Expected: garden
+
+✅ PASS | Q: Where is Mary?
+         ✅ Brain  [0.000s]: garden
+         Expected: garden
+
+✅ PASS | Q: Where is Mary?
+         ✅ Brain  [0.000s]: bedroom
+         Expected: bedroom
+
+✅ PASS | Q: Where is Mary?
+         ✅ Brain  [0.000s]: bathroom
+         Expected: bathroom
+
+✅ PASS | Q: Where is Mary?
+         ✅ Brain  [0.000s]: garden
+         Expected: garden
+
+✅ PASS | Q: Where is Mary?
+         ✅ Brain  [0.000s]: garden
+         Expected: garden
+
+✅ PASS | Q: Where is Sandra?
+         ✅ Brain  [0.000s]: kitchen
+         Expected: kitchen
+
+✅ PASS | Q: Where is Mary?
+         ✅ Brain  [0.000s]: garden
+         Expected: garden
+
+✅ PASS | Q: Where is John?
+         ✅ Brain  [0.000s]: office
+         Expected: office
+
+✅ PASS | Q: Where is John?
+         ✅ Brain  [0.000s]: bathroom
+         Expected: bathroom
+
+✅ PASS | Q: Where is John?
+         ✅ Brain  [0.000s]: hallway
+         Expected: hallway
+
+✅ PASS | Q: Where is Sandra?
+         ✅ Brain  [0.000s]: bathroom
+         Expected: bathroom
+
+✅ PASS | Q: Where is John?
+         ✅ Brain  [0.000s]: bedroom
+         Expected: bedroom
+
+✅ PASS | Q: Where is Mary?
+         ✅ Brain  [0.000s]: kitchen
+         Expected: kitchen
+
+✅ PASS | Q: Where is Mary?
+         ✅ Brain  [0.000s]: kitchen
+         Expected: kitchen
+
+✅ PASS | Q: Where is John?
+         ✅ Brain  [0.000s]: garden
+         Expected: garden
+
+✅ PASS | Q: Where is John?
+         ✅ Brain  [0.000s]: garden
+         Expected: garden
+
+✅ PASS | Q: Where is Sandra?
+         ✅ Brain  [0.000s]: garden
+         Expected: garden
+
+✅ RESULT bAbI-11 (basic-coreference): 25/25 (100.0%) | Time: 3.8s
+
+--- bAbI Task 12: conjunction ---
+✅ PASS | Q: Where is Daniel?
+         ✅ Brain  [0.000s]: office
+         Expected: office
+
+✅ PASS | Q: Where is Sandra?
+         ✅ Brain  [0.000s]: garden
+         Expected: garden
+
+✅ PASS | Q: Where is Sandra?
+         ✅ Brain  [0.000s]: bedroom
+         Expected: bedroom
+
+✅ PASS | Q: Where is Daniel?
+         ✅ Brain  [0.000s]: bathroom
+         Expected: bathroom
+
+✅ PASS | Q: Where is John?
+         ✅ Brain  [0.000s]: office
+         Expected: office
+
+✅ PASS | Q: Where is Sandra?
+         ✅ Brain  [0.000s]: bedroom
+         Expected: bedroom
+
+✅ PASS | Q: Where is Mary?
+         ✅ Brain  [0.000s]: kitchen
+         Expected: kitchen
+
+✅ PASS | Q: Where is John?
+         ✅ Brain  [0.000s]: kitchen
+         Expected: kitchen
+
+✅ PASS | Q: Where is Daniel?
+         ✅ Brain  [0.000s]: bedroom
+         Expected: bedroom
+
+✅ PASS | Q: Where is John?
+         ✅ Brain  [0.000s]: office
+         Expected: office
+
+✅ PASS | Q: Where is Daniel?
+         ✅ Brain  [0.000s]: kitchen
+         Expected: kitchen
+
+✅ PASS | Q: Where is Daniel?
+         ✅ Brain  [0.000s]: garden
+         Expected: garden
+
+✅ PASS | Q: Where is Mary?
+         ✅ Brain  [0.000s]: garden
+         Expected: garden
+
+✅ PASS | Q: Where is Mary?
+         ✅ Brain  [0.000s]: kitchen
+         Expected: kitchen
+
+✅ PASS | Q: Where is Sandra?
+         ✅ Brain  [0.000s]: hallway
+         Expected: hallway
+
+✅ PASS | Q: Where is Sandra?
+         ✅ Brain  [0.000s]: office
+         Expected: office
+
+✅ PASS | Q: Where is John?
+         ✅ Brain  [0.000s]: hallway
+         Expected: hallway
+
+✅ PASS | Q: Where is Sandra?
+         ✅ Brain  [0.000s]: garden
+         Expected: garden
+
+✅ PASS | Q: Where is Daniel?
+         ✅ Brain  [0.000s]: kitchen
+         Expected: kitchen
+
+✅ PASS | Q: Where is Sandra?
+         ✅ Brain  [0.000s]: garden
+         Expected: garden
+
+✅ PASS | Q: Where is Sandra?
+         ✅ Brain  [0.000s]: hallway
+         Expected: hallway
+
+✅ PASS | Q: Where is John?
+         ✅ Brain  [0.000s]: garden
+         Expected: garden
+
+✅ PASS | Q: Where is Daniel?
+         ✅ Brain  [0.000s]: bathroom
+         Expected: bathroom
+
+✅ PASS | Q: Where is Mary?
+         ✅ Brain  [0.000s]: garden
+         Expected: garden
+
+✅ PASS | Q: Where is Mary?
+         ✅ Brain  [0.000s]: bedroom
+         Expected: bedroom
+
+✅ RESULT bAbI-12 (conjunction): 25/25 (100.0%) | Time: 3.9s
+
+--- bAbI Task 13: compound-coreference ---
+✅ PASS | Q: Where is Daniel?
+         ✅ Brain  [0.000s]: hallway
+         Expected: hallway
+
+✅ PASS | Q: Where is John?
+         ✅ Brain  [0.000s]: hallway
+         Expected: hallway
+
+✅ PASS | Q: Where is John?
+         ✅ Brain  [0.000s]: hallway
+         Expected: hallway
+
+✅ PASS | Q: Where is Sandra?
+         ✅ Brain  [0.000s]: bedroom
+         Expected: bedroom
+
+✅ PASS | Q: Where is Mary?
+         ✅ Brain  [0.000s]: bathroom
+         Expected: bathroom
+
+✅ PASS | Q: Where is Sandra?
+         ✅ Brain  [0.000s]: hallway
+         Expected: hallway
+
+✅ PASS | Q: Where is Sandra?
+         ✅ Brain  [0.000s]: hallway
+         Expected: hallway
+
+✅ PASS | Q: Where is Mary?
+         ✅ Brain  [0.000s]: kitchen
+         Expected: kitchen
+
+✅ PASS | Q: Where is Sandra?
+         ✅ Brain  [0.000s]: bedroom
+         Expected: bedroom
+
+✅ PASS | Q: Where is Mary?
+         ✅ Brain  [0.000s]: garden
+         Expected: garden
+
+✅ PASS | Q: Where is Daniel?
+         ✅ Brain  [0.000s]: garden
+         Expected: garden
+
+✅ PASS | Q: Where is Sandra?
+         ✅ Brain  [0.000s]: kitchen
+         Expected: kitchen
+
+✅ PASS | Q: Where is Sandra?
+         ✅ Brain  [0.000s]: office
+         Expected: office
+
+✅ PASS | Q: Where is Sandra?
+         ✅ Brain  [0.000s]: bathroom
+         Expected: bathroom
+
+✅ PASS | Q: Where is Sandra?
+         ✅ Brain  [0.000s]: bathroom
+         Expected: bathroom
+
+✅ PASS | Q: Where is John?
+         ✅ Brain  [0.000s]: office
+         Expected: office
+
+✅ PASS | Q: Where is Mary?
+         ✅ Brain  [0.000s]: bedroom
+         Expected: bedroom
+
+✅ PASS | Q: Where is Mary?
+         ✅ Brain  [0.000s]: bedroom
+         Expected: bedroom
+
+✅ PASS | Q: Where is Sandra?
+         ✅ Brain  [0.000s]: hallway
+         Expected: hallway
+
+✅ PASS | Q: Where is John?
+         ✅ Brain  [0.000s]: garden
+         Expected: garden
+
+✅ PASS | Q: Where is John?
+         ✅ Brain  [0.000s]: bedroom
+         Expected: bedroom
+
+✅ PASS | Q: Where is Daniel?
+         ✅ Brain  [0.000s]: bedroom
+         Expected: bedroom
+
+✅ PASS | Q: Where is Mary?
+         ✅ Brain  [0.000s]: hallway
+         Expected: hallway
+
+✅ PASS | Q: Where is Daniel?
+         ✅ Brain  [0.000s]: bedroom
+         Expected: bedroom
+
+✅ PASS | Q: Where is Sandra?
+         ✅ Brain  [0.000s]: bathroom
+         Expected: bathroom
+
+✅ RESULT bAbI-13 (compound-coreference): 25/25 (100.0%) | Time: 4.1s
+
+--- bAbI Task 14: time-reasoning ---
+✅ PASS | Q: Where was Julie before the school?
+         ✅ Brain  [0.000s]: office
+         Expected: office
+
+✅ PASS | Q: Where was Julie before the school?
+         ✅ Brain  [0.000s]: office
+         Expected: office
+
+✅ PASS | Q: Where was Julie before the school?
+         ✅ Brain  [0.000s]: cinema
+         Expected: cinema
+
+✅ PASS | Q: Where was Bill before the school?
+         ✅ Brain  [0.000s]: cinema
+         Expected: cinema
+
+✅ PASS | Q: Where was Bill before the school?
+         ✅ Brain  [0.000s]: park
+         Expected: park
+
+✅ PASS | Q: Where was Mary before the bedroom?
+         ✅ Brain  [0.000s]: cinema
+         Expected: cinema
+
+✅ PASS | Q: Where was Julie before the office?
+         ✅ Brain  [0.000s]: cinema
+         Expected: cinema
+
+✅ PASS | Q: Where was Mary before the bedroom?
+         ✅ Brain  [0.000s]: cinema
+         Expected: cinema
+
+✅ PASS | Q: Where was Fred before the kitchen?
+         ✅ Brain  [0.000s]: cinema
+         Expected: cinema
+
+✅ PASS | Q: Where was Julie before the bedroom?
+         ✅ Brain  [0.000s]: office
+         Expected: office
+
+✅ PASS | Q: Where was Bill before the park?
+         ✅ Brain  [0.000s]: cinema
+         Expected: cinema
+
+✅ PASS | Q: Where was Julie before the bedroom?
+         ✅ Brain  [0.000s]: park
+         Expected: park
+
+✅ PASS | Q: Where was Julie before the bedroom?
+         ✅ Brain  [0.000s]: park
+         Expected: park
+
+✅ PASS | Q: Where was Julie before the school?
+         ✅ Brain  [0.000s]: park
+         Expected: park
+
+✅ PASS | Q: Where was Mary before the office?
+         ✅ Brain  [0.000s]: bedroom
+         Expected: bedroom
+
+✅ PASS | Q: Where was Bill before the office?
+         ✅ Brain  [0.000s]: school
+         Expected: school
+
+✅ PASS | Q: Where was Bill before the office?
+         ✅ Brain  [0.000s]: school
+         Expected: school
+
+✅ PASS | Q: Where was Mary before the kitchen?
+         ✅ Brain  [0.000s]: cinema
+         Expected: cinema
+
+✅ PASS | Q: Where was Mary before the office?
+         ✅ Brain  [0.000s]: kitchen
+         Expected: kitchen
+
+✅ PASS | Q: Where was Julie before the cinema?
+         ✅ Brain  [0.000s]: office
+         Expected: office
+
+✅ PASS | Q: Where was Mary before the office?
+         ✅ Brain  [0.000s]: park
+         Expected: park
+
+✅ PASS | Q: Where was Mary before the office?
+         ✅ Brain  [0.000s]: park
+         Expected: park
+
+✅ PASS | Q: Where was Mary before the park?
+         ✅ Brain  [0.000s]: office
+         Expected: office
+
+✅ PASS | Q: Where was Bill before the bedroom?
+         ✅ Brain  [0.000s]: kitchen
+         Expected: kitchen
+
+✅ PASS | Q: Where was Bill before the bedroom?
+         ✅ Brain  [0.000s]: kitchen
+         Expected: kitchen
+
+✅ RESULT bAbI-14 (time-reasoning): 25/25 (100.0%) | Time: 4.9s
+
+--- bAbI Task 15: basic-deduction ---
+✅ PASS | Q: What is gertrude afraid of?
+         ✅ Brain  [0.000s]: wolf
+         Expected: wolf
+
+✅ PASS | Q: What is gertrude afraid of?
+         ✅ Brain  [0.000s]: wolf
+         Expected: wolf
+
+✅ PASS | Q: What is jessica afraid of?
+         ✅ Brain  [0.000s]: cat
+         Expected: cat
+
+✅ PASS | Q: What is gertrude afraid of?
+         ✅ Brain  [0.000s]: wolf
+         Expected: wolf
+
+✅ PASS | Q: What is jessica afraid of?
+         ✅ Brain  [0.000s]: sheep
+         Expected: sheep
+
+✅ PASS | Q: What is emily afraid of?
+         ✅ Brain  [0.000s]: mouse
+         Expected: mouse
+
+✅ PASS | Q: What is winona afraid of?
+         ✅ Brain  [0.000s]: mouse
+         Expected: mouse
+
+✅ PASS | Q: What is emily afraid of?
+         ✅ Brain  [0.000s]: mouse
+         Expected: mouse
+
+✅ PASS | Q: What is emily afraid of?
+         ✅ Brain  [0.000s]: mouse
+         Expected: mouse
+
+✅ PASS | Q: What is gertrude afraid of?
+         ✅ Brain  [0.000s]: mouse
+         Expected: mouse
+
+✅ PASS | Q: What is gertrude afraid of?
+         ✅ Brain  [0.000s]: mouse
+         Expected: mouse
+
+✅ PASS | Q: What is winona afraid of?
+         ✅ Brain  [0.000s]: wolf
+         Expected: wolf
+
+✅ PASS | Q: What is jessica afraid of?
+         ✅ Brain  [0.000s]: cat
+         Expected: cat
+
+✅ PASS | Q: What is winona afraid of?
+         ✅ Brain  [0.000s]: sheep
+         Expected: sheep
+
+✅ PASS | Q: What is winona afraid of?
+         ✅ Brain  [0.000s]: sheep
+         Expected: sheep
+
+✅ PASS | Q: What is emily afraid of?
+         ✅ Brain  [0.000s]: cat
+         Expected: cat
+
+✅ PASS | Q: What is emily afraid of?
+         ✅ Brain  [0.000s]: sheep
+         Expected: sheep
+
+✅ PASS | Q: What is emily afraid of?
+         ✅ Brain  [0.000s]: sheep
+         Expected: sheep
+
+✅ PASS | Q: What is gertrude afraid of?
+         ✅ Brain  [0.000s]: sheep
+         Expected: sheep
+
+✅ PASS | Q: What is gertrude afraid of?
+         ✅ Brain  [0.000s]: sheep
+         Expected: sheep
+
+✅ RESULT bAbI-15 (basic-deduction): 20/20 (100.0%) | Time: 3.9s
+
+--- bAbI Task 16: basic-induction ---
+✅ PASS | Q: What color is Greg?
+         ✅ Brain  [0.000s]: green
+         Expected: green
+
+✅ PASS | Q: What color is Brian?
+         ✅ Brain  [0.000s]: white
+         Expected: white
+
+✅ PASS | Q: What color is Brian?
+         ✅ Brain  [0.000s]: white
+         Expected: white
+
+✅ PASS | Q: What color is Lily?
+         ✅ Brain  [0.000s]: white
+         Expected: white
+
+✅ PASS | Q: What color is Julius?
+         ✅ Brain  [0.000s]: yellow
+         Expected: yellow
+
+✅ RESULT bAbI-16 (basic-induction): 5/5 (100.0%) | Time: 1.0s
+
+--- bAbI Task 17: positional-reasoning ---
+✅ PASS | Q: Is the pink rectangle to the right of the blue square?
+         ✅ Brain  [0.000s]: yes
+         Expected: yes
+
+✅ PASS | Q: Is the blue square below the pink rectangle?
+         ✅ Brain  [0.000s]: no
+         Expected: no
+
+✅ PASS | Q: Is the blue square to the right of the pink rectangle?
+         ✅ Brain  [0.000s]: no
+         Expected: no
+
+✅ PASS | Q: Is the blue square below the pink rectangle?
+         ✅ Brain  [0.000s]: no
+         Expected: no
+
+✅ PASS | Q: Is the blue square below the pink rectangle?
+         ✅ Brain  [0.000s]: no
+         Expected: no
+
+✅ PASS | Q: Is the pink rectangle to the left of the blue square?
+         ✅ Brain  [0.000s]: no
+         Expected: no
+
+✅ PASS | Q: Is the blue square to the left of the pink rectangle?
+         ✅ Brain  [0.000s]: yes
+         Expected: yes
+
+✅ PASS | Q: Is the pink rectangle to the right of the blue square?
+         ✅ Brain  [0.000s]: yes
+         Expected: yes
+
+✅ PASS | Q: Is the pink rectangle to the right of the yellow square?
+         ✅ Brain  [0.000s]: no
+         Expected: no
+
+✅ PASS | Q: Is the yellow square to the right of the pink rectangle?
+         ✅ Brain  [0.000s]: yes
+         Expected: yes
+
+✅ PASS | Q: Is the pink rectangle to the left of the yellow square?
+         ✅ Brain  [0.000s]: yes
+         Expected: yes
+
+✅ PASS | Q: Is the yellow square below the pink rectangle?
+         ✅ Brain  [0.000s]: yes
+         Expected: yes
+
+✅ PASS | Q: Is the yellow square above the pink rectangle?
+         ✅ Brain  [0.000s]: no
+         Expected: no
+
+✅ PASS | Q: Is the yellow square to the right of the pink rectangle?
+         ✅ Brain  [0.000s]: yes
+         Expected: yes
+
+✅ PASS | Q: Is the yellow square below the pink rectangle?
+         ✅ Brain  [0.000s]: yes
+         Expected: yes
+
+✅ PASS | Q: Is the pink rectangle below the yellow square?
+         ✅ Brain  [0.000s]: no
+         Expected: no
+
+✅ PASS | Q: Is the red square above the pink rectangle?
+         ✅ Brain  [0.000s]: yes
+         Expected: yes
+
+✅ PASS | Q: Is the red square below the pink rectangle?
+         ✅ Brain  [0.000s]: no
+         Expected: no
+
+✅ PASS | Q: Is the pink rectangle below the red square?
+         ✅ Brain  [0.000s]: yes
+         Expected: yes
+
+✅ PASS | Q: Is the pink rectangle above the red square?
+         ✅ Brain  [0.000s]: no
+         Expected: no
+
+✅ PASS | Q: Is the pink rectangle to the left of the red square?
+         ✅ Brain  [0.000s]: no
+         Expected: no
+
+✅ PASS | Q: Is the pink rectangle to the right of the red square?
+         ✅ Brain  [0.000s]: yes
+         Expected: yes
+
+✅ PASS | Q: Is the red square below the pink rectangle?
+         ✅ Brain  [0.000s]: no
+         Expected: no
+
+✅ PASS | Q: Is the red square below the pink rectangle?
+         ✅ Brain  [0.000s]: no
+         Expected: no
+
+✅ PASS | Q: Is the red square above the triangle?
+         ✅ Brain  [0.000s]: no
+         Expected: no
+
+✅ PASS | Q: Is the red square above the triangle?
+         ✅ Brain  [0.000s]: no
+         Expected: no
+
+✅ PASS | Q: Is the triangle to the right of the red square?
+         ✅ Brain  [0.000s]: no
+         Expected: no
+
+✅ PASS | Q: Is the triangle above the red square?
+         ✅ Brain  [0.000s]: no
+         Expected: no
+
+✅ PASS | Q: Is the red square to the right of the triangle?
+         ✅ Brain  [0.000s]: yes
+         Expected: yes
+
+✅ PASS | Q: Is the triangle to the left of the red square?
+         ✅ Brain  [0.000s]: yes
+         Expected: yes
+
+✅ PASS | Q: Is the red square to the right of the triangle?
+         ✅ Brain  [0.000s]: yes
+         Expected: yes
+
+✅ PASS | Q: Is the red square to the right of the triangle?
+         ✅ Brain  [0.000s]: yes
+         Expected: yes
+
+✅ PASS | Q: Is the blue square below the yellow square?
+         ✅ Brain  [0.000s]: yes
+         Expected: yes
+
+✅ PASS | Q: Is the yellow square above the blue square?
+         ✅ Brain  [0.000s]: yes
+         Expected: yes
+
+✅ PASS | Q: Is the yellow square above the blue square?
+         ✅ Brain  [0.000s]: yes
+         Expected: yes
+
+✅ PASS | Q: Is the yellow square above the blue square?
+         ✅ Brain  [0.000s]: yes
+         Expected: yes
+
+✅ PASS | Q: Is the yellow square below the blue square?
+         ✅ Brain  [0.000s]: no
+         Expected: no
+
+✅ PASS | Q: Is the blue square to the right of the yellow square?
+         ✅ Brain  [0.000s]: no
+         Expected: no
+
+✅ PASS | Q: Is the yellow square to the left of the blue square?
+         ✅ Brain  [0.000s]: no
+         Expected: no
+
+✅ PASS | Q: Is the yellow square above the blue square?
+         ✅ Brain  [0.000s]: yes
+         Expected: yes
+
+✅ RESULT bAbI-17 (positional-reasoning): 40/40 (100.0%) | Time: 2.5s
+
+--- bAbI Task 18: size-reasoning ---
+✅ PASS | Q: Does the box fit in the box of chocolates?
+         ✅ Brain  [0.000s]: no
+         Expected: no
+
+✅ PASS | Q: Is the box of chocolates bigger than the box?
+         ✅ Brain  [0.000s]: no
+         Expected: no
+
+✅ PASS | Q: Is the box bigger than the box of chocolates?
+         ✅ Brain  [0.000s]: yes
+         Expected: yes
+
+✅ PASS | Q: Does the box of chocolates fit in the box?
+         ✅ Brain  [0.000s]: yes
+         Expected: yes
+
+✅ PASS | Q: Does the box fit in the box of chocolates?
+         ✅ Brain  [0.000s]: no
+         Expected: no
+
+✅ PASS | Q: Is the chocolate bigger than the suitcase?
+         ✅ Brain  [0.000s]: no
+         Expected: no
+
+✅ PASS | Q: Does the suitcase fit in the chocolate?
+         ✅ Brain  [0.000s]: no
+         Expected: no
+
+✅ PASS | Q: Does the suitcase fit in the chocolate?
+         ✅ Brain  [0.000s]: no
+         Expected: no
+
+✅ PASS | Q: Does the suitcase fit in the chocolate?
+         ✅ Brain  [0.000s]: no
+         Expected: no
+
+✅ PASS | Q: Is the container bigger than the chocolate?
+         ✅ Brain  [0.000s]: yes
+         Expected: yes
+
+✅ PASS | Q: Does the chocolate fit in the container?
+         ✅ Brain  [0.000s]: yes
+         Expected: yes
+
+✅ PASS | Q: Is the chocolate bigger than the suitcase?
+         ✅ Brain  [0.000s]: no
+         Expected: no
+
+✅ PASS | Q: Is the container bigger than the chocolate?
+         ✅ Brain  [0.000s]: yes
+         Expected: yes
+
+✅ PASS | Q: Is the chest bigger than the suitcase?
+         ✅ Brain  [0.000s]: no
+         Expected: no
+
+✅ PASS | Q: Does the chocolate fit in the box?
+         ✅ Brain  [0.000s]: yes
+         Expected: yes
+
+✅ PASS | Q: Does the chocolate fit in the box?
+         ✅ Brain  [0.000s]: yes
+         Expected: yes
+
+✅ PASS | Q: Does the box fit in the container?
+         ✅ Brain  [0.000s]: no
+         Expected: no
+
+✅ PASS | Q: Is the box bigger than the chocolate?
+         ✅ Brain  [0.000s]: yes
+         Expected: yes
+
+✅ PASS | Q: Does the box fit in the chocolate?
+         ✅ Brain  [0.000s]: no
+         Expected: no
+
+✅ PASS | Q: Does the chest fit in the chocolate?
+         ✅ Brain  [0.000s]: no
+         Expected: no
+
+✅ PASS | Q: Is the chocolate bigger than the chest?
+         ✅ Brain  [0.000s]: no
+         Expected: no
+
+✅ PASS | Q: Does the chocolate fit in the chest?
+         ✅ Brain  [0.000s]: yes
+         Expected: yes
+
+✅ PASS | Q: Does the chocolate fit in the chest?
+         ✅ Brain  [0.000s]: yes
+         Expected: yes
+
+✅ PASS | Q: Does the chocolate fit in the chest?
+         ✅ Brain  [0.000s]: yes
+         Expected: yes
+
+✅ PASS | Q: Is the box bigger than the chocolate?
+         ✅ Brain  [0.000s]: yes
+         Expected: yes
+
+✅ PASS | Q: Is the box of chocolates bigger than the box?
+         ✅ Brain  [0.000s]: no
+         Expected: no
+
+✅ PASS | Q: Is the chocolate bigger than the box?
+         ✅ Brain  [0.000s]: no
+         Expected: no
+
+✅ PASS | Q: Does the box fit in the chocolate?
+         ✅ Brain  [0.000s]: no
+         Expected: no
+
+✅ PASS | Q: Does the box fit in the box of chocolates?
+         ✅ Brain  [0.000s]: no
+         Expected: no
+
+✅ RESULT bAbI-18 (size-reasoning): 29/29 (100.0%) | Time: 4.9s
+
+--- bAbI Task 19: path-finding ---
+✅ PASS | Q: How do you go from the kitchen to the garden?
+         ✅ Brain  [0.000s]: s,e
+         Expected: s,e
+
+✅ PASS | Q: How do you go from the kitchen to the hallway?
+         ✅ Brain  [0.000s]: n,w
+         Expected: n,w
+
+✅ PASS | Q: How do you go from the garden to the bedroom?
+         ✅ Brain  [0.000s]: n,n
+         Expected: n,n
+
+✅ PASS | Q: How do you go from the bedroom to the kitchen?
+         ✅ Brain  [0.000s]: s,w
+         Expected: s,w
+
+✅ PASS | Q: How do you go from the bedroom to the kitchen?
+         ✅ Brain  [0.000s]: s,e
+         Expected: s,e
+
+✅ RESULT bAbI-19 (path-finding): 5/5 (100.0%) | Time: 0.7s
+
+--- bAbI Task 20: agents-motivations ---
+✅ PASS | Q: Where will sumit go?
+         ✅ Brain  [0.000s]: bedroom
+         Expected: bedroom
+
+✅ PASS | Q: Why did sumit go to the bedroom?
+         ✅ Brain  [0.000s]: tired
+         Expected: tired
+
+✅ PASS | Q: Why did sumit get the pajamas?
+         ✅ Brain  [0.000s]: tired
+         Expected: tired
+
+✅ PASS | Q: Where will yann go?
+         ✅ Brain  [0.000s]: garden
+         Expected: garden
+
+✅ PASS | Q: Where will jason go?
+         ✅ Brain  [0.000s]: kitchen
+         Expected: kitchen
+
+✅ PASS | Q: Why did yann go to the garden?
+         ✅ Brain  [0.000s]: bored
+         Expected: bored
+
+✅ PASS | Q: Why did yann get the football?
+         ✅ Brain  [0.000s]: bored
+         Expected: bored
+
+✅ PASS | Q: Why did jason go to the kitchen?
+         ✅ Brain  [0.000s]: thirsty
+         Expected: thirsty
+
+✅ PASS | Q: Where will antoine go?
+         ✅ Brain  [0.000s]: kitchen
+         Expected: kitchen
+
+✅ PASS | Q: Why did jason get the milk?
+         ✅ Brain  [0.000s]: thirsty
+         Expected: thirsty
+
+✅ PASS | Q: Why did antoine go to the kitchen?
+         ✅ Brain  [0.000s]: thirsty
+         Expected: thirsty
+
+✅ PASS | Q: Where will yann go?
+         ✅ Brain  [0.000s]: kitchen
+         Expected: kitchen
+
+✅ PASS | Q: Why did yann go to the kitchen?
+         ✅ Brain  [0.000s]: hungry
+         Expected: hungry
+
+✅ PASS | Q: Why did yann get the apple?
+         ✅ Brain  [0.000s]: hungry
+         Expected: hungry
+
+✅ PASS | Q: Where will sumit go?
+         ✅ Brain  [0.000s]: bedroom
+         Expected: bedroom
+
+✅ PASS | Q: Where will jason go?
+         ✅ Brain  [0.000s]: bedroom
+         Expected: bedroom
+
+✅ PASS | Q: Why did jason go to the bedroom?
+         ✅ Brain  [0.000s]: tired
+         Expected: tired
+
+✅ PASS | Q: Why did sumit go to the bedroom?
+         ✅ Brain  [0.000s]: tired
+         Expected: tired
+
+✅ PASS | Q: Why did jason get the pajamas?
+         ✅ Brain  [0.000s]: tired
+         Expected: tired
+
+✅ PASS | Q: Where will antoine go?
+         ✅ Brain  [0.000s]: kitchen
+         Expected: kitchen
+
+✅ PASS | Q: Why did antoine go to the kitchen?
+         ✅ Brain  [0.000s]: hungry
+         Expected: hungry
+
+✅ PASS | Q: Where will antoine go?
+         ✅ Brain  [0.000s]: kitchen
+         Expected: kitchen
+
+✅ PASS | Q: Where will yann go?
+         ✅ Brain  [0.000s]: bedroom
+         Expected: bedroom
+
+✅ PASS | Q: Why did yann go to the bedroom?
+         ✅ Brain  [0.000s]: tired
+         Expected: tired
+
+✅ PASS | Q: Why did yann get the pajamas?
+         ✅ Brain  [0.000s]: tired
+         Expected: tired
+
+✅ PASS | Q: Where will jason go?
+         ✅ Brain  [0.000s]: kitchen
+         Expected: kitchen
+
+✅ PASS | Q: Why did antoine go to the kitchen?
+         ✅ Brain  [0.000s]: thirsty
+         Expected: thirsty
+
+✅ PASS | Q: Where will sumit go?
+         ✅ Brain  [0.000s]: kitchen
+         Expected: kitchen
+
+✅ PASS | Q: Why did jason go to the kitchen?
+         ✅ Brain  [0.000s]: thirsty
+         Expected: thirsty
+
+✅ PASS | Q: Why did jason get the milk?
+         ✅ Brain  [0.000s]: thirsty
+         Expected: thirsty
+
+✅ PASS | Q: Why did sumit go to the kitchen?
+         ✅ Brain  [0.000s]: hungry
+         Expected: hungry
+
+✅ PASS | Q: Why did sumit get the apple?
+         ✅ Brain  [0.000s]: hungry
+         Expected: hungry
+
+✅ PASS | Q: Where will jason go?
+         ✅ Brain  [0.000s]: kitchen
+         Expected: kitchen
+
+✅ PASS | Q: Where will sumit go?
+         ✅ Brain  [0.000s]: bedroom
+         Expected: bedroom
+
+✅ PASS | Q: Why did jason go to the kitchen?
+         ✅ Brain  [0.000s]: hungry
+         Expected: hungry
+
+✅ PASS | Q: Where will yann go?
+         ✅ Brain  [0.000s]: bedroom
+         Expected: bedroom
+
+✅ PASS | Q: Why did yann go to the bedroom?
+         ✅ Brain  [0.000s]: tired
+         Expected: tired
+
+✅ PASS | Q: Why did yann get the pajamas?
+         ✅ Brain  [0.000s]: tired
+         Expected: tired
+
+✅ PASS | Q: Why did sumit go to the bedroom?
+         ✅ Brain  [0.000s]: tired
+         Expected: tired
+
+✅ PASS | Q: Why did jason get the apple?
+         ✅ Brain  [0.000s]: hungry
+         Expected: hungry
+
+✅ PASS | Q: Where will antoine go?
+         ✅ Brain  [0.000s]: bedroom
+         Expected: bedroom
+
+✅ PASS | Q: Why did antoine go to the bedroom?
+         ✅ Brain  [0.000s]: tired
+         Expected: tired
+
+✅ PASS | Q: Where will antoine go?
+         ✅ Brain  [0.000s]: garden
+         Expected: garden
+
+✅ PASS | Q: Where will sumit go?
+         ✅ Brain  [0.000s]: garden
+         Expected: garden
+
+✅ PASS | Q: Why did antoine go to the garden?
+         ✅ Brain  [0.000s]: bored
+         Expected: bored
+
+✅ PASS | Q: Where will jason go?
+         ✅ Brain  [0.000s]: garden
+         Expected: garden
+
+✅ PASS | Q: Why did jason go to the garden?
+         ✅ Brain  [0.000s]: bored
+         Expected: bored
+
+✅ PASS | Q: Where will yann go?
+         ✅ Brain  [0.000s]: bedroom
+         Expected: bedroom
+
+✅ PASS | Q: Why did jason get the football?
+         ✅ Brain  [0.000s]: bored
+         Expected: bored
+
+✅ PASS | Q: Why did yann go to the bedroom?
+         ✅ Brain  [0.000s]: tired
+         Expected: tired
+
+✅ PASS | Q: Why did sumit go to the garden?
+         ✅ Brain  [0.000s]: bored
+         Expected: bored
+
+✅ PASS | Q: Why did yann get the pajamas?
+         ✅ Brain  [0.000s]: tired
+         Expected: tired
+
+✅ RESULT bAbI-20 (agents-motivations): 52/52 (100.0%) | Time: 6.9s
+
+
+======================================================================
+bAbI SUMMARY (all 20 tasks)
+======================================================================
+  ✅ Task  1: ████████████████████ 100.0%  (25/25)  [3.6s]  single-supporting-fact
+  ✅ Task  2: ████████████████████ 100.0%  (25/25)  [7.2s]  two-supporting-facts
+  ✅ Task  3: ████████████████████ 100.0%  (25/25)  [29.1s]  three-supporting-facts
+  ✅ Task  4: ████████████████████ 100.0%  (5/5)  [1.1s]  two-arg-relations
+  ✅ Task  5: ████████████████████ 100.0%  (25/25)  [8.3s]  three-arg-relations
+  ✅ Task  6: ████████████████████ 100.0%  (25/25)  [4.3s]  yes-no-questions
+  ✅ Task  7: ████████████████████ 100.0%  (25/25)  [4.6s]  counting
+  ✅ Task  8: ████████████████████ 100.0%  (25/25)  [4.0s]  lists-sets
+  ✅ Task  9: ████████████████████ 100.0%  (25/25)  [3.9s]  simple-negation
+  ✅ Task 10: ████████████████████ 100.0%  (25/25)  [4.2s]  indefinite-knowledge
+  ✅ Task 11: ████████████████████ 100.0%  (25/25)  [3.8s]  basic-coreference
+  ✅ Task 12: ████████████████████ 100.0%  (25/25)  [3.9s]  conjunction
+  ✅ Task 13: ████████████████████ 100.0%  (25/25)  [4.1s]  compound-coreference
+  ✅ Task 14: ████████████████████ 100.0%  (25/25)  [4.9s]  time-reasoning
+  ✅ Task 15: ████████████████████ 100.0%  (20/20)  [3.9s]  basic-deduction
+  ✅ Task 16: ████████████████████ 100.0%  (5/5)  [1.0s]  basic-induction
+  ✅ Task 17: ████████████████████ 100.0%  (40/40)  [2.5s]  positional-reasoning
+  ✅ Task 18: ████████████████████ 100.0%  (29/29)  [4.9s]  size-reasoning
+  ✅ Task 19: ████████████████████ 100.0%  (5/5)  [0.7s]  path-finding
+  ✅ Task 20: ████████████████████ 100.0%  (52/52)  [6.9s]  agents-motivations
+
+RESULT bAbI 1-20: 481/481 (100.0%) | Time: 106.9s
+Tasks ≥95%: 20/20
+BASELINES (all tasks): MemNet avg: 24.3% (2/20 tasks 100%) | NTM avg: 19.4% (0/20 tasks 100%)
+======================================================================
+======================================================================
+MODEL STATISTICS
+======================================================================
+Neurons: 48367
+Connections: 1476135
+MYELINATED: 23784 (1.6%)
+USED: 76360 (5.2%)
+NEW: 1375991
+
+Episodic memory:
+  Total episodes: 76689
+  NEW: 35075
+  REPLAYED: 2189
+  CONSOLIDATED: 38074
+  DECAYING: 1351
+
+======================================================================
+ALL RESULTS SUMMARY
+======================================================================
+✅ CURRICULUM: 50/50 (100.0%) | Time: 42.8s
+✅ STRICT: 3/3 (100.0%) | Time: 4.4s
+✅ PRESCHOOL: 48/48 (100.0%) | Time: 41.9s
+✅ GRADE1: 64/64 (100.0%) | Time: 66.7s
+✅ FINEWEB: 9/9 (100.0%) | Time: 8.7s
+✅ PARAPHRASE: 50/50 (100.0%) | Time: 44.2s
+--- bAbI Tasks 1-20 ---
+  ✅ bAbI-1: 25/25 (100.0%) | 3.6s
+  ✅ bAbI-2: 25/25 (100.0%) | 7.2s
+  ✅ bAbI-3: 25/25 (100.0%) | 29.1s
+  ✅ bAbI-4: 5/5 (100.0%) | 1.1s
+  ✅ bAbI-5: 25/25 (100.0%) | 8.3s
+  ✅ bAbI-6: 25/25 (100.0%) | 4.3s
+  ✅ bAbI-7: 25/25 (100.0%) | 4.6s
+  ✅ bAbI-8: 25/25 (100.0%) | 4.0s
+  ✅ bAbI-9: 25/25 (100.0%) | 3.9s
+  ✅ bAbI-10: 25/25 (100.0%) | 4.2s
+  ✅ bAbI-11: 25/25 (100.0%) | 3.8s
+  ✅ bAbI-12: 25/25 (100.0%) | 3.9s
+  ✅ bAbI-13: 25/25 (100.0%) | 4.1s
+  ✅ bAbI-14: 25/25 (100.0%) | 4.9s
+  ✅ bAbI-15: 20/20 (100.0%) | 3.9s
+  ✅ bAbI-16: 5/5 (100.0%) | 1.0s
+  ✅ bAbI-17: 40/40 (100.0%) | 2.5s
+  ✅ bAbI-18: 29/29 (100.0%) | 4.9s
+  ✅ bAbI-19: 5/5 (100.0%) | 0.7s
+  ✅ bAbI-20: 52/52 (100.0%) | 6.9s
+✅ bAbI TOTAL: 481/481 (100.0%) | Time: 106.8s
+
+TOTAL: 705/705 | Total time: 315.6s
+======================================================================
+
+==========================================================================================
+BASELINE COMPARISON
+==========================================================================================
+QA Baselines: TF-IDF, BM25 (trained on ALL data, tested on all QA tests)
+Working Memory Baselines: MemNet, NTM (tested ONLY on bAbI Task 1)
+
+Test             Brain  TF-IDF    BM25  MemNet     NTM
+--------------------------------------------------------------
+CURRICULUM      100.0%   64.0%   70.0%    N/A    N/A
+STRICT          100.0%   33.3%   33.3%    N/A    N/A
+PRESCHOOL       100.0%   81.2%   87.5%    N/A    N/A
+GRADE1          100.0%   68.8%   71.9%    N/A    N/A
+FINEWEB         100.0%   11.1%   33.3%    N/A    N/A
+PARAPHRASE      100.0%   48.0%   48.0%    N/A    N/A
+bAbI-1          100.0%    N/A    N/A  100.0%   84.0%
+bAbI-2          100.0%    N/A    N/A   28.0%    0.0%
+bAbI-3          100.0%    N/A    N/A    0.0%    0.0%
+bAbI-4          100.0%    N/A    N/A   60.0%   80.0%
+bAbI-5          100.0%    N/A    N/A   64.0%   68.0%
+bAbI-6          100.0%    N/A    N/A    0.0%    0.0%
+bAbI-7          100.0%    N/A    N/A    0.0%    0.0%
+bAbI-8          100.0%    N/A    N/A   56.0%   56.0%
+bAbI-9          100.0%    N/A    N/A   32.0%   24.0%
+bAbI-10         100.0%    N/A    N/A    0.0%    0.0%
+bAbI-11         100.0%    N/A    N/A    0.0%    0.0%
+bAbI-12         100.0%    N/A    N/A  100.0%   72.0%
+bAbI-13         100.0%    N/A    N/A    0.0%    0.0%
+bAbI-14         100.0%    N/A    N/A    0.0%    0.0%
+bAbI-15         100.0%    N/A    N/A   45.0%    5.0%
+bAbI-16         100.0%    N/A    N/A    0.0%    0.0%
+bAbI-17         100.0%    N/A    N/A    0.0%    0.0%
+bAbI-18         100.0%    N/A    N/A    0.0%    0.0%
+bAbI-19         100.0%    N/A    N/A    0.0%    0.0%
+bAbI-20         100.0%    N/A    N/A    1.9%    0.0%
+bAbI TOTAL      100.0%    N/A    N/A    N/A    N/A
+--------------------------------------------------------------
+QA AVG          100.0%   51.1%   57.3%    N/A    N/A
+bAbI AVG:                               24.3%   19.4%
+==============================================================
+Tests completed. Results saved to: logs/test_results_21.02.2026_18-52-02.txt
