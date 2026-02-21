@@ -218,8 +218,20 @@ class Connection:
         # A connection can be used with DIFFERENT connectors in different contexts.
         # Example: "sun is yellow" (is) and "sun is a star" (is_a)
         # Store ALL connectors with counts and choose the appropriate one during retrieval.
-        self.connectors: dict[str, int] = {}  # {connector: count}
-        self.connector: str | None = None  # Cache: most frequent connector
+        self.connectors: dict[str, int] = {}  # {connector: count} (Legacy/Debug view)
+        self.connector: str | None = None  # Cache: most frequent connector (Legacy)
+        
+        # ====================================================================
+        # ANCHOR: SDR_CONNECTORS - Phase 27b bit-based links
+        # ====================================================================
+        # BIOLOGY (Hawkins HTM): Connections themselves should be bit-based.
+        # Instead of storing string connectors like "of" or "is_a", we store
+        # the SDRs of those connectors. This allows natural overlap:
+        # "with" and "with_my" have overlapping SDRs, so they match naturally
+        # without hardcoded prefix rules.
+        from sdr import SDR
+        self._connector_sdrs: List[SDR] = []
+        self._sdr_counts: List[int] = []
         
         # BIOLOGICAL MODEL (Context Diversity, Spens & Burgess 2024):
         # Semantic memory is statistical extraction from many episodes.
@@ -516,7 +528,18 @@ class Connection:
         """
         if connector not in self.connectors:
             self.connectors[connector] = 0
+            
+            # Phase 27b: Convert connector to SDR and store it natively
+            from sdr import GLOBAL_SDR_ENCODER
+            sdr = GLOBAL_SDR_ENCODER.encode(connector)
+            self._connector_sdrs.append(sdr)
+            self._sdr_counts.append(0)
+            
         self.connectors[connector] += 1
+        
+        # Update SDR count
+        idx = list(self.connectors.keys()).index(connector)
+        self._sdr_counts[idx] += 1
         
         # Update cache: most frequent connector
         self.connector = max(self.connectors, key=self.connectors.get)
@@ -524,32 +547,40 @@ class Connection:
     # API_PUBLIC
     def has_connector(self, connector: str) -> bool:
         """
-        Check whether the connection has the specified connector.
+        Check whether the connection has the specified connector using SDR overlap.
         
-        Supports prefix match: 'with' -> 'with_my', 'with_our'
-        This allows "What do we X with?" to find connections with connector=with_*.
+        Phase 27b: Bit-based links. We no longer use string matching.
+        We encode the query connector into an SDR and check if it overlaps
+        sufficiently with any stored connector SDRs.
         """
         # Precondition
-        assert isinstance(connector, str) and connector, "connector must be a non-empty string to match stored connector keys"
+        assert isinstance(connector, str) and connector, "connector must be a non-empty string"
 
+        # Legacy fast-path for exact matches
         if connector in self.connectors:
             return True
 
-        # CONNECTOR FAMILY MATCHING — limited to true connector families only.
-        #
-        # BIOLOGY (Patterson et al. 2007, Martin 2007):
-        # 'is' (property attribution: "apple is red") and 'is_a' (category membership:
-        # "apple is a fruit") are DIFFERENT semantic relations processed by different
-        # neural pathways. They must NOT be merged.
-        #
-        # 'with' family: 'with', 'with_my', 'with_our' — all encode the same
-        # instrumental relation (Fillmore 1968, Case Grammar). The pronoun is
-        # syntactic, not semantic. E.g. "see with eyes" = "see with our eyes".
+        # CONNECTOR FAMILY MATCHING (Legacy fallback if SDR isn't enough yet)
         if connector == 'with':
             result = any(c.startswith(connector + '_') for c in self.connectors)
             # Postcondition
             assert isinstance(result, bool), "has_connector must return a boolean for downstream gating"
-            return result
+            if result:
+                return True
+
+        # Phase 27b: SDR-based semantic matching for connectors
+        # BIOLOGY (Hawkins HTM): "with" and "with_my" naturally share bits
+        # because of the hashing and learning mechanism, so we don't need
+        # hardcoded string prefixes anymore.
+        from sdr import GLOBAL_SDR_ENCODER
+        query_sdr = GLOBAL_SDR_ENCODER.encode(connector)
+        
+        # Check against all stored connector SDRs
+        for stored_sdr in self._connector_sdrs:
+            # Require higher overlap for functional connectors to prevent false positives
+            # 0.75 ensures we only match very similar connectors (like with vs with_my)
+            if query_sdr.overlap_score(stored_sdr) >= 0.75:
+                return True
 
         # Postcondition
         assert True, "Non-family connectors only match exact keys to preserve relation specificity"

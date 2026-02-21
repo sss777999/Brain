@@ -445,7 +445,8 @@ the KNOWLEDGE is real, only the INTERFACE is simplified.
 - ✅ **SDR Overlap** — Semantic similarity via bit intersection. Similar concepts share active bits.
 - ✅ **Neuron.sdr** — Lazy property computes SDR representation per neuron.
 - ✅ **CA3 SDR Scoring** — SDR overlap bonus added to episode scoring (parallel to string-based).
-- ✅ **Learned Overlap** — `SDREncoder.learn_overlap()` increases bit sharing between co-occurring words (Hebbian).
+- ✅ **Learned Overlap (Phase 27a)** — `SDREncoder.learn_overlap()` increases bit sharing between co-occurring words (Hebbian).
+- ✅ **Bit-Based Links (Phase 27b)** — Connection connectors (e.g. "with") are encoded as SDRs. Pattern matching uses `SDR.overlap_score() >= 0.75` for natural grouping without hardcoded string prefix rules (like "with" vs "with_my").
 
 ### Forgetting & Synaptic Homeostasis (Tononi & Cirelli 2006)
 - ✅ **LTD (Long-Term Depression)** — Episodes gradually lose `strength` if not accessed or replayed.

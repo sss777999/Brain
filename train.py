@@ -28,6 +28,7 @@ from pfc import PFC, AttentionGate, MemoryRouter, SourceType
 from lexicon import Lexicon, InputLayer, OutputLayer
 from motor_output import SequenceGenerator, generate_answer_ordered
 from basal_ganglia import BasalGangliaThalamusGating, ActionSelectionDecision, InternalAction
+from sdr import GLOBAL_SDR_ENCODER
 
 
 # ANCHOR: GLOBAL_STATE
@@ -1376,6 +1377,15 @@ def train_sentence_with_context(sentence: str, source: str = "unknown"):
                 # Connections that occur across DIFFERENT contexts are more semantic.
                 sentence_hash = hash(tuple(w for _, w, _ in word_sequence))
                 conn.mark_context(sentence_hash)
+                
+                # ================================================================
+                # SDR OVERLAP LEARNING (Hebbian, Phase 27a)
+                # ================================================================
+                # BIOLOGY (Hawkins HTM): Words that co-occur develop shared SDR bits
+                # "Neurons that fire together wire together" → shared representations
+                # Only for SEMANTIC connections between content words
+                if conn_type == ConnectionType.SEMANTIC:
+                    GLOBAL_SDR_ENCODER.learn_overlap(word1, word2, overlap_fraction=0.1)
                 
                 # CONTEXT BOOST (soft-attention analogue)
                 # Only for SEMANTIC connections: they carry meaning
