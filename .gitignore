@@ -77,3 +77,4 @@ data/fineweb_edu_sample.json
 # LaTeX build artifacts (keep source files)
 # docs/arxiv.tex, docs/arxiv.pdf, docs/references.bib are tracked
 docs/compile.sh
+docs/OUTREACH_DRAFTS.md
