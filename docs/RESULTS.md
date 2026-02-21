@@ -10,13 +10,13 @@
 
 | Metric | Value |
 |--------|-------|
-| Neurons | 48,367 |
-| Connections | 1,476,135 |
+| Neurons | 48,312 |
+| Connections | 1,476,117 |
 | MYELINATED | 23,784 (1.6%) |
-| USED | 76,360 (5.2%) |
+| USED | 76,342 (5.2%) |
 | NEW | 1,375,991 |
-| Episodes | 76,689 |
-| — NEW | 35,075 |
+| Episodes | 76,679 |
+| — NEW | 35,065 |
 | — REPLAYED | 2,189 |
 | — CONSOLIDATED | 38,074 |
 | — DECAYING | 1,351 |
@@ -27,34 +27,13 @@
 
 | Test Suite | Passed | Total | Accuracy | Time | Description |
 |------------|--------|-------|----------|------|-------------|
-| **CURRICULUM** | 50 | 50 | **100.0%** | 42.8s | Core knowledge tests |
-| **STRICT** | 3 | 3 | **100.0%** | 4.4s | "I do not know" tests |
-| **PRESCHOOL** | 48 | 48 | **100.0%** | 41.9s | Ages 3-6 knowledge |
-| **GRADE1** | 64 | 64 | **100.0%** | 66.7s | Grade 1 world knowledge |
-| **FINEWEB** | 9 | 9 | **100.0%** | 8.7s | Educational text facts |
-| **PARAPHRASE** | 50 | 50 | **100.0%** | 44.2s | Surface form robustness |
-| bAbI-1 | 25 | 25 | 100.0% | 3.6s | bAbI Task 1 |
-| bAbI-2 | 25 | 25 | 100.0% | 7.2s | bAbI Task 2 |
-| bAbI-3 | 25 | 25 | 100.0% | 29.1s | bAbI Task 3 |
-| bAbI-4 | 5 | 5 | 100.0% | 1.1s | bAbI Task 4 |
-| bAbI-5 | 25 | 25 | 100.0% | 8.3s | bAbI Task 5 |
-| bAbI-6 | 25 | 25 | 100.0% | 4.3s | bAbI Task 6 |
-| bAbI-7 | 25 | 25 | 100.0% | 4.6s | bAbI Task 7 |
-| bAbI-8 | 25 | 25 | 100.0% | 4.0s | bAbI Task 8 |
-| bAbI-9 | 25 | 25 | 100.0% | 3.9s | bAbI Task 9 |
-| bAbI-10 | 25 | 25 | 100.0% | 4.2s | bAbI Task 10 |
-| bAbI-11 | 25 | 25 | 100.0% | 3.8s | bAbI Task 11 |
-| bAbI-12 | 25 | 25 | 100.0% | 3.9s | bAbI Task 12 |
-| bAbI-13 | 25 | 25 | 100.0% | 4.1s | bAbI Task 13 |
-| bAbI-14 | 25 | 25 | 100.0% | 4.9s | bAbI Task 14 |
-| bAbI-15 | 20 | 20 | 100.0% | 3.9s | bAbI Task 15 |
-| bAbI-16 | 5 | 5 | 100.0% | 1.0s | bAbI Task 16 |
-| bAbI-17 | 40 | 40 | 100.0% | 2.5s | bAbI Task 17 |
-| bAbI-18 | 29 | 29 | 100.0% | 4.9s | bAbI Task 18 |
-| bAbI-19 | 5 | 5 | 100.0% | 0.7s | bAbI Task 19 |
-| bAbI-20 | 52 | 52 | 100.0% | 6.9s | bAbI Task 20 |
-| **bAbI TOTAL** | **481** | **481** | **100.0%** | 106.8s | All 20 bAbI tasks |
-| **TOTAL** | **705** | **705** | **100.0%** | | All tests combined |
+| **CURRICULUM** | 50 | 50 | **100.0%** | 60.3s | Core knowledge tests |
+| **STRICT** | 3 | 3 | **100.0%** | 4.8s | "I do not know" tests |
+| **PRESCHOOL** | 48 | 48 | **100.0%** | 58.8s | Ages 3-6 knowledge |
+| **GRADE1** | 64 | 64 | **100.0%** | 93.4s | Grade 1 world knowledge |
+| **FINEWEB** | 9 | 9 | **100.0%** | 10.3s | Educational text facts |
+| **PARAPHRASE** | 50 | 50 | **100.0%** | 57.2s | Surface form robustness |
+| **TOTAL** | **224** | **224** | **100.0%** | | All tests combined |
 
 ---
 
@@ -70,27 +49,6 @@ QA baselines (TF-IDF, BM25) trained on **identical data**. Working memory baseli
 | GRADE1 | **100.0%** | 68.8% | 71.9% | N/A | N/A |
 | FINEWEB | **100.0%** | 11.1% | 33.3% | N/A | N/A |
 | PARAPHRASE | **100.0%** | 48.0% | 48.0% | N/A | N/A |
-| bAbI-1 | **100.0%** | N/A | N/A | 100.0% | 84.0% |
-| bAbI-2 | **100.0%** | N/A | N/A | 28.0% | 0.0% |
-| bAbI-3 | **100.0%** | N/A | N/A | 0.0% | 0.0% |
-| bAbI-4 | **100.0%** | N/A | N/A | 60.0% | 80.0% |
-| bAbI-5 | **100.0%** | N/A | N/A | 64.0% | 68.0% |
-| bAbI-6 | **100.0%** | N/A | N/A | 0.0% | 0.0% |
-| bAbI-7 | **100.0%** | N/A | N/A | 0.0% | 0.0% |
-| bAbI-8 | **100.0%** | N/A | N/A | 56.0% | 56.0% |
-| bAbI-9 | **100.0%** | N/A | N/A | 32.0% | 24.0% |
-| bAbI-10 | **100.0%** | N/A | N/A | 0.0% | 0.0% |
-| bAbI-11 | **100.0%** | N/A | N/A | 0.0% | 0.0% |
-| bAbI-12 | **100.0%** | N/A | N/A | 100.0% | 72.0% |
-| bAbI-13 | **100.0%** | N/A | N/A | 0.0% | 0.0% |
-| bAbI-14 | **100.0%** | N/A | N/A | 0.0% | 0.0% |
-| bAbI-15 | **100.0%** | N/A | N/A | 45.0% | 5.0% |
-| bAbI-16 | **100.0%** | N/A | N/A | 0.0% | 0.0% |
-| bAbI-17 | **100.0%** | N/A | N/A | 0.0% | 0.0% |
-| bAbI-18 | **100.0%** | N/A | N/A | 0.0% | 0.0% |
-| bAbI-19 | **100.0%** | N/A | N/A | 0.0% | 0.0% |
-| bAbI-20 | **100.0%** | N/A | N/A | 1.9% | 0.0% |
-| **bAbI TOTAL** | **100.0%** | N/A | N/A | 24.3% | 19.4% |
 | **QA AVG** | **100.0%** | **51.1%** | **57.3%** | N/A | N/A |
 
 *bAbI requires working memory — TF-IDF/BM25 cannot track entity states. MemNet/NTM tested on all 20 tasks.*
@@ -98,7 +56,6 @@ QA baselines (TF-IDF, BM25) trained on **identical data**. Working memory baseli
 ### Key Findings
 
 1. **Brain significantly outperforms simple IR methods** (+48-88%)
-2. **Working memory (bAbI 1-20)** — Brain achieves 100% (481/481), TF-IDF/BM25 cannot handle context
 3. **Paraphrase robustness** — 100% accuracy on surface form variation
 4. **"I don't know" capability** — Brain correctly abstains on unknown queries
 
