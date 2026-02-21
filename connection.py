@@ -633,25 +633,31 @@ class Connection:
         """
         Compute an effective myelination threshold accounting for biological factors.
         
-        BIOLOGICAL MODEL (Synaptic Tagging and Capture, Frey & Morris 1998):
+        BIOLOGY (Synaptic Tagging and Capture, Frey & Morris 1997):
+        A weak connection can become strong if it is "captured" by
+        neighboring strong connections.
+        - If a neuron already has many myelinated connections, new ones
+          myelinate faster (lower threshold).
+        - Shared PRPs (plasticity-related proteins).
         
-        1. SYNAPTIC CAPTURE (protein capture from neighbors):
-           A weak connection can "capture" plasticity-related proteins (PRPs)
-           from a neighboring strong connection on the same neuron.
-           
-        2. DOPAMINE MODULATION (emotional salience):
-           Implemented via context_attention_boost in mark_used_forward().
-           
-        OPTIMIZATION: Use cached counters _myelinated_out_count
-        and _myelinated_in_count instead of O(n) recomputation on each call.
-        This is biologically plausible: a neuron locally "knows" the state of its synapses.
-           
+        BIOLOGY (Neuromodulation, Schultz 1998):
+        - Dopamine (DA) lowers the threshold for LTP/myelination.
+        
         Returns:
             Effective threshold (at least THRESHOLD_MIN_MYELINATION)
         """
         base_threshold = self.THRESHOLD_USED_TO_MYELINATED
         
-        # 1. SYNAPTIC CAPTURE: use cached counters (O(1) instead of O(n))
+        # 1. DOPAMINE MODULATION
+        from neuromodulation import GLOBAL_MODULATORS, ModulatorType
+        da_level = GLOBAL_MODULATORS.get_level(ModulatorType.DOPAMINE)
+        # Baseline DA is 0.5. High DA (e.g. 1.0) lowers threshold
+        # If DA=1.0, threshold drops by 30%
+        if da_level > 0.5:
+            da_reduction = int(base_threshold * 0.3 * ((da_level - 0.5) * 2.0))
+            base_threshold -= da_reduction
+        
+        # 2. SYNAPTIC CAPTURE: use cached counters (O(1) instead of O(n))
         # BIOLOGY: A neuron locally "knows" how many of its synapses are myelinated
         myelinated_out = self.from_neuron._myelinated_out_count
         myelinated_in = self.to_neuron._myelinated_in_count
@@ -730,8 +736,17 @@ class Connection:
         """
         if self.state == ConnectionState.MYELINATED:
             return  # Myelinated connections are not forgotten easily
+            
+        # Base decay
+        increment = 1
         
-        self._cycles_without_use += 1
+        # BIOLOGY (Tononi & Cirelli 2006, Synaptic Homeostasis):
+        # Connections with low context diversity (purely episodic, tied to a single event)
+        # decay faster than semantic connections (experienced in multiple contexts).
+        if len(self.contexts) <= 1:
+            increment += 1  # Accelerated decay for episodic traces
+        
+        self._cycles_without_use += increment
         
         if self._cycles_without_use >= self.THRESHOLD_TO_PRUNE:
             self.state = ConnectionState.PRUNE

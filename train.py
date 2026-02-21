@@ -1786,8 +1786,22 @@ def ask(question: str) -> str:
     from config import set_inference_mode, set_learning_mode
     set_inference_mode()
     
+    # BIOLOGY: Neuromodulators respond to incoming query (alertness, switch to retrieval)
+    from neuromodulation import GLOBAL_MODULATORS
+    GLOBAL_MODULATORS.update_on_query(is_novel=True)
+    
     try:
-        return _ask_impl(question)
+        answer = _ask_impl(question)
+        
+        # Evaluate success/confidence (heuristic for now: found answer vs "I don't know")
+        success = answer not in ("I don't know.", "Unknown.", "I do not know.")
+        confidence = 0.8 if success else 0.0
+        
+        # BIOLOGY: Neuromodulators respond to outcome (reward/frustration)
+        GLOBAL_MODULATORS.update_on_answer(success=success, confidence=confidence)
+        GLOBAL_MODULATORS.decay_to_baseline()
+        
+        return answer
     finally:
         # ARCHITECTURE: Restore LEARN mode after inference
         set_learning_mode()

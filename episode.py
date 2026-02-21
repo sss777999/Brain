@@ -175,6 +175,14 @@ class Episode:
         self.replay_count: int = 0
         self._decay_counter: int = 0  # Counter of cycles without replay
         
+        # ANCHOR: SYNAPTIC_HOMEOSTASIS_INIT
+        # BIOLOGY (Tononi & Cirelli 2006, Synaptic Homeostasis Hypothesis):
+        # LTD (Long-Term Depression) mechanism for forgetting.
+        # Episodes start strong but decay during NREM sleep unless accessed.
+        self.strength: float = 1.0
+        self.last_accessed_time: int = timestamp
+        self.access_count: int = 0
+        
         # ANCHOR: SEMANTIC_ROLES_INIT
         # BIOLOGY (Event Structure, Zacks & Tversky 2001):
         # Episodes store not just words but their thematic roles in the event.
@@ -227,7 +235,7 @@ class Episode:
         self.state = EpisodeState.CONSOLIDATED
     
     # API_PUBLIC
-    def apply_decay(self) -> bool:
+    def apply_decay(self, current_time: int = 0) -> bool:
         """
         Apply decay.
         
@@ -246,9 +254,35 @@ class Episode:
         if self._decay_counter >= 3 and self.state != EpisodeState.DECAYING:
             self.state = EpisodeState.DECAYING
         
-        # After 7 cycles: remove (if there was no replay)
-        # 7 is a working-memory "magic" number, but here it's just a threshold
-        return self._decay_counter >= 7 and self.replay_count == 0
+        # BIOLOGY (Tononi & Cirelli 2006, Synaptic Homeostasis):
+        # Global downscaling during NREM sleep.
+        # Base decay factor
+        decay_factor = 0.95
+        
+        # Source protection: LEARNING/EXPERIENCE episodes decay slower
+        # MEDIA/NARRATIVE decay faster
+        if self.source in ("LEARNING", "EXPERIENCE"):
+            decay_factor = 0.98
+        elif self.source in ("MEDIA", "NARRATIVE"):
+            decay_factor = 0.90
+            
+        # Recent access protects against decay
+        time_since_access = current_time - self.last_accessed_time if current_time > 0 else 1000
+        if time_since_access < 100:
+            decay_factor = min(1.0, decay_factor + 0.05)
+            
+        self.strength *= decay_factor
+        
+        # Pruning thresholds
+        # 1. Original heuristic: remove if no replays after 7 cycles
+        if self._decay_counter >= 7 and self.replay_count == 0:
+            return True
+            
+        # 2. LTD threshold: remove if strength is too low
+        if self.strength < 0.1:
+            return True
+            
+        return False
     
     # API_PUBLIC
     def overlaps_with(self, other: Episode) -> Set[str]:

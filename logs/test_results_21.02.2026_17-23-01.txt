@@ -1,0 +1,1455 @@
+Log file: logs/test_results_21.02.2026_17-23-01.txt
+
+
+======================================================================
+TESTS CURRICULUM
+======================================================================
+✅ PASS | Q: What is a dog?
+         ✅ Brain  [0.571s]: animal and a pet that loves to play says bow wow which means puppy is a baby
+         ❌ TF-IDF [0.159s]: dog is dog food
+         ❌ BM25   [0.089s]: what is puppy baby dog
+         Expected: ['animal', 'pet', 'mammal']
+
+✅ PASS | Q: What is a cat?
+         ✅ Brain  [1.477s]: animal and a pet that catches eats fish and meat kitten is a baby
+         ❌ TF-IDF [0.160s]: cat is cat food
+         ❌ BM25   [0.088s]: what is kitten baby cat
+         Expected: ['animal', 'pet', 'mammal']
+
+✅ PASS | Q: What is a lion?
+         ✅ Brain  [0.625s]: animal cub is a baby laid his huge paw on the tiny creature says roar mouse
+         ✅ TF-IDF [0.159s]: lion is animal
+         ✅ BM25   [0.090s]: lion is animal
+         Expected: ['animal', 'wild', 'predator']
+
+✅ PASS | Q: What is a whale?
+         ✅ Brain  [0.686s]: mammal large at animal biggest is the ocean
+         ✅ TF-IDF [0.159s]: whale is animal
+         ✅ BM25   [0.089s]: a whale is a mammal
+         Expected: ['animal', 'mammal', 'ocean']
+
+✅ PASS | Q: What is an apple?
+         ✅ Brain  [0.456s]: fruit apple red or green leaves tree apples grow trees
+         ✅ TF-IDF [0.167s]: an apple is a fruit
+         ✅ BM25   [0.099s]: an apple is a fruit
+         Expected: ['fruit']
+
+✅ PASS | Q: What is a carrot?
+         ✅ Brain  [0.437s]: vegetable orange
+         ❌ TF-IDF [0.160s]: carrot is orange
+         ✅ BM25   [0.090s]: a carrot is a vegetable
+         Expected: ['vegetable']
+
+✅ PASS | Q: What is a car?
+         ✅ Brain  [0.541s]: vehicle car four wheels driver made of metal wear a seatbelt
+         ❌ TF-IDF [0.160s]: car is fast
+         ✅ BM25   [0.090s]: a car is a vehicle
+         Expected: ['vehicle']
+
+✅ PASS | Q: What is a piano?
+         ✅ Brain  [0.320s]: instrument
+         ✅ TF-IDF [0.160s]: piano is instrument
+         ✅ BM25   [0.089s]: piano is instrument
+         Expected: ['instrument']
+
+✅ PASS | Q: What color is the sky?
+         ✅ Brain  [0.434s]: blue gray rainy day
+         ✅ TF-IDF [0.177s]: blue is the color of the sky
+         ✅ BM25   [0.106s]: blue is the color of the sky
+         Expected: ['blue']
+
+✅ PASS | Q: What color is grass?
+         ✅ Brain  [0.401s]: green grows on the ground cows eat dew forms morning cow eats
+         ✅ TF-IDF [0.168s]: green is the color of grass
+         ✅ BM25   [0.097s]: grass is green in color
+         Expected: ['green']
+
+✅ PASS | Q: What color is the sun?
+         ✅ Brain  [0.490s]: yellow and bright round in another up
+         ✅ TF-IDF [0.175s]: yellow is the color of the sun
+         ✅ BM25   [0.106s]: yellow is the color of the sun
+         Expected: ['yellow']
+
+✅ PASS | Q: What color is snow?
+         ✅ Brain  [0.603s]: white and cold
+         ✅ TF-IDF [0.167s]: the color of snow is white
+         ✅ BM25   [0.098s]: the color of snow is white
+         Expected: ['white']
+
+✅ PASS | Q: What color is a banana?
+         ✅ Brain  [0.492s]: yellow banana fruit
+         ✅ TF-IDF [0.167s]: yellow is the color of a banana
+         ✅ BM25   [0.103s]: yellow is the color of a banana
+         Expected: ['yellow']
+
+✅ PASS | Q: What color is an orange?
+         ✅ Brain  [0.475s]: orange is the color rainbow has seven colors red and yellow leaves green and blue indigo fruit pumpkin leaves to turn
+         ✅ TF-IDF [0.174s]: orange is the color of an orange
+         ✅ BM25   [0.106s]: orange is the color of an orange
+         Expected: ['orange']
+
+✅ PASS | Q: What does a dog say?
+         ✅ Brain  [0.405s]: says woof woof bow wow thank animal and a pet
+         ❌ TF-IDF [0.165s]: dog food dog
+         ✅ BM25   [0.098s]: a dog say woof
+         Expected: ['woof', 'bark']
+
+✅ PASS | Q: What does a cat say?
+         ✅ Brain  [0.408s]: says meow meow polly poor poll wants mew like of which is not a good friends catch pastry she heard loudly and scratch
+         ❌ TF-IDF [0.166s]: cat food cat
+         ❌ BM25   [0.097s]: what is kitten baby cat
+         Expected: ['meow', 'purr']
+
+✅ PASS | Q: What does a cow say?
+         ✅ Brain  [0.411s]: says moo
+         ❌ TF-IDF [0.165s]: animal cow
+         ❌ BM25   [0.097s]: what is calf baby cow
+         Expected: ['moo']
+
+✅ PASS | Q: What does a duck say?
+         ✅ Brain  [0.372s]: says quack quack
+         ❌ TF-IDF [0.166s]: duck donald duck
+         ❌ BM25   [0.098s]: duck donald duck
+         Expected: ['quack']
+
+✅ PASS | Q: What does a lion say?
+         ✅ Brain  [0.551s]: says roar mouse that even a see us help quickly found struggling in the net amused
+         ❌ TF-IDF [0.168s]: animal lion
+         ❌ BM25   [0.101s]: We express ourselves by what we do, by what we say, and by w
+         Expected: ['roar']
+
+✅ PASS | Q: What is the opposite of hot?
+         ✅ Brain  [0.000s]: cold
+         ✅ TF-IDF [0.180s]: hot is the opposite of cold
+         ✅ BM25   [0.115s]: hot is the opposite of cold
+         Expected: ['cold']
+
+✅ PASS | Q: What is the opposite of big?
+         ✅ Brain  [0.000s]: small
+         ✅ TF-IDF [0.179s]: big is the opposite of small
+         ✅ BM25   [0.116s]: big is the opposite of small
+         Expected: ['small', 'little']
+
+✅ PASS | Q: What is the opposite of fast?
+         ✅ Brain  [0.000s]: slow
+         ✅ TF-IDF [0.183s]: fast is the opposite of slow
+         ✅ BM25   [0.117s]: fast is the opposite of slow
+         Expected: ['slow']
+
+✅ PASS | Q: What is the opposite of up?
+         ✅ Brain  [0.000s]: down
+         ✅ TF-IDF [0.182s]: up is the opposite of down
+         ✅ BM25   [0.116s]: up is the opposite of down
+         Expected: ['down']
+
+✅ PASS | Q: What is the opposite of happy?
+         ✅ Brain  [0.000s]: sad
+         ✅ TF-IDF [0.180s]: happy is the opposite of sad
+         ✅ BM25   [0.116s]: happy is the opposite of sad
+         Expected: ['sad']
+
+✅ PASS | Q: What is the opposite of day?
+         ✅ Brain  [0.000s]: night
+         ✅ TF-IDF [0.181s]: day is the opposite of night
+         ✅ BM25   [0.115s]: day is the opposite of night
+         Expected: ['night']
+
+✅ PASS | Q: What is the capital of France?
+         ✅ Brain  [0.384s]: paris berlin is germany tokyo is japan rome is italy beijing is china
+         ✅ TF-IDF [0.180s]: paris is the capital of france
+         ✅ BM25   [0.115s]: paris is the capital of france
+         Expected: ['paris']
+
+✅ PASS | Q: What is the capital of England?
+         ✅ Brain  [0.380s]: london beijing is china rome is italy paris is france berlin is germany
+         ✅ TF-IDF [0.182s]: london is the capital of england
+         ✅ BM25   [0.115s]: london is the capital of england
+         Expected: ['london']
+
+✅ PASS | Q: What is the capital of Japan?
+         ✅ Brain  [0.385s]: tokyo moscow is russia beijing is china berlin is germany paris is france
+         ✅ TF-IDF [0.181s]: tokyo is the capital of japan
+         ✅ BM25   [0.117s]: tokyo is the capital of japan
+         Expected: ['tokyo']
+
+✅ PASS | Q: Where is Paris?
+         ✅ Brain  [0.356s]: capital of france
+         ❌ TF-IDF [0.160s]: paris is capital
+         ❌ BM25   [0.090s]: paris is capital
+         Expected: ['france']
+
+✅ PASS | Q: Where is London?
+         ✅ Brain  [0.344s]: capital of england
+         ❌ TF-IDF [0.160s]: london is capital
+         ❌ BM25   [0.090s]: london is capital
+         Expected: ['england', 'uk']
+
+✅ PASS | Q: What is the sun?
+         ✅ Brain  [0.574s]: star big opposites hot sky only in the not a planet earth goes what down at night
+         ❌ TF-IDF [0.168s]: the sun is up
+         ❌ BM25   [0.099s]: the sun is round
+         Expected: ['star']
+
+✅ PASS | Q: What is the Earth?
+         ✅ Brain  [0.567s]: planet earth goes around the sun is round circle like a ball spins top moon
+         ❌ TF-IDF [0.169s]: earth is life
+         ❌ BM25   [0.099s]: it hasn't
+Unfortunately this is not what old earth scientist
+         Expected: ['planet']
+
+✅ PASS | Q: What is the moon?
+         ✅ Brain  [0.559s]: stars appear in the sky at night when they would come out to see shines goes around the earth
+         ✅ TF-IDF [0.169s]: night is moon
+         ✅ BM25   [0.106s]: the moon is round
+         Expected: ['satellite', 'round', 'night']
+
+✅ PASS | Q: What is water?
+         ✅ Brain  [0.570s]: liquid plants that need sunlight and soil to grow drink instead of sweet drinks cannot birds live wash your hands with soap
+         ❌ TF-IDF [0.162s]: What Is It
+         ❌ BM25   [0.090s]: Water retains its inherent properties of emissivity regardle
+         Expected: ['liquid', 'h2o', 'drink']
+
+✅ PASS | Q: What is ice?
+         ✅ Brain  [0.614s]: solid melts when it gets warm ice cream is cold and sweet get melt
+         ❌ TF-IDF [0.161s]: ice skating is ice
+         ❌ BM25   [0.091s]: ice skating is ice
+         Expected: ['solid', 'cold', 'frozen']
+
+✅ PASS | Q: What is a puppy?
+         ✅ Brain  [0.305s]: baby dog
+         ✅ TF-IDF [0.160s]: what is puppy baby dog
+         ✅ BM25   [0.091s]: what is puppy baby dog
+         Expected: ['baby', 'dog']
+
+✅ PASS | Q: What is a kitten?
+         ✅ Brain  [0.382s]: baby cat
+         ✅ TF-IDF [0.161s]: what is kitten baby cat
+         ✅ BM25   [0.089s]: what is kitten baby cat
+         Expected: ['baby', 'cat']
+
+✅ PASS | Q: What is a calf?
+         ✅ Brain  [0.369s]: baby cow
+         ✅ TF-IDF [0.161s]: what is calf baby cow
+         ✅ BM25   [0.090s]: what is calf baby cow
+         Expected: ['baby', 'cow']
+
+✅ PASS | Q: What is a chick?
+         ✅ Brain  [0.548s]: baby chicken bird egg becomes become
+         ✅ TF-IDF [0.161s]: A chick is a baby bird
+         ✅ BM25   [0.090s]: a chick is a baby chicken
+         Expected: ['baby', 'chicken']
+
+✅ PASS | Q: What do we see with?
+         ✅ Brain  [0.858s]: eyes two paragraphs use would help colors and shapes and movement
+         ❌ TF-IDF [0.177s]: We express ourselves by what we do, by what we say, and by w
+         ❌ BM25   [0.110s]: We express ourselves by what we do, by what we say, and by w
+         Expected: ['eyes']
+
+✅ PASS | Q: What do we hear with?
+         ✅ Brain  [0.768s]: ears to use paragraphs two resolve help sounds and music comes fanny to see stand men play
+         ✅ TF-IDF [0.178s]: we hear with our ears
+         ✅ BM25   [0.108s]: we hear with our ears
+         Expected: ['ears']
+
+✅ PASS | Q: What do we smell with?
+         ✅ Brain  [0.672s]: nose our use lexicography sense uses
+         ✅ TF-IDF [0.179s]: we smell with nose
+         ✅ BM25   [0.108s]: we smell with nose
+         Expected: ['nose']
+
+✅ PASS | Q: When do we wake up?
+         ✅ Brain  [0.787s]: morning afternoon eat breakfast time to go to bed early
+         ✅ TF-IDF [0.177s]: morning is when we wake up
+         ✅ BM25   [0.107s]: morning is when we wake up
+         Expected: ['morning']
+
+✅ PASS | Q: When do we sleep?
+         ✅ Brain  [0.823s]: night is dark people
+         ✅ TF-IDF [0.168s]: night is when we sleep
+         ❌ BM25   [0.099s]: we dream when we sleep
+         Expected: ['night']
+
+✅ PASS | Q: What comes after Monday?
+         ✅ Brain  [0.000s]: tuesday
+         ❌ TF-IDF [0.165s]: monday comes after sunday
+         ✅ BM25   [0.099s]: tuesday comes after monday
+         Expected: ['tuesday']
+
+✅ PASS | Q: What shape is a ball?
+         ✅ Brain  [0.408s]: round is earth the like
+         ✅ TF-IDF [0.168s]: the shape of a ball is round
+         ✅ BM25   [0.099s]: the shape of a ball is round
+         Expected: ['round', 'circle', 'sphere']
+
+✅ PASS | Q: How many sides does a triangle have?
+         ✅ Brain  [0.667s]: three four rectangle has four is two long and short sides square equal
+         ✅ TF-IDF [0.181s]: three sides triangle
+         ✅ BM25   [0.115s]: three sides triangle
+         Expected: ['three', '3']
+
+✅ PASS | Q: How many sides does a square have?
+         ✅ Brain  [0.691s]: four equal sides rectangle triangle has three four two long and short box
+         ✅ TF-IDF [0.182s]: four sides square
+         ✅ BM25   [0.115s]: four sides square
+         Expected: ['four', '4']
+
+✅ PASS | Q: What comes after one?
+         ✅ Brain  [0.001s]: two
+         ✅ TF-IDF [0.168s]: two comes after one
+         ✅ BM25   [0.098s]: two comes after one
+         Expected: ['two', '2', 'after one comes two']
+
+✅ PASS | Q: What comes after five?
+         ✅ Brain  [0.000s]: six
+         ❌ TF-IDF [0.169s]: five comes after four
+         ❌ BM25   [0.098s]: five comes after four
+         Expected: ['six', '6', 'after five comes six']
+
+======================================================================
+RESULT CURRICULUM: 50/50 (100.0%) | Brain: 22.17s | GPT: 0.00s
+BASELINES: TFIDF: 64% (8.47s) | BM25: 70% (5.06s)
+======================================================================
+
+======================================================================
+TESTS STRICT
+======================================================================
+✅ PASS | Q: What is the meaning of life?
+         ✅ Brain  [0.626s]: love
+         ✅ TF-IDF [0.182s]: the meaning of life is love
+         ✅ BM25   [0.117s]: the meaning of life is love
+         Expected: ['love', 'happiness']
+
+✅ PASS | Q: Who wrote Hamlet?
+         ✅ Brain  [0.500s]: I do not know
+         ❌ TF-IDF [0.160s]: Read them anonymously afterwards and get the class to guess 
+         ❌ BM25   [0.090s]: Read them anonymously afterwards and get the class to guess 
+         Expected: ['not know', "don't know", 'unknown']
+
+✅ PASS | Q: Who is the president of Mars?
+         ✅ Brain  [0.824s]: I do not know
+         ❌ TF-IDF [0.183s]: earth is mars
+         ❌ BM25   [0.117s]: mars is planet
+         Expected: ['not know', "don't know", 'unknown']
+
+======================================================================
+RESULT STRICT: 3/3 (100.0%) | Brain: 1.95s
+BASELINES: TFIDF: 33% (0.52s) | BM25: 33% (0.32s)
+======================================================================
+
+======================================================================
+TESTS - PRESCHOOL (preschool knowledge 3-6 years)
+======================================================================
+✅ Q: What is a puppy?
+   ✅ Brain  [0.305s]: baby dog
+   ✅ TF-IDF [0.163s]: what is puppy baby dog
+   ✅ BM25   [0.091s]: what is puppy baby dog
+   Expected: ['baby dog', 'young dog', 'dog']
+
+✅ Q: What is a kitten?
+   ✅ Brain  [0.386s]: baby cat
+   ✅ TF-IDF [0.163s]: what is kitten baby cat
+   ✅ BM25   [0.091s]: what is kitten baby cat
+   Expected: ['baby cat', 'young cat', 'cat']
+
+✅ Q: What is a calf?
+   ✅ Brain  [0.378s]: baby cow
+   ✅ TF-IDF [0.164s]: what is calf baby cow
+   ✅ BM25   [0.091s]: what is calf baby cow
+   Expected: ['baby cow', 'young cow', 'cow']
+
+✅ Q: What does a tadpole become?
+   ✅ Brain  [0.433s]: frog egg starts baby becomes caterpillar turns
+   ✅ TF-IDF [0.169s]: tadpole become frog
+   ✅ BM25   [0.100s]: tadpole become frog
+   Expected: ['frog']
+
+✅ Q: What does a caterpillar become?
+   ✅ Brain  [0.425s]: butterfly egg cocoon becomes caterpillar turns
+   ✅ TF-IDF [0.170s]: caterpillar become butterfly
+   ✅ BM25   [0.100s]: caterpillar become butterfly
+   Expected: ['butterfly']
+
+✅ Q: What is a group of fish called?
+   ✅ Brain  [0.611s]: school extinct birds flock dogs pack lions pride
+   ✅ TF-IDF [0.184s]: A group of fish is called a school
+   ✅ BM25   [0.117s]: A group of fish is called a school
+   Expected: ['school']
+
+✅ Q: What is a group of wolves called?
+   ✅ Brain  [0.580s]: pack birds flock dogs
+   ✅ TF-IDF [0.183s]: A group of wolves is called a pack
+   ✅ BM25   [0.115s]: A group of wolves is called a pack
+   Expected: ['pack']
+
+✅ Q: What is a group of birds called?
+   ✅ Brain  [0.589s]: flock fish school play dogs pack sheep
+   ✅ TF-IDF [0.184s]: A group of birds is called a flock
+   ✅ BM25   [0.115s]: A group of birds is called a flock
+   Expected: ['flock']
+
+✅ Q: What is a group of lions called?
+   ✅ Brain  [0.574s]: pride birds flock fish school wolves pack
+   ✅ TF-IDF [0.184s]: A group of lions is called a pride
+   ✅ BM25   [0.116s]: A group of lions is called a pride
+   Expected: ['pride']
+
+✅ Q: What is a table made of?
+   ✅ Brain  [0.411s]: wood chair piece of furniture chair plate help set
+   ✅ TF-IDF [0.180s]: a table is made of wood
+   ✅ BM25   [0.108s]: a table is made of wood
+   Expected: ['wood']
+
+✅ Q: What is a window made of?
+   ✅ Brain  [0.337s]: glass window lets in light
+   ✅ TF-IDF [0.181s]: a window is made of glass
+   ✅ BM25   [0.110s]: a window is made of glass
+   Expected: ['glass']
+
+✅ Q: What is a tire made of?
+   ✅ Brain  [0.423s]: rubber
+   ✅ TF-IDF [0.181s]: a tire is made of rubber
+   ✅ BM25   [0.107s]: a tire is made of rubber
+   Expected: ['rubber']
+
+✅ Q: What is a shirt made of?
+   ✅ Brain  [0.351s]: cotton shirt goes on your body put
+   ✅ TF-IDF [0.180s]: a shirt is made of cotton
+   ✅ BM25   [0.108s]: a shirt is made of cotton
+   Expected: ['cotton', 'fabric']
+
+✅ Q: What happens when you touch fire?
+   ✅ Brain  [0.527s]: fire can burn not fire hot fire things oven
+   ✅ TF-IDF [0.183s]: when you touch fire you burn
+   ✅ BM25   [0.116s]: when you touch fire you burn
+   Expected: ['burn', 'hurt', 'pain']
+
+✅ Q: What happens when ice gets warm?
+   ✅ Brain  [0.480s]: warm it melts melt get frozen water
+   ✅ TF-IDF [0.183s]: ice melts when it gets warm
+   ✅ BM25   [0.117s]: ice melts when it gets warm
+   Expected: ['melt', 'melts']
+
+✅ Q: What happens when you fall?
+   ✅ Brain  [0.486s]: fall down you can get hurt leaves change color trees in autumn in tree
+   ❌ TF-IDF [0.180s]: What happens when you choose to buy Green Power
+   ❌ BM25   [0.108s]: What happens when you choose to buy Green Power
+   Expected: ['hurt', 'pain']
+
+✅ Q: Is fire dangerous?
+   ✅ Brain  [0.437s]: hot and red is the color truck burn things do not play
+   ✅ TF-IDF [0.160s]: fire is dangerous
+   ✅ BM25   [0.091s]: fire is dangerous
+   Expected: ['yes', 'dangerous', 'hot']
+
+✅ Q: Is a knife sharp?
+   ✅ Brain  [0.524s]: cut use pennies food knife fork is next
+   ✅ TF-IDF [0.163s]: knife is sharp
+   ✅ BM25   [0.091s]: knife is sharp
+   Expected: ['yes', 'sharp', 'cut']
+
+✅ Q: When should you wash your hands?
+   ✅ Brain  [0.841s]: eating toilet soap eat it or use of water
+   ❌ TF-IDF [0.185s]: hands wash
+   ❌ BM25   [0.117s]: Wash your hands before you eat.
+   Expected: ['before eating', 'after toilet', 'eating']
+
+✅ Q: When should you brush your teeth?
+   ✅ Brain  [0.774s]: day breakfast morning and at night in your bed toothbrush keep them clean
+   ❌ TF-IDF [0.184s]: teeth brush
+   ❌ BM25   [0.115s]: Turn off the tap when you brush your teeth.
+   Expected: ['morning', 'night', 'day', 'every']
+
+✅ Q: What do you use to wash hands?
+   ✅ Brain  [0.677s]: hands with soap and water creating use
+   ✅ TF-IDF [0.190s]: use water wash hands
+   ✅ BM25   [0.124s]: use soap wash hands
+   Expected: ['soap', 'water']
+
+✅ Q: What do you say when you ask for something?
+   ✅ Brain  [0.348s]: please when we want please thank you when we get receive
+   ✅ TF-IDF [0.196s]: When you ask for something say please
+   ✅ BM25   [0.139s]: When you ask for something say please
+   Expected: ['please']
+
+✅ Q: What do you say when you receive something?
+   ✅ Brain  [0.386s]: thank you when we get you to ask when we please
+   ✅ TF-IDF [0.190s]: When you receive something say thank you
+   ✅ BM25   [0.132s]: When you receive something say thank you
+   Expected: ['thank you', 'thank']
+
+✅ Q: What do you say when you make a mistake?
+   ✅ Brain  [0.436s]: good friends sorry when_we mistakes morning no narratives words
+   ✅ TF-IDF [0.188s]: we say sorry when we make a mistake
+   ✅ BM25   [0.133s]: we say sorry when we make a mistake
+   Expected: ['sorry']
+
+✅ Q: What comes after A?
+   ✅ Brain  [0.000s]: letter_b
+   ❌ TF-IDF [0.161s]: two comes after one
+   ✅ BM25   [0.090s]: what comes after letter_a letter_b
+   Expected: ['b', 'letter_b']
+
+✅ Q: What is the first letter?
+   ✅ Brain  [0.604s]: letter_a january after month monday on day of the week first breakfast meal finished reader
+   ✅ TF-IDF [0.183s]: a is letter
+   ✅ BM25   [0.109s]: The first letter is letter_a
+   Expected: ['a', 'letter_a']
+
+✅ Q: What is the last letter?
+   ✅ Brain  [0.560s]: letter_z december month managed to scramble out come lesson in this book wake you up near
+   ✅ TF-IDF [0.181s]: the last letter is Z
+   ✅ BM25   [0.108s]: the last letter is Z
+   Expected: ['z', 'letter_z']
+
+✅ Q: What comes after ten?
+   ✅ Brain  [0.000s]: eleven
+   ❌ TF-IDF [0.168s]: ten comes after nine
+   ❌ BM25   [0.099s]: ten comes after nine
+   Expected: ['eleven']
+
+✅ Q: What comes after nineteen?
+   ✅ Brain  [0.000s]: twenty
+   ✅ TF-IDF [0.170s]: Twenty comes after nineteen
+   ✅ BM25   [0.099s]: Twenty comes after nineteen
+   Expected: ['twenty']
+
+✅ Q: Is an elephant bigger than a mouse?
+   ✅ Brain  [0.421s]: elephant is bigger than a mouse
+   ✅ TF-IDF [0.189s]: An elephant is bigger than a mouse
+   ✅ BM25   [0.117s]: An elephant is bigger than a mouse
+   Expected: ['yes', 'bigger']
+
+✅ Q: Is a turtle faster than a rabbit?
+   ✅ Brain  [0.408s]: slower not
+   ❌ TF-IDF [0.181s]: rabbit faster than turtle
+   ❌ BM25   [0.107s]: rabbit faster than turtle
+   Expected: ['no', 'slower']
+
+✅ Q: Is a feather heavier than a rock?
+   ✅ Brain  [0.428s]: rock is heavier than a feather is lighter
+   ✅ TF-IDF [0.181s]: A rock is heavier than a feather
+   ✅ BM25   [0.110s]: A rock is heavier than a feather
+   Expected: ['no', 'lighter', 'rock', 'heavier']
+
+✅ Q: What does a seed become?
+   ✅ Brain  [0.321s]: plant then sprout grows flower then fruit starts
+   ✅ TF-IDF [0.171s]: seed become plant
+   ✅ BM25   [0.099s]: seed become plant
+   Expected: ['plant', 'sprout']
+
+✅ Q: What is under the ground?
+   ✅ Brain  [0.401s]: root grass grows below rains gets wet snows turns white
+   ✅ TF-IDF [0.182s]: root under ground
+   ✅ BM25   [0.108s]: root under ground
+   Expected: ['root', 'roots']
+
+✅ Q: What does an egg become?
+   ✅ Brain  [0.437s]: bird chick animal tadpole then frog becomes caterpillar then cocoon then butterfly
+   ✅ TF-IDF [0.180s]: egg become animal
+   ✅ BM25   [0.108s]: egg become chick
+   Expected: ['chick', 'bird', 'animal']
+
+✅ Q: What comes from a cocoon?
+   ✅ Brain  [0.369s]: butterfly come out letter_a after letter_b ten after eleven
+   ✅ TF-IDF [0.171s]: A butterfly comes out of the cocoon
+   ✅ BM25   [0.100s]: A butterfly comes out of the cocoon
+   Expected: ['butterfly']
+
+✅ Q: What comes after Monday?
+   ✅ Brain  [0.000s]: tuesday
+   ❌ TF-IDF [0.168s]: monday comes after sunday
+   ✅ BM25   [0.099s]: tuesday comes after monday
+   Expected: ['tuesday']
+
+✅ Q: What month comes after January?
+   ✅ Brain  [0.000s]: february
+   ❌ TF-IDF [0.179s]: month january
+   ✅ BM25   [0.107s]: month after January February
+   Expected: ['february']
+
+✅ Q: When does the sun rise?
+   ✅ Brain  [0.792s]: morning in the rises goes what down at night dinner evening
+   ✅ TF-IDF [0.181s]: when sun rise morning
+   ✅ BM25   [0.108s]: when sun rise morning
+   Expected: ['morning']
+
+✅ Q: When do stars appear?
+   ✅ Brain  [0.758s]: night at moon is in the sky come out shine
+   ✅ TF-IDF [0.169s]: stars appear at night
+   ✅ BM25   [0.099s]: stars appear at night
+   Expected: ['night']
+
+✅ Q: What do we see with?
+   ✅ Brain  [0.796s]: eyes two paragraphs use would help colors and shapes and movement
+   ❌ TF-IDF [0.179s]: We express ourselves by what we do, by what we say, and by w
+   ❌ BM25   [0.107s]: We express ourselves by what we do, by what we say, and by w
+   Expected: ['eyes']
+
+✅ Q: What do we hear with?
+   ✅ Brain  [0.704s]: ears to use paragraphs two resolve help sounds and music comes fanny to see stand men play
+   ✅ TF-IDF [0.179s]: we hear with our ears
+   ✅ BM25   [0.107s]: we hear with our ears
+   Expected: ['ears']
+
+✅ Q: How many fingers on one hand?
+   ✅ Brain  [1.003s]: five hold things at school is where we learn what human has two paragraphs use
+   ✅ TF-IDF [0.182s]: A hand has five fingers
+   ✅ BM25   [0.117s]: A hand has five fingers
+   Expected: ['five', '5']
+
+✅ Q: What is the opposite of up?
+   ✅ Brain  [0.000s]: down
+   ✅ TF-IDF [0.183s]: up is the opposite of down
+   ✅ BM25   [0.115s]: up is the opposite of down
+   Expected: ['down']
+
+✅ Q: What is the opposite of in?
+   ✅ Brain  [0.001s]: out
+   ✅ TF-IDF [0.184s]: in is the opposite of out
+   ✅ BM25   [0.115s]: in is the opposite of out
+   Expected: ['out']
+
+✅ Q: What is the opposite of left?
+   ✅ Brain  [0.000s]: right
+   ✅ TF-IDF [0.185s]: left is the opposite of right
+   ✅ BM25   [0.116s]: left is the opposite of right
+   Expected: ['right']
+
+✅ Q: What sense uses the nose?
+   ✅ Brain  [0.321s]: smell tongue to taste use
+   ✅ TF-IDF [0.180s]: what sense uses nose smell
+   ✅ BM25   [0.107s]: what sense uses nose smell
+   Expected: ['smell']
+
+✅ Q: What sense uses the tongue?
+   ✅ Brain  [0.318s]: taste nose to smell
+   ✅ TF-IDF [0.180s]: what sense uses tongue taste
+   ✅ BM25   [0.108s]: what sense uses tongue taste
+   Expected: ['taste']
+
+======================================================================
+RESULT PRESCHOOL: 48/48 (100.0%) | Brain: 20.36s | GPT: 0.00s
+BASELINES: TF-IDF 39/48 (81.2%) | BM25 42/48 (87.5%)
+Brain advantage: vs TF-IDF +18.8% | vs BM25 +12.5%
+======================================================================
+Episodes: 76679
+
+======================================================================
+TESTS - GRADE 1 "WORLD AROUND"
+======================================================================
+✅ Q: Is a tree alive?
+   ✅ Brain  [0.523s]: grows pine maple oak big plant
+   ✅ TF-IDF [0.161s]: tree is alive
+   ✅ BM25   [0.090s]: tree is alive
+   Expected: ['alive', 'yes', 'grows']
+
+✅ Q: Is a stone alive?
+   ✅ Brain  [0.569s]: not not because they are grow hard and heavy statue is made ant a saw getting dove
+   ✅ TF-IDF [0.162s]: stone is not alive
+   ✅ BM25   [0.090s]: stone is not alive
+   Expected: ['not alive', 'no']
+
+✅ Q: Is a bird alive?
+   ✅ Brain  [0.512s]: move less and eat and have baby birds animal penguin tree cannot fly
+   ✅ TF-IDF [0.161s]: bird is alive
+   ✅ BM25   [0.093s]: bird is alive
+   Expected: ['alive', 'yes', 'move', 'eat', 'baby']
+
+✅ Q: When does snow fall?
+   ✅ Brain  [0.932s]: falls in winter sky ice cold covers the ground
+   ❌ TF-IDF [0.169s]: fall snow
+   ❌ BM25   [0.099s]: fall snow
+   Expected: ['winter']
+
+✅ Q: When do flowers bloom?
+   ✅ Brain  [0.777s]: spring is warm open during the day flowers petals
+   ✅ TF-IDF [0.170s]: flowers bloom spring
+   ✅ BM25   [0.100s]: flowers bloom spring
+   Expected: ['spring']
+
+✅ Q: When do leaves fall?
+   ✅ Brain  [0.854s]: autumn in trees tree change color winter no
+   ✅ TF-IDF [0.171s]: leaves fall
+   ✅ BM25   [0.102s]: leaves fall fall
+   Expected: ['autumn', 'fall']
+
+✅ Q: Is winter cold or hot?
+   ✅ Brain  [0.436s]: cold with snow snows animals rest
+   ✅ TF-IDF [0.180s]: winter is cold
+   ✅ BM25   [0.109s]: winter is cold
+   Expected: ['cold', 'snow']
+
+✅ Q: Is summer cold or hot?
+   ✅ Brain  [0.490s]: hot and sunny we wear light clothes in winter is colder hotter
+   ✅ TF-IDF [0.182s]: summer is hot
+   ✅ BM25   [0.110s]: summer is hot
+   Expected: ['hot', 'warm', 'opposite']
+
+✅ Q: What is a dog?
+   ✅ Brain  [0.476s]: animal and a pet that loves to play says bow wow which means puppy is a baby
+   ❌ TF-IDF [0.163s]: dog is dog food
+   ❌ BM25   [0.092s]: what is puppy baby dog
+   Expected: ['pet', 'animal']
+
+✅ Q: What is a cow?
+   ✅ Brain  [0.586s]: animal farm gives us milk calf is a baby cow says moo
+   ✅ TF-IDF [0.163s]: cow is animal
+   ❌ BM25   [0.093s]: what is calf baby cow
+   Expected: ['farm animal', 'animal']
+
+✅ Q: What is a wolf?
+   ✅ Brain  [0.644s]: wild in the animal that lives in the forest great killed a great many sheep boy village ran toward the village shouting villagers not run to help looked at me like a top of his voice expected work
+   ✅ TF-IDF [0.163s]: wolf is animal
+   ✅ BM25   [0.092s]: wolf is animal
+   Expected: ['wild animal', 'animal']
+
+✅ Q: What does a cow eat?
+   ✅ Brain  [0.313s]: eats grass calf is a baby see how still she stands the dear old gives us sweet ice milk to drink
+   ❌ TF-IDF [0.170s]: animal cow
+   ❌ BM25   [0.099s]: what is calf baby cow
+   Expected: ['grass']
+
+✅ Q: What does a rabbit eat?
+   ✅ Brain  [0.429s]: eats carrots and other vegetables bunny is a baby turtle is slower not faster pet
+   ❌ TF-IDF [0.171s]: fast rabbit
+   ❌ BM25   [0.102s]: What does this mean
+   Expected: ['carrots', 'carrot']
+
+✅ Q: Where does a fish live?
+   ✅ Brain  [0.381s]: water frog lives in the ocean fish cannot land on his trees flowers birds dogs and cats are all living
+   ✅ TF-IDF [0.172s]: fish live in water
+   ✅ BM25   [0.101s]: fish live in water
+   Expected: ['water']
+
+✅ Q: Where does a bear live?
+   ✅ Brain  [0.345s]: lives in the forest bear animal mouse eats berries and fish and honey big wild
+   ❌ TF-IDF [0.170s]: and to live
+   ❌ BM25   [0.099s]: home is where we live and sleep
+   Expected: ['forest']
+
+✅ Q: What does a plant need?
+   ✅ Brain  [0.712s]: plants water to grow to sun sunlight and soil
+   ❌ TF-IDF [0.168s]: What does this mean
+   ❌ BM25   [0.100s]: What does this mean
+   Expected: ['water', 'sunlight', 'soil']
+
+✅ Q: What does a tree have?
+   ✅ Brain  [0.463s]: roots branches and leaves trunk
+   ❌ TF-IDF [0.171s]: tree orange tree
+   ❌ BM25   [0.098s]: - Other symptoms
+- What other symptoms does the person have
+   Expected: ['roots', 'trunk', 'branches', 'leaves']
+
+✅ Q: Where do apples grow?
+   ✅ Brain  [0.450s]: apple trees people harvest vegetables bananas are fruit apple red fruits like oranges have vitamins
+   ✅ TF-IDF [0.171s]: Apples grow on apple trees.
+   ✅ BM25   [0.099s]: Apples grow on apple trees.
+   Expected: ['tree', 'apple tree']
+
+✅ Q: Is an apple a fruit?
+   ✅ Brain  [0.374s]: apple is a fruit apple tree red letter_a eat
+   ✅ TF-IDF [0.170s]: an apple is a fruit
+   ✅ BM25   [0.098s]: an apple is a fruit
+   Expected: ['fruit', 'yes']
+
+✅ Q: Is a carrot a vegetable?
+   ✅ Brain  [0.240s]: carrot is a vegetable orange
+   ✅ TF-IDF [0.162s]: a carrot is a vegetable
+   ✅ BM25   [0.091s]: a carrot is a vegetable
+   Expected: ['vegetable', 'yes']
+
+✅ Q: What color is grass?
+   ✅ Brain  [0.376s]: green grows on the ground cows eat dew forms morning cow eats
+   ✅ TF-IDF [0.172s]: green is the color of grass
+   ✅ BM25   [0.099s]: grass is green in color
+   Expected: ['green']
+
+✅ Q: What color is the sky?
+   ✅ Brain  [0.410s]: blue gray rainy day
+   ✅ TF-IDF [0.182s]: blue is the color of the sky
+   ✅ BM25   [0.107s]: blue is the color of the sky
+   Expected: ['blue']
+
+✅ Q: What color is snow?
+   ✅ Brain  [0.561s]: white and cold
+   ✅ TF-IDF [0.172s]: the color of snow is white
+   ✅ BM25   [0.099s]: the color of snow is white
+   Expected: ['white']
+
+✅ Q: What color is the sun?
+   ✅ Brain  [0.466s]: yellow and bright round in another up
+   ✅ TF-IDF [0.180s]: yellow is the color of the sun
+   ✅ BM25   [0.107s]: yellow is the color of the sun
+   Expected: ['yellow']
+
+✅ Q: What do we see with?
+   ✅ Brain  [0.789s]: eyes two paragraphs use would help colors and shapes and movement
+   ❌ TF-IDF [0.179s]: We express ourselves by what we do, by what we say, and by w
+   ❌ BM25   [0.109s]: We express ourselves by what we do, by what we say, and by w
+   Expected: ['eyes']
+
+✅ Q: What do we hear with?
+   ✅ Brain  [0.722s]: ears to use paragraphs two resolve help sounds and music comes fanny to see stand men play
+   ✅ TF-IDF [0.181s]: we hear with our ears
+   ✅ BM25   [0.107s]: we hear with our ears
+   Expected: ['ears']
+
+✅ Q: How many hands does a human have?
+   ✅ Brain  [0.795s]: two legs walk feet human eyes human ears
+   ✅ TF-IDF [0.183s]: a human has two hands
+   ❌ BM25   [0.116s]: How many hands have touched a coin in your pocket or your pu
+   Expected: ['two', '2']
+
+✅ Q: How many legs does a human have?
+   ✅ Brain  [0.787s]: two and hands and two and arms walk and run walk feet
+   ✅ TF-IDF [0.183s]: human has two legs
+   ✅ BM25   [0.115s]: human has two legs
+   Expected: ['two', '2']
+
+✅ Q: When does the sun shine?
+   ✅ Brain  [0.860s]: shines during the day brightly shining sky goes what down at night
+   ❌ TF-IDF [0.182s]: shine sun
+   ❌ BM25   [0.108s]: shine sun
+   Expected: ['day']
+
+✅ Q: When do stars appear?
+   ✅ Brain  [0.743s]: night at moon is in the sky come out shine
+   ✅ TF-IDF [0.171s]: stars appear at night
+   ✅ BM25   [0.099s]: stars appear at night
+   Expected: ['night']
+
+✅ Q: When do people sleep?
+   ✅ Brain  [0.754s]: night drink their water every day where they live at home at help you need friends play like
+   ✅ TF-IDF [0.171s]: People sleep at night.
+   ✅ BM25   [0.099s]: People sleep at night.
+   Expected: ['night']
+
+✅ Q: Where does a car drive?
+   ✅ Brain  [0.291s]: drives on the road and can take you to different places driver car vehicle car engine
+   ❌ TF-IDF [0.169s]: drive car
+   ❌ BM25   [0.099s]: drive car
+   Expected: ['road']
+
+✅ Q: Where does a train ride?
+   ✅ Brain  [0.315s]: tracks train stops at the station subway goes underground trains rails
+   ❌ TF-IDF [0.170s]: ride train
+   ❌ BM25   [0.099s]: ride train
+   Expected: ['rails', 'tracks']
+
+✅ Q: Where do airplanes fly?
+   ✅ Brain  [0.312s]: sky airplanes pilots take you to other countries
+   ✅ TF-IDF [0.169s]: airplanes fly in the sky
+   ✅ BM25   [0.100s]: pilots fly airplanes
+   Expected: ['sky', 'air']
+
+✅ Q: What does a cow give?
+   ✅ Brain  [0.396s]: gives us milk cows farm animal see how still she stands the dear old sweet
+   ❌ TF-IDF [0.170s]: animal cow
+   ❌ BM25   [0.099s]: what is calf baby cow
+   Expected: ['milk']
+
+✅ Q: What does a chicken lay?
+   ✅ Brain  [0.386s]: lays eggs farm animal
+   ❌ TF-IDF [0.170s]: chicken chicken nuggets
+   ❌ BM25   [0.100s]: chicken chicken nuggets
+   Expected: ['eggs']
+
+✅ Q: Where does a duck swim?
+   ✅ Brain  [0.419s]: pond in the swims duck duckling is a baby cow says quack goose is bigger
+   ❌ TF-IDF [0.169s]: swim duck
+   ❌ BM25   [0.101s]: swim duck
+   Expected: ['pond', 'water']
+
+✅ Q: Where do birds live?
+   ✅ Brain  [0.405s]: nests trees flowers fish dogs and cats are all living eat and have baby feathers seeds
+   ✅ TF-IDF [0.169s]: birds live in nests
+   ✅ BM25   [0.099s]: birds live in nests
+   Expected: ['nest', 'tree', 'nests']
+
+✅ Q: What covers the ground in winter?
+   ✅ Brain  [0.414s]: snow is cold and falls spring after comes
+   ✅ TF-IDF [0.186s]: Snow covers the ground in winter.
+   ✅ BM25   [0.116s]: Snow covers the ground in winter.
+   Expected: ['snow', 'ice']
+
+✅ Q: What falls from clouds?
+   ✅ Brain  [0.297s]: rain cover the sky in the float snow
+   ✅ TF-IDF [0.171s]: snow falls from clouds
+   ✅ BM25   [0.100s]: rain falls from clouds
+   Expected: ['rain', 'snow']
+
+✅ Q: What makes trees move?
+   ✅ Brain  [0.348s]: wind windy whistling sound grow in the park sailboat uses
+   ✅ TF-IDF [0.176s]: Wind makes the trees move.
+   ✅ BM25   [0.100s]: Wind makes the trees move.
+   Expected: ['wind']
+
+✅ Q: What do we wear when it is cold?
+   ✅ Brain  [0.388s]: coats and hats winter when snow
+   ✅ TF-IDF [0.198s]: when it is cold we wear coats
+   ✅ BM25   [0.134s]: when it is cold we wear coats
+   Expected: ['coat', 'hat', 'coats']
+
+✅ Q: What do all living things need?
+   ✅ Brain  [0.400s]: water is not sergeant alive water to survive plants to grow or breathe eat it or use categories to organize thing belongs
+   ❌ TF-IDF [0.182s]: Plants are living things.
+   ✅ BM25   [0.116s]: Water is not alive but all living things need water to survi
+   Expected: ['water']
+
+✅ Q: Where does water come from?
+   ✅ Brain  [0.425s]: comes from rain and snow for not waste salt drinkable drinking makes thirsty alive but all living and things need to survive
+   ❌ TF-IDF [0.180s]: Where has it come from
+   ❌ BM25   [0.107s]: Where has it come from
+   Expected: ['rain', 'clouds']
+
+✅ Q: Can we drink salt water?
+   ✅ Brain  [0.517s]: cannot fish ocean not drinkable animals instead of sweet drinks
+   ✅ TF-IDF [0.179s]: we cannot drink salt water
+   ✅ BM25   [0.107s]: we cannot drink salt water
+   Expected: ['no']
+
+✅ Q: What is the Earth?
+   ✅ Brain  [0.556s]: planet earth goes around the sun is round circle like a ball spins top moon
+   ❌ TF-IDF [0.172s]: earth is life
+   ❌ BM25   [0.099s]: it hasn't
+Unfortunately this is not what old earth scientist
+   Expected: ['planet']
+
+✅ Q: What does the Earth go around?
+   ✅ Brain  [0.453s]: goes around the sun or moon one was year home planet
+   ✅ TF-IDF [0.185s]: It takes one year for the Earth to go around the Sun.
+   ✅ BM25   [0.117s]: It takes one year for the Earth to go around the Sun.
+   Expected: ['sun']
+
+✅ Q: What orbits the Earth?
+   ✅ Brain  [0.434s]: moon earth planet home goes around the sun
+   ✅ TF-IDF [0.172s]: the moon orbits the earth
+   ✅ BM25   [0.099s]: the moon orbits the earth
+   Expected: ['moon']
+
+✅ Q: When can we see the Moon?
+   ✅ Brain  [0.475s]: night at bright dark hard shines stars appear in the sky
+   ✅ TF-IDF [0.184s]: We can see the Moon at night.
+   ✅ BM25   [0.116s]: We can see the Moon at night.
+   Expected: ['night']
+
+✅ Q: What do we need for strong bones?
+   ✅ Brain  [0.421s]: milk body good kept food to grow iron help some people hold up
+   ✅ TF-IDF [0.190s]: We need milk for strong bones.
+   ✅ BM25   [0.126s]: We need milk for strong bones.
+   Expected: ['milk']
+
+✅ Q: What gives us energy?
+   ✅ Brain  [0.444s]: eating bread and rice give sun from the light and heat warmth cow milk
+   ✅ TF-IDF [0.168s]: Eating gives you energy
+   ✅ BM25   [0.099s]: Eating gives you energy
+   Expected: ['bread', 'rice', 'food', 'eating']
+
+✅ Q: What is not good for teeth?
+   ✅ Brain  [0.900s]: sweets sport to watch the big play on the wet sand polly and the cat friends up tree admiringly he cried morning beautiful creature the crow closed on the cheese return his greeting fire
+   ✅ TF-IDF [0.186s]: Sweets are not good for our teeth.
+   ✅ BM25   [0.119s]: Sweets are not good for our teeth.
+   Expected: ['candy', 'sweets']
+
+✅ Q: What keeps our body healthy?
+   ✅ Brain  [0.409s]: exercise vegetables healthy feel good fruit means being strong
+   ✅ TF-IDF [0.179s]: Exercise keeps our body healthy.
+   ✅ BM25   [0.110s]: Exercise keeps our body healthy.
+   Expected: ['exercise', 'sleep']
+
+✅ Q: When should we brush teeth?
+   ✅ Brain  [0.764s]: day breakfast morning and at night in your bed toothbrush keep them clean
+   ❌ TF-IDF [0.178s]: teeth brush
+   ✅ BM25   [0.107s]: we brush our teeth every day
+   Expected: ['morning', 'night', 'day', 'every']
+
+✅ Q: When should we wash hands?
+   ✅ Brain  [0.804s]: eating toilet soap eat it or use of water
+   ❌ TF-IDF [0.179s]: hands wash
+   ✅ BM25   [0.111s]: should wash hands before eating
+   Expected: ['before eating', 'eat']
+
+✅ Q: Where can we borrow books?
+   ✅ Brain  [0.497s]: library has many burners read and learn new things
+   ✅ TF-IDF [0.180s]: We can borrow books from the library.
+   ✅ BM25   [0.109s]: We can borrow books from the library.
+   Expected: ['library']
+
+✅ Q: What can we learn from books?
+   ✅ Brain  [0.540s]: read before the new things carries many yoga school is where children
+   ✅ TF-IDF [0.183s]: We can learn many things from books.
+   ✅ BM25   [0.116s]: We can learn many things from books.
+   Expected: ['many', 'things', 'stories']
+
+✅ Q: What should we say when we make a mistake?
+   ✅ Brain  [0.428s]: good friends sorry when_we mistakes morning no narratives words
+   ✅ TF-IDF [0.189s]: we say sorry when we make a mistake
+   ✅ BM25   [0.134s]: we say sorry when we make a mistake
+   Expected: ['sorry']
+
+✅ Q: Who helps us learn at school?
+   ✅ Brain  [0.695s]: teachers can help go kilter children math
+   ❌ TF-IDF [0.183s]: i learn at school
+   ✅ BM25   [0.117s]: Teachers help us learn at school.
+   Expected: ['teacher']
+
+✅ Q: What do we learn in math class?
+   ✅ Brain  [0.415s]: numbers backpacks school pearsall world in science taught
+   ✅ TF-IDF [0.190s]: We learn numbers in math class.
+   ✅ BM25   [0.125s]: We learn numbers in math class.
+   Expected: ['numbers']
+
+✅ Q: Is helping others good?
+   ✅ Brain  [0.461s]: makes you feel helping right thing
+   ✅ TF-IDF [0.169s]: Helping others makes us feel good.
+   ✅ BM25   [0.099s]: Helping others makes us feel good.
+   Expected: ['yes', 'good', 'feel']
+
+✅ Q: What do we say when we ask for something?
+   ✅ Brain  [0.338s]: please when we want please thank you when we get receive
+   ✅ TF-IDF [0.196s]: we say please when we ask for something
+   ✅ BM25   [0.142s]: we say please when we ask for something
+   Expected: ['please']
+
+✅ Q: What do we say when someone gives us something?
+   ✅ Brain  [0.355s]: thank you when we get you helps receive ask when we please
+   ✅ TF-IDF [0.203s]: We say thank you when someone gives us something.
+   ✅ BM25   [0.143s]: We say thank you when someone gives us something.
+   Expected: ['thank', 'thank you']
+
+✅ Q: What do we say when we bump into someone?
+   ✅ Brain  [0.341s]: excuse thank helps gives us something hello when we meet not interrupt speaking
+   ✅ TF-IDF [0.195s]: We say excuse me when we bump into someone.
+   ✅ BM25   [0.141s]: We say excuse me when we bump into someone.
+   Expected: ['excuse', 'sorry']
+
+======================================================================
+RESULT GRADE1: 64/64 (100.0%) | Brain: 32.81s | GPT: 0.00s
+BASELINES: TF-IDF 44/64 (68.8%) | BM25 46/64 (71.9%)
+Brain advantage: vs TF-IDF +31.2% | vs BM25 +28.1%
+======================================================================
+Episodes: 76679
+
+======================================================================
+TESTS FineWeb-Edu (direct facts from texts)
+======================================================================
+✅ Q: Who shot Lincoln?
+   ✅ Brain  [0.269s]: president john wilkes booth was 26 years old and one of the nations most famous actors
+   ❌ TF-IDF [0.162s]: Lincoln was intended
+   ❌ BM25   [0.090s]: That night, he crept into Lincoln’s theater box and shot him
+   Expected: ['booth']
+
+✅ Q: How old was Booth?
+   ✅ Brain  [0.774s]: shot president lincoln john wilkes 26 years collapsed one of the nations most famous actors no minuscule first
+   ❌ TF-IDF [0.169s]: old new
+   ✅ BM25   [0.099s]: When he shot President Lincoln, John Wilkes Booth was 26 yea
+   Expected: ['26', 'years']
+
+✅ Q: What was Booth?
+   ✅ Brain  [0.335s]: shot president lincoln john wilkes 26 years old and one of the nations most famous actors learned far narratives country peculiarly first
+   ❌ TF-IDF [0.161s]: Ruffin’s act is not so disgusting as Booth’s; but of the two
+   ✅ BM25   [0.091s]: When he shot President Lincoln, John Wilkes Booth was 26 yea
+   Expected: ['actor', 'famous']
+
+✅ Q: What color is chlorophyll?
+   ✅ Brain  [0.474s]: green disappears from the leaves water bottle light reading certain purple black
+   ❌ TF-IDF [0.170s]: What about women of color
+   ❌ BM25   [0.099s]: What about women of color
+   Expected: ['green']
+
+✅ Q: What disappears from leaves?
+   ✅ Brain  [0.338s]: green chlorophyll
+   ✅ TF-IDF [0.171s]: The green chlorophyll disappears from the leaves
+   ✅ BM25   [0.099s]: The green chlorophyll disappears from the leaves
+   Expected: ['chlorophyll', 'green']
+
+✅ Q: What is sedimentary rock made of?
+   ✅ Brain  [0.385s]: sedimentary rock is made of rocks many how layers shells sea animals formed sand plants
+   ❌ TF-IDF [0.186s]: This is how sedimentary rock is made.
+   ❌ BM25   [0.117s]: This is how sedimentary rock is made.
+   Expected: ['bones', 'shells', 'organic', 'sandstone', 'limestone', 'shale']
+
+✅ Q: What is the origin of species?
+   ✅ Brain  [0.364s]: darwin however thought that variation had no iona limits when he proposed his theory267 and he depicted various examples of variation as the most important evidence for evolution in his book short or one at the right in the first minuscule means of natural
+   ❌ TF-IDF [0.186s]: Origin of Species
+   ❌ BM25   [0.118s]: Origin of Species
+   Expected: ['darwin', 'selection']
+
+✅ Q: Who invented the telephone?
+   ✅ Brain  [0.694s]: I do not know
+   ❌ TF-IDF [0.171s]: ___ Post emergency telephone numbers near each telephone in 
+   ❌ BM25   [0.099s]: Who knows, maybe humans would have invented roller coasters 
+   Expected: ['not know']
+
+✅ Q: Who discovered America?
+   ✅ Brain  [0.607s]: I do not know
+   ❌ TF-IDF [0.162s]: america english
+   ❌ BM25   [0.091s]: He discovered this great manuscript in the hands of a Jew, w
+   Expected: ['not know']
+
+======================================================================
+RESULT FineWeb-Edu: 9/9 (100.0%) | Brain: 4.24s | GPT: 0.00s
+BASELINES: TF-IDF 1/9 (11.1%) | BM25 3/9 (33.3%)
+Brain advantage: vs TF-IDF +88.9% | vs BM25 +66.7%
+======================================================================
+
+======================================================================
+PARAPHRASE ROBUSTNESS TESTS
+======================================================================
+Testing same knowledge with alternative phrasings...
+
+✅ Q: A dog is what kind of thing?
+   ✅ Brain  [0.465s]: animal and a pet that loves to play says bow wow which means puppy is a baby
+   ❌ TF-IDF [0.185s]: what is thing
+   ❌ BM25   [0.118s]: what is thing
+   Expected: ['animal', 'pet', 'mammal']
+
+✅ Q: Dogs belong to what category?
+   ✅ Brain  [0.644s]: bark and say woof cats are animals wag like to run and play pets
+   ❌ TF-IDF [0.183s]: Because I don't see terms so important to determine a person
+   ❌ BM25   [0.108s]: Because I don't see terms so important to determine a person
+   Expected: ['animal', 'pet', 'mammal']
+
+✅ Q: Tell me what a dog is
+   ✅ Brain  [0.462s]: animal and a pet that loves to play says bow wow which means puppy is a baby
+   ❌ TF-IDF [0.179s]: dog is dog food
+   ❌ BM25   [0.108s]: Host: Tell me about what the Molecular Imaging Center itself
+   Expected: ['animal', 'pet', 'mammal']
+
+✅ Q: What category does a dog belong to?
+   ✅ Brain  [0.627s]: mammal food puppy says
+   ❌ TF-IDF [0.183s]: Because I don't see terms so important to determine a person
+   ❌ BM25   [0.117s]: Because I don't see terms so important to determine a person
+   Expected: ['animal', 'pet', 'mammal']
+
+✅ Q: An apple is a type of what?
+   ✅ Brain  [0.832s]: fruit
+   ✅ TF-IDF [0.184s]: an apple is a fruit
+   ✅ BM25   [0.118s]: an apple is a fruit
+   Expected: ['fruit']
+
+✅ Q: Apples are classified as what?
+   ✅ Brain  [0.369s]: grow on apple trees bananas are fruit apple red fruits like oranges have vitamins people harvest vegetables
+   ✅ TF-IDF [0.181s]: apples are red fruit
+   ✅ BM25   [0.108s]: apples are red fruit
+   Expected: ['fruit']
+
+✅ Q: What kind of food is an apple?
+   ✅ Brain  [0.402s]: fruit apple red or green leaves tree apples grow trees
+   ✅ TF-IDF [0.193s]: an apple is a fruit
+   ✅ BM25   [0.125s]: an apple is a fruit
+   Expected: ['fruit']
+
+✅ Q: The sky is what color?
+   ✅ Brain  [0.407s]: blue gray rainy day
+   ✅ TF-IDF [0.182s]: blue is the color of the sky
+   ✅ BM25   [0.108s]: blue is the color of the sky
+   Expected: ['blue']
+
+✅ Q: What is the color of the sky?
+   ✅ Brain  [0.461s]: blue gray rainy
+   ✅ TF-IDF [0.184s]: blue is the color of the sky
+   ✅ BM25   [0.123s]: blue is the color of the sky
+   Expected: ['blue']
+
+✅ Q: Tell me the sky's color
+   ✅ Brain  [0.471s]: blue gray rainy
+   ✅ TF-IDF [0.181s]: blue is the color of the sky
+   ❌ BM25   [0.107s]: Tell me, Fleest thou the Lord
+   Expected: ['blue']
+
+✅ Q: The color of the sky is what?
+   ✅ Brain  [0.460s]: blue gray rainy
+   ✅ TF-IDF [0.185s]: blue is the color of the sky
+   ✅ BM25   [0.124s]: blue is the color of the sky
+   Expected: ['blue']
+
+✅ Q: Grass is what color?
+   ✅ Brain  [0.381s]: green grows on the ground cows eat dew forms morning cow eats
+   ✅ TF-IDF [0.172s]: green is the color of grass
+   ✅ BM25   [0.100s]: grass is green in color
+   Expected: ['green']
+
+✅ Q: What is the color of grass?
+   ✅ Brain  [0.439s]: green white to red and orange
+   ✅ TF-IDF [0.186s]: green is the color of grass
+   ✅ BM25   [0.120s]: green is the color of grass
+   Expected: ['green']
+
+✅ Q: Hot is the opposite of what?
+   ✅ Brain  [0.000s]: cold
+   ✅ TF-IDF [0.186s]: hot is the opposite of cold
+   ✅ BM25   [0.117s]: hot is the opposite of cold
+   Expected: ['cold']
+
+✅ Q: What word is opposite to hot?
+   ✅ Brain  [0.000s]: cold
+   ✅ TF-IDF [0.184s]: hot is the opposite of cold
+   ✅ BM25   [0.116s]: hot is the opposite of cold
+   Expected: ['cold']
+
+✅ Q: The opposite of hot is what?
+   ✅ Brain  [0.000s]: cold
+   ✅ TF-IDF [0.186s]: hot is the opposite of cold
+   ✅ BM25   [0.116s]: hot is the opposite of cold
+   Expected: ['cold']
+
+✅ Q: What is hot's opposite?
+   ✅ Brain  [0.000s]: cold
+   ✅ TF-IDF [0.170s]: hot is the opposite of cold
+   ✅ BM25   [0.098s]: hot is the opposite of cold
+   Expected: ['cold']
+
+✅ Q: Big is the opposite of what?
+   ✅ Brain  [0.000s]: small
+   ✅ TF-IDF [0.184s]: big is the opposite of small
+   ✅ BM25   [0.116s]: big is the opposite of small
+   Expected: ['small', 'little']
+
+✅ Q: What word means the opposite of big?
+   ✅ Brain  [0.000s]: small
+   ✅ TF-IDF [0.193s]: big is the opposite of small
+   ✅ BM25   [0.125s]: big is the opposite of small
+   Expected: ['small', 'little']
+
+✅ Q: France has what capital?
+   ✅ Brain  [0.373s]: paris
+   ✅ TF-IDF [0.170s]: paris is the capital of france
+   ✅ BM25   [0.100s]: paris is the capital of france
+   Expected: ['paris']
+
+✅ Q: The capital of France is what?
+   ✅ Brain  [0.406s]: paris berlin is germany tokyo is japan rome is italy beijing is china
+   ✅ TF-IDF [0.183s]: paris is the capital of france
+   ✅ BM25   [0.117s]: paris is the capital of france
+   Expected: ['paris']
+
+✅ Q: Which city is the capital of France?
+   ✅ Brain  [0.621s]: paris berlin is germany beijing is china london is england rome is italy
+   ✅ TF-IDF [0.190s]: paris is the capital of france
+   ✅ BM25   [0.125s]: paris is the capital of france
+   Expected: ['paris']
+
+✅ Q: Name the capital of France
+   ✅ Brain  [0.396s]: paris berlin is germany tokyo is japan rome is italy beijing is china
+   ✅ TF-IDF [0.181s]: paris is the capital of france
+   ✅ BM25   [0.107s]: paris is the capital of france
+   Expected: ['paris']
+
+✅ Q: Paris is located where?
+   ✅ Brain  [0.356s]: capital of france
+   ❌ TF-IDF [0.169s]: Where are Records Located
+   ❌ BM25   [0.099s]: Where are Records Located
+   Expected: ['france']
+
+✅ Q: In what country is Paris?
+   ✅ Brain  [0.625s]: capital of france
+   ❌ TF-IDF [0.182s]: paris is capital
+   ❌ BM25   [0.108s]: "What thy country
+   Expected: ['france']
+
+✅ Q: Paris is in what country?
+   ✅ Brain  [0.373s]: capital of france
+   ❌ TF-IDF [0.182s]: paris is capital
+   ❌ BM25   [0.108s]: "What thy country
+   Expected: ['france']
+
+✅ Q: The sun is a type of what?
+   ✅ Brain  [1.816s]: star not a planet plants that need much water to grow takes one each of earth to go evening setting a wolf really did spring and fall upon the sheep
+   ❌ TF-IDF [0.185s]: the sun is up
+   ❌ BM25   [0.116s]: yellow is the color of the sun
+   Expected: ['star']
+
+✅ Q: What kind of celestial body is the sun?
+   ✅ Brain  [0.570s]: star big opposites hot sky only in the not a planet earth goes what down at night
+   ✅ TF-IDF [0.197s]: stars and planets are celestial objects
+   ❌ BM25   [0.134s]: Ask questions like: What kind of book is it
+   Expected: ['star']
+
+✅ Q: Tell me what the sun is
+   ✅ Brain  [0.552s]: star big opposites hot sky only in the not a planet earth goes what down at night
+   ❌ TF-IDF [0.184s]: I will tell you
+   ❌ BM25   [0.116s]: Host: Tell me about what the Molecular Imaging Center itself
+   Expected: ['star']
+
+✅ Q: Water is what state of matter?
+   ✅ Brain  [0.591s]: liquid plants that need sunlight and soil to grow drink instead of sweet drinks cannot birds live wash your hands with soap
+   ❌ TF-IDF [0.186s]: matter can change from one state to another
+   ❌ BM25   [0.116s]: matter can change from one state to another
+   Expected: ['liquid']
+
+✅ Q: What kind of substance is water?
+   ✅ Brain  [0.561s]: liquid plants that need sunlight and soil to grow drink instead of sweet drinks cannot birds live wash your hands with soap
+   ❌ TF-IDF [0.186s]: help is kind
+   ❌ BM25   [0.116s]: Ask questions like: What kind of book is it
+   Expected: ['liquid', 'drink']
+
+✅ Q: What sound does a dog make?
+   ✅ Brain  [0.389s]: says woof woof bow wow thank animal and a pet
+   ❌ TF-IDF [0.180s]: - What does the wheezing sound like
+   ❌ BM25   [0.108s]: - What does the wheezing sound like
+   Expected: ['woof', 'bark']
+
+✅ Q: A dog says what?
+   ✅ Brain  [0.389s]: say woof bow wow which means animal and a pet
+   ❌ TF-IDF [0.162s]: dog food dog
+   ✅ BM25   [0.092s]: a dog says woof woof
+   Expected: ['woof', 'bark']
+
+✅ Q: Dogs make what sound?
+   ✅ Brain  [0.413s]: bark woof bark animals mammals cannot fly
+   ❌ TF-IDF [0.166s]: What sound is orange
+   ❌ BM25   [0.099s]: What sound is orange
+   Expected: ['woof', 'bark']
+
+✅ Q: What sound does a cat make?
+   ✅ Brain  [0.400s]: says meow meow polly poor poll wants mew like of which is not a good friends catch pastry she heard loudly and scratch
+   ❌ TF-IDF [0.181s]: - What does the wheezing sound like
+   ❌ BM25   [0.108s]: - What does the wheezing sound like
+   Expected: ['meow', 'purr']
+
+✅ Q: A cat says what?
+   ✅ Brain  [0.447s]: meow meow polly can say mew like of which is not catch mat animal
+   ❌ TF-IDF [0.163s]: cat food cat
+   ✅ BM25   [0.091s]: a cat says meow meow
+   Expected: ['meow', 'purr']
+
+✅ Q: A puppy is what kind of animal?
+   ✅ Brain  [0.307s]: baby dog
+   ✅ TF-IDF [0.184s]: what is puppy baby dog
+   ✅ BM25   [0.117s]: what is puppy baby dog
+   Expected: ['baby', 'dog', 'young']
+
+✅ Q: What is a puppy called?
+   ✅ Brain  [0.764s]: baby dog infant
+   ✅ TF-IDF [0.172s]: what is puppy baby dog
+   ✅ BM25   [0.100s]: what is puppy baby dog
+   Expected: ['baby', 'dog', 'young']
+
+✅ Q: We see using what?
+   ✅ Brain  [0.532s]: eyes our use paragraphs two foggy we cannot far moon at night
+   ❌ TF-IDF [0.170s]: See also F
+   ❌ BM25   [0.104s]: Facts are not pure and unsullied bits of information; cultur
+   Expected: ['eyes']
+
+✅ Q: What body part do we use to see?
+   ✅ Brain  [0.792s]: eyes two paragraphs use would help colors and shapes and movement
+   ❌ TF-IDF [0.198s]: Do your part
+   ❌ BM25   [0.134s]: every body part has a special job to do
+   Expected: ['eyes']
+
+✅ Q: Seeing is done with what?
+   ✅ Brain  [0.788s]: eyes two paragraphs use would help colors and shapes and movement
+   ✅ TF-IDF [0.183s]: eyes are for seeing
+   ❌ BM25   [0.107s]: painting is done with a brush
+   Expected: ['eyes']
+
+✅ Q: We hear using what?
+   ✅ Brain  [0.407s]: ears to use would help sounds and music two four comes fanny to see stand men play
+   ✅ TF-IDF [0.170s]: we hear with our ears
+   ✅ BM25   [0.100s]: we hear with our ears
+   Expected: ['ears']
+
+✅ Q: Hearing is done with what?
+   ✅ Brain  [0.700s]: ears to use paragraphs two resolve help sounds and music comes fanny to see stand men play
+   ❌ TF-IDF [0.182s]: hearing is hear
+   ❌ BM25   [0.107s]: painting is done with a brush
+   Expected: ['ears']
+
+✅ Q: By what is sound heard?
+   ✅ Brain  [0.726s]: ears to use paragraphs two resolve help sounds and music comes fanny to see stand men play
+   ❌ TF-IDF [0.182s]: What sound is orange
+   ❌ BM25   [0.108s]: What sound is orange
+   Expected: ['ears']
+
+✅ Q: By what organ do we smell?
+   ✅ Brain  [0.574s]: food nose taste use
+   ❌ TF-IDF [0.185s]: the brain is the most important organ
+   ❌ BM25   [0.117s]: We express ourselves by what we do, by what we say, and by w
+   Expected: ['nose']
+
+✅ Q: We wake up at what time of day?
+   ✅ Brain  [0.784s]: morning afternoon eat breakfast time to go to bed early
+   ❌ TF-IDF [0.197s]: time to wake up
+   ❌ BM25   [0.134s]: time to wake up
+   Expected: ['morning']
+
+✅ Q: What time of day do people wake up?
+   ✅ Brain  [0.765s]: morning afternoon eat breakfast time to go to bed early
+   ❌ TF-IDF [0.199s]: time to wake up
+   ❌ BM25   [0.134s]: time to wake up
+   Expected: ['morning']
+
+✅ Q: After Monday comes what?
+   ✅ Brain  [0.000s]: tuesday
+   ❌ TF-IDF [0.169s]: monday comes after sunday
+   ✅ BM25   [0.100s]: tuesday comes after monday
+   Expected: ['tuesday']
+
+✅ Q: Monday is followed by what day?
+   ✅ Brain  [0.000s]: tuesday
+   ❌ TF-IDF [0.185s]: “on the day of” Monday)
+   ❌ BM25   [0.117s]: monday is first day
+   Expected: ['tuesday']
+
+✅ Q: The day after Monday is what?
+   ✅ Brain  [0.000s]: tuesday
+   ❌ TF-IDF [0.185s]: “on the day of” Monday)
+   ❌ BM25   [0.117s]: monday is first day
+   Expected: ['tuesday']
+
+======================================================================
+RESULT PARAPHRASE: 50/50 (100.0%)
+Baseline (original questions): 98.8%
+Degradation: -1.2% (lower is better)
+Brain: 22.84s
+BASELINES: TF-IDF 24/50 (48.0%) | BM25 24/50 (48.0%)
+Brain advantage: vs TF-IDF +52.0% | vs BM25 +52.0%
+======================================================================
+======================================================================
+MODEL STATISTICS
+======================================================================
+Neurons: 48312
+Connections: 1476117
+MYELINATED: 23784 (1.6%)
+USED: 76342 (5.2%)
+NEW: 1375991
+
+Episodic memory:
+  Total episodes: 76679
+  NEW: 35065
+  REPLAYED: 2189
+  CONSOLIDATED: 38074
+  DECAYING: 1351
+
+======================================================================
+ALL RESULTS SUMMARY
+======================================================================
+✅ CURRICULUM: 50/50 (100.0%) | Time: 22.2s
+✅ STRICT: 3/3 (100.0%) | Time: 1.9s
+✅ PRESCHOOL: 48/48 (100.0%) | Time: 20.4s
+✅ GRADE1: 64/64 (100.0%) | Time: 32.8s
+✅ FINEWEB: 9/9 (100.0%) | Time: 4.2s
+✅ PARAPHRASE: 50/50 (100.0%) | Time: 22.8s
+
+TOTAL: 224/224 | Total time: 104.4s
+======================================================================
+
+==========================================================================================
+BASELINE COMPARISON
+==========================================================================================
+QA Baselines: TF-IDF, BM25 (trained on ALL data, tested on all QA tests)
+Working Memory Baselines: MemNet, NTM (tested ONLY on bAbI Task 1)
+
+Test             Brain  TF-IDF    BM25  MemNet     NTM
+--------------------------------------------------------------
+CURRICULUM      100.0%   64.0%   70.0%    N/A    N/A
+STRICT          100.0%   33.3%   33.3%    N/A    N/A
+PRESCHOOL       100.0%   81.2%   87.5%    N/A    N/A
+GRADE1          100.0%   68.8%   71.9%    N/A    N/A
+FINEWEB         100.0%   11.1%   33.3%    N/A    N/A
+PARAPHRASE      100.0%   48.0%   48.0%    N/A    N/A
+--------------------------------------------------------------
+QA AVG          100.0%   51.1%   57.3%    N/A    N/A
+==============================================================
+Tests completed. Results saved to: logs/test_results_21.02.2026_17-23-01.txt

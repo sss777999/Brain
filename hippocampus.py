@@ -1130,7 +1130,7 @@ class Hippocampus:
     # API_PUBLIC
     def encode(self, input_neurons: Set[str], source: str = "unknown", 
                word_to_neuron: dict = None, input_words: tuple = None,
-               semantic_roles: dict = None) -> Episode:
+               semantic_roles: dict = None) -> Optional[Episode]:
         """
         Encode a new episode.
         
@@ -1138,6 +1138,11 @@ class Hippocampus:
                 1. Pattern separation in DG (with Winner-Take-All)
                 2. Create episode with context
                 3. Store in hippocampus
+        
+        BIOLOGY (Neuromodulation, Hasselmo 2006):
+        - Acetylcholine (ACh) determines encoding vs retrieval mode.
+        - High ACh (novelty/learning) promotes encoding.
+        - Low ACh (familiarity/recall) suppresses encoding.
         
         BIOLOGY (Hippocampal Time Cells, Eichenbaum 2014):
         input_words stores WORD ORDER - like a child memorizing a phrase as a whole.
@@ -1154,10 +1159,18 @@ class Hippocampus:
             semantic_roles: Dict mapping role names to word sets.
         
         Returns:
-            Created episode.
+            Created episode or None if encoding was suppressed.
         """
         # Precondition
         assert len(input_neurons) > 0, "must have at least one neuron"
+        
+        # BIOLOGY: Check ACh level to see if we are in encoding mode
+        from neuromodulation import GLOBAL_MODULATORS, ModulatorType
+        ach_level = GLOBAL_MODULATORS.get_level(ModulatorType.ACETYLCHOLINE)
+        if ach_level < 0.3:
+            # Low ACh -> retrieval mode, encoding is suppressed
+            # We don't form new memories of the question itself during retrieval
+            return None
         
         # 1. Pattern separation in DG with Winner-Take-All
         sparse_neurons = self.pattern_separate(input_neurons, word_to_neuron)
@@ -1983,13 +1996,31 @@ class Hippocampus:
         to_remove: List[Episode] = []
         
         for episode in self.episodes:
-            if episode.apply_decay():
+            if episode.apply_decay(current_time=self._timestamp):
                 to_remove.append(episode)
         
         for episode in to_remove:
             self.episodes.remove(episode)
+            # Remove from inverted index
+            for word in episode.input_neurons:
+                if word in self._word_to_episodes:
+                    idx_to_remove = self.episodes.index(episode) if episode in self.episodes else -1 # we can't reliably remove by index anymore without rebuild, wait we need to rebuild or just remove by id later... 
+                    # Actuallly since episode is removed, the indices shift.
+                    # We should rebuild the inverted index instead of removing elements one by one.
+        
+        if to_remove:
+            self._rebuild_inverted_index()
         
         return len(to_remove)
+        
+    def _rebuild_inverted_index(self) -> None:
+        """Rebuild the inverted index from scratch. Useful after mass deletions."""
+        self._word_to_episodes.clear()
+        for idx, episode in enumerate(self.episodes):
+            for word in episode.input_neurons:
+                if word not in self._word_to_episodes:
+                    self._word_to_episodes[word] = set()
+                self._word_to_episodes[word].add(idx)
     
     # API_PUBLIC
     def get_episode_by_id(self, episode_id: str) -> Optional[Episode]:

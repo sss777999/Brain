@@ -351,7 +351,14 @@ class PFC:
     @property
     def GATE_THRESHOLD(self) -> float:
         """Minimum relevance to enter PFC."""
-        return 0.3
+        base_threshold = 0.3
+        # BIOLOGY: Serotonin (5-HT) regulates impulse control and gating
+        from neuromodulation import GLOBAL_MODULATORS, ModulatorType
+        ht_level = GLOBAL_MODULATORS.get_level(ModulatorType.SEROTONIN)
+        # Baseline 5-HT is 0.5. Low 5-HT -> lower threshold (more impulsive, lets anything in)
+        # High 5-HT -> higher threshold (strict gating)
+        ht_modifier = (ht_level - 0.5) * 0.4
+        return max(0.1, min(0.9, base_threshold + ht_modifier))
     
     @property
     def PRUNE_THRESHOLD(self) -> float:
