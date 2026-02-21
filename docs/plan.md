@@ -122,11 +122,21 @@ Working Memory Baselines (MemNet, NTM): tested ONLY on bAbI Task 1
     - WMStateTracker class — PFC situation model for structured WM reasoning
     - Entity locations: PFC spatial register (Goldman-Rakic 1995)
     - Object tracking: visuospatial sketchpad (Baddeley 2000)
-    - Negation: PFC inhibitory control (Miller & Cohen 2001)
-    - Temporal history: hippocampal time cells (Eichenbaum 2014)
-    - Spatial reasoning: cognitive map with transitivity (O'Keefe & Nadel 1978)
-    - Path finding: place/grid cell navigation (Moser et al. 2008)
-    - Deduction: semantic memory hierarchy (Collins & Quillian 1969)
+    - Temporal history, spatial maps, negation, deduction
+    - All bAbI tasks 1-20 (481/481) pass
+    
+    PHASE 24: Global Neuromodulator System
+    - Dynamic chemical state (DA, NE, ACh, 5-HT) affecting learning/retrieval modes
+    - Dopamine (DA): Lowers myelination threshold, boosts CA3 target pathways on successful answers
+    - Norepinephrine (NE): Tightens CA3 WTA focus (INHIBITION_K) during new queries
+    - Acetylcholine (ACh): High ACh enables encoding; low ACh suppresses it during retrieval
+    - Serotonin (5-HT): Regulates PFC gating threshold
+    
+    PHASE 25: Forgetting & Synaptic Homeostasis
+    - LTD (Long-Term Depression): Episodes lose strength if not replayed or accessed
+    - Episodic Pruning: Low context diversity connections decay faster than semantic ones
+    - Synaptic Downscaling: NREM sleep globally scales down weights
+    - Physical Deletion: Episodes with strength < 0.1 are physically removed
     - ⚠️ KNOWN LIMITATION: LOCATIONS/OBJECTS vocabulary sets are domain-specific
       world knowledge that would ideally be learned from semantic memory.
       The MECHANISM is biological, the VOCABULARY is explicitly provided.
