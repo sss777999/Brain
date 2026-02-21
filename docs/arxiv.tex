@@ -1380,13 +1380,14 @@ formal neuroscientific validation is claimed.
       in \texttt{train.py} beyond basic three-factor dopamine. All four neuromodulators now have explicit
       release conditions and effects on learning:
       \textbf{Acetylcholine} released at encoding onset, amplifies eligibility traces (attention gate)
-      \citep{hasselmo2006mechanisms};
       \textbf{Norepinephrine} released on novel/unexpected input, boosts exploration of new connections
-      \citep{sara2009locus};
       \textbf{Serotonin} released for sustained learning (long sentences), stabilizes but slows plasticity
       (temporal discounting) \citep{miyazaki2014optogenetic}.
       Combined learning modifier: $m_{total} = m_{DA} \times m_{ACh} \times m_{NE} \times m_{5HT}$
       applied to eligibility traces via \texttt{\_get\_combined\_learning\_modifier()}.
+\item \textbf{Global Neuromodulator System} --- Dynamic chemical state (\texttt{NeuromodulatorSystem}) representing Dopamine (reward/learning rate), Norepinephrine (attention focus via WTA threshold), Acetylcholine (encode/retrieve mode switching), and Serotonin (PFC gating impulse control) \citep{hasselmo2006role}.
+\item \textbf{Synaptic Homeostasis and LTD} --- Biologically grounded forgetting mechanism \citep{tononi2006sleep}. Global downscaling occurs during NREM sleep. Episodes undergo Long-Term Depression (LTD) if not accessed, with purely episodic traces decaying faster than semantic ones. Physical pruning occurs below threshold, bounding memory capacity.
+\item \textbf{Narrative Source Filtering} --- Suppresses NARRATIVE associations (stories, fables) during factual retrieval via PFC top-down modulation to prevent memory contamination \citep{tulving1972episodic}.
 \item \textbf{Motor Output / Sequence Generator} --- Correct word order in generated answers
       via \texttt{motor\_output.py}. The \texttt{SequenceGenerator} class preserves hippocampal time cell order
       (stored in episode \texttt{input\_words} tuple). This models Broca's area for speech production
