@@ -5,7 +5,7 @@ A biologically inspired cognitive architecture that models the complete pipeline
 [![Python 3.11+](https://img.shields.io/badge/python-3.11+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Status: Research](https://img.shields.io/badge/status-research-orange.svg)]()
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.18704593.svg)](https://doi.org/10.5281/zenodo.18704593)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.18704592.svg)](https://doi.org/10.5281/zenodo.18704592)
 
 **🤝 Seeking Collaborators & Experts:** I am an independent researcher. This project is a fundamental attempt to replicate real brain mechanisms in code (without relying on LLMs for reasoning). I am actively looking for neurobiologists, cognitive scientists, and AI researchers for discussion, critique, and joint development.
 
