@@ -9,6 +9,8 @@ A biologically inspired cognitive architecture that models the complete pipeline
 
 **🤝 Seeking Collaborators & Experts:** I am an independent researcher. This project is a fundamental attempt to replicate real brain mechanisms in code (without relying on LLMs for reasoning). I am actively looking for neurobiologists, cognitive scientists, and AI researchers for discussion, critique, and joint development.
 
+**📄 [Read the Full Article (PDF)](docs/arxiv.pdf)** — Detailed explanation of the biological mechanisms and the cognitive architecture.
+
 **📊 [Full Test Results & Baseline Comparison](docs/RESULTS.md)** — Brain vs TF-IDF/BM25: **+43-49% advantage**
 
 ---
