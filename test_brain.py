@@ -29,7 +29,10 @@ GPT evaluation:
 import sys
 import time
 import os
+import re
+from typing import Any, Dict, List, Sequence, Set, Union
 from datetime import datetime
+from hippocampus import Hippocampus
 from train import train_on_curriculum, ask, get_statistics
 from llm_postprocess import postprocess_answer
 from gpt_evaluator import evaluate_answer_quality
@@ -137,10 +140,10 @@ CURRICULUM_TESTS = [
     ("What is ice?", ["solid", "cold", "frozen"]),
     
     # === BABY ANIMALS ===
-    ("What is a puppy?", ["baby", "dog"]),
-    ("What is a kitten?", ["baby", "cat"]),
-    ("What is a calf?", ["baby", "cow"]),
-    ("What is a chick?", ["baby", "chicken"]),
+    ("What is a puppy?", {"any_of": ["baby dog", "young dog"]}),
+    ("What is a kitten?", {"any_of": ["baby cat", "young cat"]}),
+    ("What is a calf?", {"any_of": ["baby cow", "young cow"]}),
+    ("What is a chick?", {"any_of": ["baby chicken", "baby bird"]}),
     
     # === BODY PARTS ===
     ("What do we see with?", ["eyes"]),
@@ -211,8 +214,8 @@ CATEGORY_TESTS = {
         ("What is water?", ["liquid"]),
     ],
     "Baby animals": [
-        ("What is a puppy?", ["baby", "dog"]),
-        ("What is a kitten?", ["baby", "cat"]),
+        ("What is a puppy?", {"any_of": ["baby dog", "young dog"]}),
+        ("What is a kitten?", {"any_of": ["baby cat", "young cat"]}),
     ],
     "Hallucinations (should NOT know)": [
         ("Who wrote Hamlet?", ["not know", "don't know"]),
@@ -231,7 +234,7 @@ FINEWEB_TESTS = [
     # Text: "one of the nation's most famous actors"
     # Text: "shot President Lincoln"
     ("Who shot Lincoln?", ["booth"]),
-    ("How old was Booth?", ["26", "years"]),
+    ("How old was Booth?", {"all_of": ["26", "years"]}),
     ("What was Booth?", ["actor", "famous"]),
     
     # === SOHO (Article 6) ===
@@ -335,8 +338,8 @@ PARAPHRASE_TESTS = [
     
     # === BABY ANIMALS - alternative phrasings ===
     # Original: "What is a puppy?" -> "baby dog"
-    ("A puppy is what kind of animal?", ["baby", "dog", "young"]),
-    ("What is a puppy called?", ["baby", "dog", "young"]),
+    ("A puppy is what kind of animal?", {"any_of": ["baby dog", "young dog"]}),
+    ("What is a puppy called?", {"any_of": ["baby dog", "young dog"]}),
     
     # === BODY PARTS - alternative phrasings ===
     # Original: "What do we see with?" -> "eyes"
@@ -381,7 +384,7 @@ def check_answer_with_llm(question: str, answer: str, expected: list) -> bool:
     
     prompt = f"""Question: {question}
 Answer: {answer}
-Expected keywords: {', '.join(expected)}
+Expected keywords: {_format_expectation_text(expected)}
 
 Does the answer correctly respond to the question with the expected meaning?
 Reply only YES or NO."""
@@ -402,25 +405,382 @@ Reply only YES or NO."""
     return check_answer_simple(answer, expected)
 
 
-def check_answer_simple(answer: str, expected_keywords: list) -> bool:
-    """
-    Simple check: does answer contain at least one keyword.
-    """
-    answer_lower = answer.lower()
-    for keyword in expected_keywords:
-        if keyword.lower() in answer_lower:
-            return True
-    return False
+# ANCHOR: QA_EVAL_STOPWORDS
+_QA_EVAL_STOPWORDS: Set[str] = {
+    'a', 'an', 'and', 'are', 'as', 'at', 'be', 'been', 'being', 'but', 'by', 'can',
+    'could', 'did', 'do', 'does', 'for', 'from', 'had', 'has', 'have', 'he', 'her',
+    'his', 'i', 'if', 'in', 'into', 'is', 'it', 'its', 'me', 'might', 'my', 'of',
+    'on', 'or', 'our', 'she', 'so', 'than', 'that', 'the', 'their', 'them', 'there',
+    'they', 'this', 'to', 'too', 'up', 'us', 'was', 'we', 'were', 'what', 'when',
+    'where', 'which', 'who', 'why', 'with', 'would', 'you', 'your', 'am', 'not',
+}
 
 
-def check_answer(answer: str, expected_keywords: list, question: str = "") -> bool:
+# ANCHOR: QA_EVAL_UNKNOWN_MARKERS
+_QA_EVAL_UNKNOWN_MARKERS: Set[str] = {
+    'do not know',
+    'not know',
+    'unknown',
+    'i do not know',
+}
+
+
+# ANCHOR: QA_EVAL_NORMALIZE_TOKENS
+# API_PRIVATE
+def _normalize_eval_tokens(text: str) -> List[str]:
+    """
+    Normalize text for strict whole-token answer evaluation.
+
+    Intent:
+        Test evaluation must judge whether the answer expresses the expected
+        concept rather than rewarding accidental substring overlap inside noisy
+        readouts.
+
+    Args:
+        text: Raw answer or expectation text.
+
+    Returns:
+        Normalized list of tokens.
+
+    Raises:
+        AssertionError: If text is None.
+    """
+    assert text is not None, "text cannot be None because answer evaluation needs a concrete linguistic trace"
+    normalized = text.lower()
+    replacements = {
+        "don't": 'do not',
+        "dont": 'do not',
+        "doesn't": 'does not',
+        "didn't": 'did not',
+        "can't": 'can not',
+        "cannot": 'can not',
+        "won't": 'will not',
+        "i'm": 'i am',
+    }
+    for source, target in replacements.items():
+        normalized = normalized.replace(source, target)
+    normalized = re.sub(r'[^a-z0-9\s]', ' ', normalized)
+    normalized = re.sub(r'\s+', ' ', normalized).strip()
+    tokens = [token for token in normalized.split(' ') if token]
+    assert all(token and token == token.strip() for token in tokens), "normalized tokens must stay non-empty because evaluation compares explicit token identities"
+    return tokens
+
+
+# ANCHOR: QA_EVAL_CONTENT_TOKENS
+# API_PRIVATE
+def _extract_content_tokens(tokens: Sequence[str]) -> List[str]:
+    """
+    Remove low-information function words from normalized evaluation tokens.
+
+    Intent:
+        Precision checks should estimate how focused the answer is on the target
+        concept, which requires measuring informative lexical content rather than
+        counting articles and auxiliaries.
+
+    Args:
+        tokens: Normalized tokens.
+
+    Returns:
+        Content-bearing tokens.
+
+    Raises:
+        AssertionError: If tokens is None.
+    """
+    assert tokens is not None, "tokens cannot be None because evaluation precision depends on answer content density"
+    content_tokens = [token for token in tokens if token not in _QA_EVAL_STOPWORDS]
+    assert len(content_tokens) <= len(tokens), "content token filtering must never invent extra lexical evidence"
+    return content_tokens
+
+
+# ANCHOR: QA_EVAL_EXPECTATION_SPEC
+# API_PRIVATE
+def _coerce_expectation_spec(expected_keywords: Union[List[str], Dict[str, Any], str]) -> Dict[str, Any]:
+    """
+    Convert legacy expectation formats into an explicit evaluation spec.
+
+    Intent:
+        The test corpus historically used plain keyword lists. Converting them to
+        a single normalized schema allows stricter matching without breaking the
+        existing datasets.
+
+    Args:
+        expected_keywords: Legacy list/string or structured expectation spec.
+
+    Returns:
+        Normalized expectation dictionary.
+
+    Raises:
+        AssertionError: If no expected answer content is provided.
+    """
+    assert expected_keywords is not None, "expected_keywords cannot be None because a test must define what counts as success"
+    if isinstance(expected_keywords, dict):
+        spec: Dict[str, Any] = {
+            'any_of': list(expected_keywords.get('any_of', [])),
+            'all_of': list(expected_keywords.get('all_of', [])),
+            'min_any_matches': expected_keywords.get('min_any_matches', None),
+            'max_content_tokens': expected_keywords.get('max_content_tokens', None),
+            'min_match_ratio': expected_keywords.get('min_match_ratio', None),
+        }
+    elif isinstance(expected_keywords, str):
+        spec = {
+            'any_of': [expected_keywords],
+            'all_of': [],
+            'min_any_matches': None,
+            'max_content_tokens': None,
+            'min_match_ratio': None,
+        }
+    else:
+        spec = {
+            'any_of': list(expected_keywords),
+            'all_of': [],
+            'min_any_matches': None,
+            'max_content_tokens': None,
+            'min_match_ratio': None,
+        }
+    assert spec['any_of'] or spec['all_of'], "expectation spec must define at least one acceptable concept because pass/fail depends on it"
+    return spec
+
+
+# ANCHOR: QA_EVAL_EXPECTATION_FORMAT
+# API_PRIVATE
+def _format_expectation_text(expected_keywords: Union[List[str], Dict[str, Any], str]) -> str:
+    """
+    Convert an expectation spec into a readable text description.
+
+    Intent:
+        Human-facing logs and LLM/GPT evaluators should see the semantic target in
+        explicit form even when tests use structured expectation dictionaries.
+
+    Args:
+        expected_keywords: Legacy or structured expectation specification.
+
+    Returns:
+        Readable expectation string.
+
+    Raises:
+        AssertionError: If the resulting text is empty.
+    """
+    spec = _coerce_expectation_spec(expected_keywords)
+    parts: List[str] = []
+    if spec['all_of']:
+        parts.append(f"ALL OF: {', '.join(spec['all_of'])}")
+    if spec['any_of']:
+        parts.append(f"ANY OF: {', '.join(spec['any_of'])}")
+    if spec['min_any_matches']:
+        parts.append(f"MIN ANY MATCHES: {spec['min_any_matches']}")
+    result = ' | '.join(parts)
+    assert result, "formatted expectation text must stay non-empty because evaluation prompts need explicit success criteria"
+    return result
+
+
+# ANCHOR: QA_EVAL_REGULAR_PLURAL_LEMMAS
+# API_PRIVATE
+def _regular_plural_lemmas(token: str) -> Set[str]:
+    """
+    Generate simple lemma candidates for regular English plural morphology.
+
+    Intent:
+        The evaluator should treat regular plural/singular surface forms as the
+        same lexical concept when that distinction is not semantically relevant
+        to answer correctness.
+
+    Args:
+        token: Normalized token.
+
+    Returns:
+        Set of plausible singular/plural lemma variants.
+
+    Raises:
+        AssertionError: If token is empty.
+    """
+    assert token, "token must be non-empty because morphological decomposition requires a concrete lexical form"
+    lemmas: Set[str] = set()
+    if len(token) > 4 and token.endswith('ies'):
+        lemmas.add(token[:-3] + 'y')
+    if len(token) > 4 and token.endswith('es'):
+        lemmas.add(token[:-2])
+    if len(token) > 3 and token.endswith('s') and not token.endswith('ss'):
+        lemmas.add(token[:-1])
+    result = {lemma for lemma in lemmas if lemma}
+    assert all(lemma for lemma in result), "plural decomposition must preserve only valid lexical variants because empty lemmas cannot guide matching"
+    return result
+
+
+# ANCHOR: QA_EVAL_MORPH_TOKEN_MATCH
+# API_PRIVATE
+def _tokens_match_with_morphology(answer_token: str, expected_token: str) -> bool:
+    """
+    Check token equivalence using existing hippocampal morphology mappings.
+
+    Intent:
+        Strict evaluation should distinguish conceptually correct plural/singular
+        forms from unrelated noise, reusing the same lexical-variant knowledge
+        already present in the retrieval system.
+
+    Args:
+        answer_token: Token produced by the model.
+        expected_token: Token required by the test expectation.
+
+    Returns:
+        True when the two tokens are equivalent under the morphology map.
+
+    Raises:
+        AssertionError: If either token is empty.
+    """
+    assert answer_token, "answer_token must be non-empty because lexical matching depends on concrete word forms"
+    assert expected_token, "expected_token must be non-empty because empty expectation tokens cannot define correctness"
+    if answer_token == expected_token:
+        return True
+    answer_forms = {answer_token} | set(Hippocampus.VERB_FORMS.get(answer_token, set())) | _regular_plural_lemmas(answer_token)
+    expected_forms = {expected_token} | set(Hippocampus.VERB_FORMS.get(expected_token, set())) | _regular_plural_lemmas(expected_token)
+    result = bool(answer_forms & expected_forms)
+    assert isinstance(result, bool), "morphology-aware token comparison must yield a boolean because evaluator decisions are binary"
+    return result
+
+
+# ANCHOR: QA_EVAL_EXPECTATION_MATCH
+# API_PRIVATE
+def _matches_expectation(answer_tokens: Sequence[str], expectation: str) -> bool:
+    """
+    Check whether the answer expresses a full expected concept.
+
+    Intent:
+        Multi-word expectations such as `baby dog` or `do not know` should only
+        match when all concept tokens are present, preventing partial-credit
+        matches like `dog` for `baby dog`.
+
+    Args:
+        answer_tokens: Normalized answer tokens.
+        expectation: Expected token or phrase.
+
+    Returns:
+        True when all expectation tokens are present.
+
+    Raises:
+        AssertionError: If expectation is empty.
+    """
+    expectation_tokens = _normalize_eval_tokens(expectation)
+    assert expectation_tokens, "expectation must contain at least one token because empty targets cannot define correctness"
+    result = all(
+        any(_tokens_match_with_morphology(answer_token, expectation_token) for answer_token in answer_tokens)
+        for expectation_token in expectation_tokens
+    )
+    assert isinstance(result, bool), "expectation matching must return a boolean because pass/fail accounting depends on it"
+    return result
+
+
+# ANCHOR: QA_EVAL_STRICT_SCORING
+# API_PRIVATE
+def evaluate_answer_strict(answer: str, expected_keywords: Union[List[str], Dict[str, Any], str], question: str = "") -> Dict[str, Any]:
+    """
+    Evaluate answer correctness with semantic matching and precision gating.
+
+    Intent:
+        A biologically plausible model can transiently co-activate related traces,
+        but the QA benchmark should only credit focused readouts that express the
+        requested concept rather than long noisy blends containing one lucky word.
+
+    Args:
+        answer: Model answer to evaluate.
+        expected_keywords: Expected answer specification.
+        question: Original question for debugging context.
+
+    Returns:
+        Evaluation details including correctness, matched expectations, and
+        precision statistics.
+
+    Raises:
+        AssertionError: If answer is None.
+    """
+    assert answer is not None, "answer cannot be None because QA evaluation needs an observable behavioral output"
+    spec = _coerce_expectation_spec(expected_keywords)
+    answer_tokens = _normalize_eval_tokens(answer)
+    answer_content_tokens = _extract_content_tokens(answer_tokens)
+    question_tokens = _normalize_eval_tokens(question)
+    question_content_tokens = _extract_content_tokens(question_tokens)
+
+    unique_answer_content_tokens = list(dict.fromkeys(answer_content_tokens))
+    unique_question_content_tokens = list(dict.fromkeys(question_content_tokens))
+    precision_content_tokens = [
+        token for token in unique_answer_content_tokens
+        if not any(
+            _tokens_match_with_morphology(token, question_token)
+            for question_token in unique_question_content_tokens
+        )
+    ]
+    if not precision_content_tokens and unique_answer_content_tokens:
+        precision_content_tokens = list(unique_answer_content_tokens)
+
+    any_matches = [candidate for candidate in spec['any_of'] if _matches_expectation(answer_tokens, candidate)]
+    all_matches = [candidate for candidate in spec['all_of'] if _matches_expectation(answer_tokens, candidate)]
+
+    matched_tokens: Set[str] = set()
+    for candidate in any_matches + all_matches:
+        matched_tokens.update(_normalize_eval_tokens(candidate))
+
+    min_any_matches = spec['min_any_matches']
+    if min_any_matches is None:
+        min_any_matches = 1 if spec['any_of'] else 0
+
+    semantic_ok = len(any_matches) >= int(min_any_matches) and len(all_matches) == len(spec['all_of'])
+
+    matched_content_tokens = [
+        token for token in precision_content_tokens
+        if any(_tokens_match_with_morphology(token, matched_token) for matched_token in matched_tokens)
+    ]
+    matched_content_count = len(set(matched_content_tokens))
+    content_count = len(precision_content_tokens)
+    answer_is_unknown = any(' '.join(_normalize_eval_tokens(candidate)) in _QA_EVAL_UNKNOWN_MARKERS for candidate in spec['any_of'] + spec['all_of'])
+
+    if answer_is_unknown:
+        max_content_tokens = int(spec['max_content_tokens'] or 5)
+        precision_ok = content_count <= max_content_tokens
+    else:
+        default_max_content_tokens = max(2, matched_content_count + 1)
+        if spec['all_of']:
+            default_max_content_tokens = max(default_max_content_tokens, matched_content_count + 1)
+        max_content_tokens = int(spec['max_content_tokens'] or default_max_content_tokens)
+        default_min_match_ratio = 0.50 if matched_content_count <= 1 else 0.34
+        if spec['all_of']:
+            default_min_match_ratio = max(default_min_match_ratio, 0.50)
+        min_match_ratio = float(spec['min_match_ratio'] or default_min_match_ratio)
+        short_clause_ok = semantic_ok and content_count <= min(4, max_content_tokens + 1)
+        precision_ok = content_count <= max_content_tokens or (
+            matched_content_count / max(1, content_count)
+        ) >= min_match_ratio or short_clause_ok
+
+    is_correct = semantic_ok and precision_ok
+    result = {
+        'is_correct': is_correct,
+        'semantic_ok': semantic_ok,
+        'precision_ok': precision_ok,
+        'matched_any': any_matches,
+        'matched_all': all_matches,
+        'content_count': content_count,
+        'matched_content_count': matched_content_count,
+        'question': question,
+    }
+    assert isinstance(result['is_correct'], bool), "strict evaluator must return a boolean decision because test accounting depends on binary pass/fail"
+    return result
+
+
+def check_answer_simple(answer: str, expected_keywords: Union[List[str], Dict[str, Any], str]) -> bool:
+    """
+    Strict check: require semantic match and sufficient answer precision.
+    """
+    evaluation = evaluate_answer_strict(answer, expected_keywords)
+    return evaluation['is_correct']
+
+
+def check_answer(answer: str, expected_keywords: Union[List[str], Dict[str, Any], str], question: str = "") -> bool:
     """
     Checks answer correctness.
     
-    Simple check: does answer contain at least one keyword.
-    For stricter check use check_answer_with_llm directly.
+    Applies strict semantic matching and rejects noisy partial answers that only
+    contain one lucky keyword.
     """
-    return check_answer_simple(answer, expected_keywords)
+    evaluation = evaluate_answer_strict(answer, expected_keywords, question)
+    return evaluation['is_correct']
 
 
 def run_tests(questions: list = None, show_llm: bool = True):
@@ -573,7 +933,7 @@ def run_test_suite(tests: list, suite_name: str):
                 ans, ok, bl_t = baseline_results[bl_name]
                 label = {'tfidf': 'TF-IDF', 'bm25': 'BM25'}[bl_name]
                 log(f'         {"✅" if ok else "❌"} {label:6} [{bl_t:.3f}s]: {ans}')
-        log(f'         Expected: {expected}')
+        log(f'         Expected: {_format_expectation_text(expected)}')
         
         log('')
     
@@ -604,12 +964,12 @@ def run_test_suite(tests: list, suite_name: str):
     
     # Baseline comparison summary
     if qa_baselines and total > 0:
-        bl_parts = []
-        for bl_name in ['tfidf', 'bm25']:
-            bl_acc = baseline_passed.get(bl_name, 0) / total * 100
-            bl_t = baseline_time.get(bl_name, 0)
-            bl_parts.append(f'{bl_name.upper()}: {bl_acc:.0f}% ({bl_t:.2f}s)')
-        log(f'BASELINES: {" | ".join(bl_parts)}')
+        tfidf_passed = baseline_passed.get('tfidf', 0)
+        bm25_passed = baseline_passed.get('bm25', 0)
+        tfidf_acc = tfidf_passed / total * 100
+        bm25_acc = bm25_passed / total * 100
+        log(f'BASELINES: TF-IDF {tfidf_passed}/{total} ({tfidf_acc:.1f}%) | BM25 {bm25_passed}/{total} ({bm25_acc:.1f}%)')
+        log(f'Brain advantage: vs TF-IDF {accuracy - tfidf_acc:+.1f}% | vs BM25 {accuracy - bm25_acc:+.1f}%')
     log('=' * 70)
     
     if failed_tests:
@@ -621,7 +981,7 @@ def run_test_suite(tests: list, suite_name: str):
             log(f'  Q: {q}')
             log(f'  Brain raw: {raw}')
             log(f"  Broca's area (LLM): {llm}")
-            log(f'  Expected: {exp}')
+            log(f'  Expected: {_format_expectation_text(exp)}')
             if gpt_e and not gpt_e.get("error"):
                 score = gpt_e.get("score") or gpt_e.get("final") or 0
                 log(f'  GPT Score: {score}/10 — {gpt_e.get("explanation", "")[:60]}')
@@ -855,7 +1215,7 @@ def run_grade1_tests(model_name: str = None):
             b_st = "✅" if bm25_ok else "❌"
             log(f'   {t_st} TF-IDF [{t_tfidf:.3f}s]: {tfidf_ans[:60]}')
             log(f'   {b_st} BM25   [{t_bm25:.3f}s]: {bm25_ans[:60]}')
-        log(f'   Expected: {expected}')
+        log(f'   Expected: {_format_expectation_text(expected)}')
         
         log('')
     
@@ -1029,7 +1389,7 @@ def run_preschool_tests(model_name: str = None):
             b_st = "✅" if bm25_ok else "❌"
             log(f'   {t_st} TF-IDF [{t_tfidf:.3f}s]: {tfidf_ans[:60]}')
             log(f'   {b_st} BM25   [{t_bm25:.3f}s]: {bm25_ans[:60]}')
-        log(f'   Expected: {expected}')
+        log(f'   Expected: {_format_expectation_text(expected)}')
         
         log('')
     
@@ -1197,7 +1557,7 @@ def run_fineweb_tests():
             b_st = "✅" if bm25_ok else "❌"
             log(f'   {t_st} TF-IDF [{t_tfidf:.3f}s]: {tfidf_ans[:60]}')
             log(f'   {b_st} BM25   [{t_bm25:.3f}s]: {bm25_ans[:60]}')
-        log(f'   Expected: {expected}')
+        log(f'   Expected: {_format_expectation_text(expected)}')
         
         log('')
     
@@ -1335,7 +1695,7 @@ def run_paraphrase_tests():
             b_st = "✅" if bm25_ok else "❌"
             log(f'   {t_st} TF-IDF [{t_tfidf:.3f}s]: {tfidf_ans[:60]}')
             log(f'   {b_st} BM25   [{t_bm25:.3f}s]: {bm25_ans[:60]}')
-        log(f'   Expected: {expected}')
+        log(f'   Expected: {_format_expectation_text(expected)}')
         log('')
     
     total = passed + failed
@@ -1345,12 +1705,13 @@ def run_paraphrase_tests():
     # Compare with original CURRICULUM_TESTS accuracy (baseline ~98.8%)
     # Degradation = original_accuracy - paraphrase_accuracy
     baseline_accuracy = 98.8  # From paper
+    historical_delta = accuracy - baseline_accuracy
     degradation = baseline_accuracy - accuracy
     
     log('=' * 70)
     log(f'RESULT PARAPHRASE: {passed}/{total} ({accuracy:.1f}%)')
-    log(f'Baseline (original questions): {baseline_accuracy:.1f}%')
-    log(f'Degradation: {degradation:+.1f}% (lower is better)')
+    log(f'Historical baseline (paper, original questions): {baseline_accuracy:.1f}%')
+    log(f'Historical delta vs paper baseline: {historical_delta:+.1f}%')
     time_str = f'Brain: {total_brain_time:.2f}s'
     if not NO_LLM_MODE:
         time_str += f' | LLM: {total_llm_time:.2f}s'
@@ -1368,7 +1729,7 @@ def run_paraphrase_tests():
         log('')
         log('FAILED PARAPHRASES (surface form sensitivity):')
         for q, raw, exp in failed_tests:
-            log(f'   ❌ "{q}" -> got "{raw}", expected {exp}')
+            log(f'   ❌ "{q}" -> got "{raw}", expected {_format_expectation_text(exp)}')
     
     return {
         'passed': passed, 'failed': failed, 'total': total, 'accuracy': accuracy,
@@ -1376,6 +1737,7 @@ def run_paraphrase_tests():
         'brain_time': total_brain_time, 'llm_time': total_llm_time, 'gpt_time': 0,
         'total_time': total_time,
         'baseline_accuracy': baseline_accuracy,
+        'historical_delta': historical_delta,
         'degradation': degradation,
         'tfidf_passed': tfidf_passed if baselines_available else None,
         'bm25_passed': bm25_passed if baselines_available else None,
@@ -1440,7 +1802,7 @@ def run_baseline_comparison():
         m_st = "✅" if bm25_ok else "❌"
         
         log(f'Q: {question}')
-        log(f'   Expected: {expected}')
+        log(f'   Expected: {_format_expectation_text(expected)}')
         log(f'   {b_st} Brain:   {brain_raw[:50]}')
         log(f'   {t_st} TF-IDF:  {tfidf_ans[:50]}')
         log(f'   {m_st} BM25:    {bm25_ans[:50]}')
@@ -1466,7 +1828,7 @@ def run_baseline_comparison():
         m_st = "✅" if bm25_ok else "❌"
         
         log(f'Q: {question}')
-        log(f'   Expected: {expected}')
+        log(f'   Expected: {_format_expectation_text(expected)}')
         log(f'   {b_st} Brain:   {brain_raw[:50]}')
         log(f'   {t_st} TF-IDF:  {tfidf_ans[:50]}')
         log(f'   {m_st} BM25:    {bm25_ans[:50]}')
@@ -1480,12 +1842,12 @@ def run_baseline_comparison():
     total = results['brain']['passed'] + results['brain']['failed']
     
     for name, res in results.items():
-        acc = res['passed'] / total * 100 if total > 0 else 0
+        acc = res['passed'] / total * 100
         log(f'{name.upper():8} : {res["passed"]}/{total} ({acc:.1f}%)')
     
-    brain_acc = results['brain']['passed'] / total * 100 if total > 0 else 0
-    tfidf_acc = results['tfidf']['passed'] / total * 100 if total > 0 else 0
-    bm25_acc = results['bm25']['passed'] / total * 100 if total > 0 else 0
+    brain_acc = results['brain']['passed'] / total * 100
+    tfidf_acc = results['tfidf']['passed'] / total * 100
+    bm25_acc = results['bm25']['passed'] / total * 100
     
     log('')
     log('Brain advantage over IR baselines:')
@@ -1496,7 +1858,7 @@ def run_baseline_comparison():
     return results
 
 
-def run_babi_tests():
+def run_babi_tests(babi_limit=5, babi_task=None):
     """
     Runs bAbI Tasks 1-20 tests (working memory + cognitive abilities).
     
@@ -1534,7 +1896,7 @@ def run_babi_tests():
         return []
     
     # Import parser from test_babi
-    from test_babi import parse_babi_file, load_story_to_pfc, test_question
+    from test_babi import answer_babi_question, parse_babi_file, load_story_to_pfc
     
     # Load working memory baselines (MemNet, NTM) — only for Task 1
     memnet, ntm = None, None
@@ -1567,17 +1929,18 @@ def run_babi_tests():
     grand_total_passed = 0
     grand_total_failed = 0
     
-    MAX_STORIES = 5  # 5 stories per task for speed (481 questions total)
-    
-    for task_num in range(1, 21):
-        task_files = list(Path(data_dir).glob(f"qa{task_num}_*_train.txt"))
+    task_numbers = [babi_task] if babi_task is not None else range(1, 21)
+    for task_num in task_numbers:
+        task_files = list(Path(data_dir).glob(f"qa{task_num}_*_test.txt"))
         if not task_files:
             log(f"⚠️ Task {task_num}: file not found")
             continue
         
         task_file = task_files[0]
-        task_name = BABI_TASK_NAMES.get(task_num, task_file.stem.replace("_train", "").replace(f"qa{task_num}_", ""))
-        stories = parse_babi_file(str(task_file))[:MAX_STORIES]
+        task_name = BABI_TASK_NAMES.get(task_num, task_file.stem.replace("_test", "").replace(f"qa{task_num}_", ""))
+        stories = parse_babi_file(str(task_file))
+        if babi_limit:
+            stories = stories[:babi_limit]
         
         task_passed = 0
         task_failed = 0
@@ -1598,7 +1961,8 @@ def run_babi_tests():
                 load_story_to_pfc(context_facts)
                 
                 t_q = time_module.time()
-                is_correct, actual = test_question(question, expected)
+                actual = answer_babi_question(question, task_num)
+                is_correct = check_answer(actual, expected, question)
                 t_brain = time_module.time() - t_q
                 task_brain_time += t_brain
                 
@@ -1606,14 +1970,14 @@ def run_babi_tests():
                 if memnet:
                     try:
                         memnet_ans = memnet.answer_with_context(context_facts, question)
-                        if expected.lower() in memnet_ans.lower():
+                        if memnet_ans and check_answer(memnet_ans, expected, question):
                             memnet_passed += 1
                     except Exception:
                         pass
                 if ntm:
                     try:
                         ntm_ans = ntm.answer_with_context(context_facts, question)
-                        if expected.lower() in ntm_ans.lower():
+                        if ntm_ans and check_answer(ntm_ans, expected, question):
                             ntm_passed += 1
                     except Exception:
                         pass
@@ -1626,8 +1990,9 @@ def run_babi_tests():
                 
                 status = "✅ PASS" if is_correct else "❌ FAIL"
                 log(f'{status} | Q: {question}')
+                brain_status = "✅" if is_correct else "❌"
                 log(f'         {"✅" if is_correct else "❌"} Brain  [{t_brain:.3f}s]: {actual}')
-                log(f'         Expected: {expected}')
+                log(f'         Expected: {_format_expectation_text(expected)}')
                 if not is_correct:
                     log(f'         Context: {" | ".join(context_facts[:3])}...')
                 log('')
@@ -2064,20 +2429,41 @@ def test_pfc_persistent_activity() -> dict:
 
 def main():
     """Main function."""
+    import argparse
     # Parse arguments
-    do_train = '--train' in sys.argv  # Train only if explicitly specified
-    raw_only = '--raw' in sys.argv
-    strict_mode = '--strict' in sys.argv
-    category_mode = '--category' in sys.argv
-    grade1_only = '--grade1' in sys.argv  # Only grade 1 tests
-    curriculum_only = '--curriculum' in sys.argv  # Only curriculum
-    preschool_only = '--preschool' in sys.argv  # Only preschool tests
-    fineweb_only = '--fineweb' in sys.argv  # Only FineWeb-Edu tests
-    paraphrase_only = '--paraphrase' in sys.argv  # Only paraphrase robustness tests
-    compare_baselines = '--compare-baselines' in sys.argv  # Compare Brain vs baselines
-    no_gpt = '--no-gpt' in sys.argv  # Disable GPT evaluation
-    no_llm = '--no-llm' in sys.argv  # Disable LLM postprocessing
-    skip_babi = '--skip-babi' in sys.argv  # Skip bAbI tests
+    parser = argparse.ArgumentParser(description='Brain Test Suite')
+    parser.add_argument('--train', action='store_true', help='Train the model')
+    parser.add_argument('--raw', action='store_true', help='Run raw tests')
+    parser.add_argument('--strict', action='store_true', help='Run strict logic test suite')
+    parser.add_argument('--category', action='store_true', help='Run category test suite')
+    parser.add_argument('--curriculum', action='store_true', help='Run CURRICULUM test suite only')
+    parser.add_argument('--grade1', action='store_true', help='Run GRADE1 test suite')
+    parser.add_argument('--preschool', action='store_true', help='Run PRESCHOOL test suite')
+    parser.add_argument('--fineweb', action='store_true', help='Run FineWeb-Edu test suite')
+    parser.add_argument('--paraphrase', action='store_true', help='Run PARAPHRASE test suite')
+    parser.add_argument('--babi', action='store_true', help='Run bAbI tasks (if --skip-babi is not set)')
+    parser.add_argument('--babi-limit', type=int, default=5, help='Max stories per bAbI task (default: 5, use 0 for all)')
+    parser.add_argument('--babi-task', type=int, default=None, help='Run only a specific bAbI task number')
+    parser.add_argument('--all', action='store_true', help='Run all test suites')
+    parser.add_argument('--no-gpt', action='store_true', help='Disable GPT evaluation')
+    parser.add_argument('--no-llm', action='store_true', help='Disable LLM postprocessing')
+    parser.add_argument('--skip-babi', action='store_true', help='Skip bAbI tests')
+    args = parser.parse_args()
+    
+    do_train = args.train
+    raw_only = args.raw
+    strict_mode = args.strict
+    category_mode = args.category
+    curriculum_only = args.curriculum
+    grade1_only = args.grade1
+    preschool_only = args.preschool
+    fineweb_only = args.fineweb
+    paraphrase_only = args.paraphrase
+    babi_only = args.babi
+    compare_baselines = False  # Not implemented
+    no_gpt = args.no_gpt
+    no_llm = args.no_llm
+    skip_babi = args.skip_babi
     
     # Disable GPT evaluation if flag is set
     if no_gpt:
@@ -2158,7 +2544,7 @@ def main():
             print("   Run: python3 train.py")
             return
         result = run_paraphrase_tests()
-        print(f"\nParaphrase robustness: {result['accuracy']:.1f}% (degradation: {result['degradation']:+.1f}%)")
+        print(f"\nParaphrase robustness: {result['accuracy']:.1f}% (delta vs paper baseline: {result.get('historical_delta', -result['degradation']):+.1f}%)")
         print("Tests completed.")
         return
     
@@ -2195,6 +2581,11 @@ def main():
             print("\n❌ Model not found!")
             print("   Run: python3 test_brain.py --train")
             return
+
+    if babi_only:
+        run_babi_tests(babi_limit=args.babi_limit, babi_task=args.babi_task)
+        print("\nTests completed.")
+        return
     
     # Run tests and collect results
     all_results = []
@@ -2226,7 +2617,7 @@ def main():
         if paraphrase_result:
             all_results.append(('PARAPHRASE', paraphrase_result))
         if not skip_babi:
-            babi_task_results = run_babi_tests()  # bAbI Tasks 1-20 (working memory)
+            babi_task_results = run_babi_tests(babi_limit=args.babi_limit, babi_task=args.babi_task)  # bAbI Tasks 1-20 (working memory)
             if babi_task_results:
                 all_results.extend(babi_task_results)
     
@@ -2326,7 +2717,8 @@ def main():
         log('BASELINE COMPARISON')
         log('=' * 90)
         log('QA Baselines: TF-IDF, BM25 (trained on ALL data, tested on all QA tests)')
-        log('Working Memory Baselines: MemNet, NTM (tested ONLY on bAbI Task 1)')
+        log('Working Memory Baselines: MemNet, NTM (tested on all bAbI tasks)')
+        log('QA SUITE AVG is a macro-average across suites, not weighted by question count.')
         log('')
         
         # Header
@@ -2366,7 +2758,7 @@ def main():
                 avg_qa_brain = sum(r.get('accuracy', 0) for _, r in qa_entries) / n_qa
                 avg_tfidf = sum((r.get('tfidf_accuracy', 0) or 0) for _, r in qa_entries) / n_qa
                 avg_bm25 = sum((r.get('bm25_accuracy', 0) or 0) for _, r in qa_entries) / n_qa
-                log(f"{'QA AVG':<14} {avg_qa_brain:>6.1f}% {avg_tfidf:>6.1f}% {avg_bm25:>6.1f}%    N/A    N/A")
+                log(f"{'QA SUITE AVG':<14} {avg_qa_brain:>6.1f}% {avg_tfidf:>6.1f}% {avg_bm25:>6.1f}%    N/A    N/A")
             
             # MemNet/NTM average across all bAbI tasks
             memnet_parts = [r.get('memnet_accuracy') for _, r in babi_entries if r.get('memnet_accuracy') is not None]
@@ -2487,7 +2879,8 @@ def generate_results_md(all_results: list, stats: dict) -> None:
     # === BASELINE COMPARISON ===
     lines.append("## Baseline Comparison")
     lines.append("")
-    lines.append("QA baselines (TF-IDF, BM25) trained on **identical data**. Working memory baselines (MemNet, NTM) tested on bAbI Task 1 only.")
+    lines.append("QA baselines (TF-IDF, BM25) trained on **identical data**. Working memory baselines (MemNet, NTM) tested on all bAbI tasks.")
+    lines.append("QA SUITE AVG is a macro-average across QA suites, not weighted by question count.")
     lines.append("")
     lines.append("| Test | Brain | TF-IDF | BM25 | MemNet | NTM |")
     lines.append("|------|-------|--------|------|--------|-----|")
@@ -2530,7 +2923,7 @@ def generate_results_md(all_results: list, stats: dict) -> None:
         avg_brain = qa_brain / qa_count
         avg_tfidf = qa_tfidf / qa_count
         avg_bm25 = qa_bm25 / qa_count
-        lines.append(f"| **QA AVG** | **{avg_brain:.1f}%** | **{avg_tfidf:.1f}%** | **{avg_bm25:.1f}%** | N/A | N/A |")
+        lines.append(f"| **QA SUITE AVG** | **{avg_brain:.1f}%** | **{avg_tfidf:.1f}%** | **{avg_bm25:.1f}%** | N/A | N/A |")
     
     lines.append("")
     lines.append("*bAbI requires working memory — TF-IDF/BM25 cannot track entity states. MemNet/NTM tested on all 20 tasks.*")
@@ -2598,7 +2991,7 @@ def generate_results_md(all_results: list, stats: dict) -> None:
     lines.append("python train.py")
     lines.append("")
     lines.append("# Run all tests with baseline comparison")
-    lines.append("python test_brain.py --no-gpt --no-llm")
+    lines.append("python test_brain.py --no-gpt --no-llm --babi-limit 5")
     lines.append("")
     lines.append("# Run specific test suite")
     lines.append("python test_brain.py --curriculum --no-gpt --no-llm")

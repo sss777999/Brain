@@ -35,6 +35,9 @@ packages = ["."]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+markers = [
+    "empirical: tests that require a trained model in ./models/",
+]
 
 [dependency-groups]
 dev = [

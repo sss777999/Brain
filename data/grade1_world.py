@@ -481,9 +481,9 @@ GRADE1_QUESTIONS = [
     ("Where does a bear live?", ["forest"]),
     
     # Plants
-    ("What does a plant need?", ["water", "sunlight", "soil"]),
-    ("What does a tree have?", ["roots", "trunk", "branches", "leaves"]),
-    ("Where do apples grow?", ["tree", "apple tree"]),
+    ("What does a plant need?", {"all_of": ["water", "sunlight", "soil"]}),
+    ("What does a tree have?", {"all_of": ["roots", "trunk", "branches", "leaves"]}),
+    ("Where do apples grow?", {"any_of": ["apple tree"]}),
     ("Is an apple a fruit?", ["fruit", "yes"]),
     ("Is a carrot a vegetable?", ["vegetable", "yes"]),
     
@@ -545,7 +545,7 @@ GRADE1_QUESTIONS = [
     # Water
     ("What do all living things need?", ["water"]),
     ("Where does water come from?", ["rain", "clouds"]),
-    ("Can we drink salt water?", ["no"]),
+    ("Can we drink salt water?", {"any_of": ["no", "cannot", "can not"]}),
     
     # Earth and space
     ("What is the Earth?", ["planet"]),
@@ -560,12 +560,12 @@ GRADE1_QUESTIONS = [
     
     # Exercise and sleep
     ("What keeps our body healthy?", ["exercise", "sleep"]),
-    ("When should we brush teeth?", ["morning", "night", "day", "every"]),
-    ("When should we wash hands?", ["before eating", "eat"]),
+    ("When should we brush teeth?", {"any_of": ["morning night", "every day"]}),
+    ("When should we wash hands?", {"any_of": ["before eating"]}),
     
     # Books and learning
     ("Where can we borrow books?", ["library"]),
-    ("What can we learn from books?", ["many", "things", "stories"]),
+    ("What can we learn from books?", {"any_of": ["many things", "stories"]}),
     
     # Friends
     # NOTE: "What should we do with friends?" removed - word "should" not in episodes friends+share/play

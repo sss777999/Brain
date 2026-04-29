@@ -51,10 +51,14 @@ uv run python train.py
 
 ```python
 from train import ask, load_model
+from training_modes import SelfEpisodeData, SelfFactData, TrainingMode, train
 
 load_model()
-answer = ask("What is the capital of France?")
-print(answer)  # "paris"
+train(TrainingMode.SELF_FACT, SelfFactData(sentence="My name is Brain"))
+train(TrainingMode.SELF_EPISODE, SelfEpisodeData(what="I went to the office", when="morning"))
+
+print(ask("What is the capital of France?"))  # "paris"
+print(ask("Who am I?"))  # self-semantic answer, e.g. "brain"
 ```
 
 ---
@@ -421,6 +425,8 @@ AVERAGE       100.0%   51.1%    57.3%    N/A     N/A
 - **Broca's Area / Syntactic Processing (PHASE 11)** — syntactic processing
   - SyntacticProcessor extracts subject/predicate from questions (Friederici 2011)
   - Subject bonus in CA3 scoring to prioritize relevant episodes
+  - Classifier stripping keeps category paraphrases canonical
+  - "The sun is a type of what?" → "What is the sun?"
   - Binary choice: "Is winter cold or hot?" → "cold"
 - **Cause-Effect Relations (PHASE 12)** — cause-effect relations
   - Parsing questions of the form "What happens when X?"
@@ -451,6 +457,12 @@ AVERAGE       100.0%   51.1%    57.3%    N/A     N/A
   - `get_expected_roles()` — PFC determines expected roles based on question type
   - Goal-conditioned retrieval: "What is X?" → category/property roles, "Where is X?" → location role
   - Roles stored in Episode and serialized with model
+- **Self Memory Domains** — separation of general knowledge from self-knowledge
+  - Episode-level domains: `GENERAL`, `SELF_SEMANTIC`, `SELF_EPISODIC`
+  - First-person words (`I/me/my/mine/myself`) are canonicalized to `self_entity`
+  - `SELF_FACT` stores stable self-schema; `SELF_EPISODE` stores autobiographical events
+  - CA3 adds a self-relevance bonus for self-queries instead of mixing self traces with general memory
+  - Immediate replay stabilizes newly encoded self traces, approximating self-reference facilitation
 - **Baseline Comparison** — scientific evaluation against standard IR methods
   - TF-IDF and BM25 baselines on the same curriculum data
   - Brain significantly outperforms: +49% vs TF-IDF, +43% vs BM25

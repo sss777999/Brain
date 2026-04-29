@@ -69,17 +69,25 @@ class ParsedSentence:
     subject: Optional[str] = None
     verb: Optional[str] = None
     object: Optional[str] = None
+    indirect_object: Optional[str] = None
     predicate: Optional[str] = None
     modifiers: List[str] = None
+    alternatives: List[str] = None
     question_focus: Optional[str] = None
     relation_direction: Optional[Tuple[str, str]] = None  # (from, to)
     raw_roles: Dict[str, SyntacticRole] = None
+    is_negated: bool = False
     
     def __post_init__(self):
+        assert self.modifiers is None or isinstance(self.modifiers, list), "modifiers must stay list-like because downstream reasoning appends syntactic state markers"
+        assert self.alternatives is None or isinstance(self.alternatives, list), "alternatives must stay list-like because uncertainty tracking stores multiple candidate states"
         if self.modifiers is None:
             self.modifiers = []
+        if self.alternatives is None:
+            self.alternatives = []
         if self.raw_roles is None:
             self.raw_roles = {}
+        assert isinstance(self.modifiers, list) and isinstance(self.alternatives, list), "parsed sentence lists must be materialized because downstream code mutates them during interpretation"
 
 
 # ANCHOR: SYNTACTIC_PROCESSOR - Broca's area implementation
@@ -111,10 +119,40 @@ class SyntacticProcessor:
         'move': 'to',
         'moves': 'to',
         'moved': 'to',
+        'travel': 'to',
+        'travels': 'to',
+        'travelled': 'to',
+        'traveled': 'to',
+        'journey': 'to',
+        'journeys': 'to',
+        'journeyed': 'to',
+        'walk': 'to',
+        'walks': 'to',
+        'walked': 'to',
+        'run': 'to',
+        'runs': 'to',
+        'ran': 'to',
         'orbit': 'around',  # X orbits AROUND Y
         'orbits': 'around',
         'revolve': 'around',
         'revolves': 'around',
+    }
+    
+    # Possession / interaction verbs
+    POSSESSION_VERBS = {
+        'get', 'gets', 'got',
+        'take', 'takes', 'took',
+        'grab', 'grabs', 'grabbed',
+        'pick', 'picks', 'picked',
+        'drop', 'drops', 'dropped',
+        'discard', 'discards', 'discarded',
+        'leave', 'leaves', 'left',
+        'put', 'puts',
+    }
+    TRANSFER_VERBS = {
+        'give', 'gives', 'gave',
+        'hand', 'hands', 'handed',
+        'pass', 'passes', 'passed',
     }
     
     # Comparative structures
@@ -142,10 +180,53 @@ class SyntacticProcessor:
         'onto': 'toward',
         'than': 'comparison',
     }
+    LOCATIVE_PREPS = {
+        'in', 'at', 'on', 'inside', 'outside', 'under', 'above',
+        'below', 'behind', 'near', 'beside', 'between'
+    }
+    SPATIAL_RELATIONS = {'north', 'south', 'east', 'west', 'above', 'below'}
+    SPATIAL_RELATION_PHRASES = {
+        ('to', 'the', 'left', 'of'): 'left',
+        ('to', 'the', 'right', 'of'): 'right',
+    }
     
     def __init__(self):
         """Initialize Broca's area processor."""
         pass
+
+    # ANCHOR: CANONICALIZE_QUERY_NOUN_TOKENS
+    # API_PRIVATE
+    def _canonicalize_query_noun_tokens(self, tokens: List[str]) -> List[str]:
+        """
+        Reduce regular plural query nouns to canonical concept forms.
+
+        Intent:
+            During syntactic reanalysis, Broca should hand downstream retrieval a
+            concept-level noun form for category questions so plural surface
+            morphology does not bias recall toward unrelated plural episodes.
+
+        Args:
+            tokens: Subject or category noun tokens.
+
+        Returns:
+            Canonicalized token list.
+
+        Raises:
+            AssertionError: If tokens is None.
+        """
+        assert tokens is not None, "tokens cannot be None because Broca reanalysis needs explicit lexical material to canonicalize"
+        canonical_tokens: List[str] = []
+        for token in tokens:
+            canonical = token
+            if len(token) > 4 and token.endswith('ies'):
+                canonical = token[:-3] + 'y'
+            elif len(token) > 4 and token.endswith(('ches', 'shes', 'xes', 'zes', 'ses')):
+                canonical = token[:-2]
+            elif len(token) > 3 and token.endswith('s') and not token.endswith('ss'):
+                canonical = token[:-1]
+            canonical_tokens.append(canonical)
+        assert len(canonical_tokens) == len(tokens), "canonicalization must preserve token count because Broca reanalysis should transform morphology, not delete constituents"
+        return canonical_tokens
     
     # ANCHOR: NORMALIZE_QUESTION - Phase 3 reanalysis (Friederici 2011)
     # API_PUBLIC
@@ -202,7 +283,8 @@ class SyntacticProcessor:
         if words[0] in self.QUESTION_WORDS or words[0] in self.COPULA:
             # BIOLOGY: "kind of" is a classifier construction (Croft 2001)
             # "What kind of food is an apple?" → "What is an apple?"
-            if len(words) >= 5 and words[0] == 'what' and words[1] == 'kind' and words[2] == 'of':
+            CLASSIFIER_STARTS = {'kind', 'type', 'sort', 'state', 'category'}
+            if len(words) >= 5 and words[0] == 'what' and words[1] in CLASSIFIER_STARTS and words[2] == 'of':
                 for i in range(3, len(words)):
                     if words[i] in self.COPULA:
                         subject_words = words[i+1:]
@@ -228,11 +310,13 @@ class SyntacticProcessor:
                 to_idx = words.index('to')
                 if to_idx == use_idx + 1 and to_idx + 1 < len(words):
                     verb = words[to_idx + 1]
+                    verb_tail = words[to_idx + 2:]
                     for i, w in enumerate(words):
                         if w in ('do', 'does'):
                             subject = [s for s in words[i+1:use_idx]
                                        if s not in ('a', 'an', 'the')]
-                            return f"what do {' '.join(subject)} {verb} with"
+                            tail = f" {' '.join(verb_tail)}" if verb_tail else ""
+                            return f"what do {' '.join(subject)} {verb}{tail} with"
             
             # "What time of day do people wake up?" → "When do people wake up?"
             if len(words) >= 5 and words[0] == 'what' and words[1] == 'time':
@@ -253,7 +337,7 @@ class SyntacticProcessor:
         
         # CHUNK_START: inverted_wh_questions
         # Pattern: "X is/are what (Y)?" → "What Y is X?"
-        # BIOLOGY (Trace Deletion, Grodzinsky 2000): recover moved WH-word
+        # BIOLOGY: Same trace deletion — recover moved WH-word
         if 'what' in words:
             what_idx = words.index('what')
             
@@ -301,8 +385,15 @@ class SyntacticProcessor:
                         # These are metalinguistic frames, not semantic content.
                         # The brain extracts the RELATION, discarding the classifier frame.
                         CLASSIFIER_STARTS = {'kind', 'type', 'sort', 'state', 'category'}
+                        classifier_between = [w for w in between if w not in ('a', 'an', 'the')]
+                        if classifier_between and classifier_between[0] in CLASSIFIER_STARTS:
+                            between = []
                         if after_what and after_what[0] in CLASSIFIER_STARTS:
                             after_what = []  # Strip entire classifier phrase
+                        if not after_what and not between:
+                            subject_words = self._canonicalize_query_noun_tokens(subject_words)
+                            if len(subject_words) == 1:
+                                copula = 'is'
                         
                         parts = ['what']
                         if after_what:
@@ -316,16 +407,26 @@ class SyntacticProcessor:
                 # "Dogs make what sound?" → "What does dogs say?"
                 # "Dogs belong to what category?" → "What is dogs?"
                 # BIOLOGY: Synonym mapping (Angular Gyrus BA39)
-                VERBS_BEFORE_WHAT = {'make', 'makes', 'belong', 'belongs', 'produce', 'produces'}
+                if what_idx >= 3 and words[what_idx - 1] == 'using':
+                    subject_words = [w for w in words[:what_idx - 2]
+                                     if w not in ('a', 'an', 'the')]
+                    if subject_words:
+                        subject_words = self._canonicalize_query_noun_tokens(subject_words)
+                        return f"what do {' '.join(subject_words)} {words[what_idx - 2]} with"
+
+                VERBS_BEFORE_WHAT = {'make', 'makes', 'belong', 'belongs', 'produce', 'produces', 'say', 'says'}
                 for i in range(what_idx):
                     if words[i] in VERBS_BEFORE_WHAT:
                         subject_words = [w for w in words[:i]
                                          if w not in ('a', 'an', 'the')]
                         if subject_words:
+                            subject_words = self._canonicalize_query_noun_tokens(subject_words)
                             verb = words[i]
                             after_what = words[what_idx + 1:]
                             # "make sound" → "say" (synonym mapping)
                             if verb in ('make', 'makes') and 'sound' in after_what:
+                                return f"what does {' '.join(subject_words)} say"
+                            if verb in ('say', 'says'):
                                 return f"what does {' '.join(subject_words)} say"
                             # "belong to category" → "is" (metalinguistic → copula)
                             if verb in ('belong', 'belongs'):
@@ -462,6 +563,7 @@ class SyntacticProcessor:
         result = ParsedSentence()
         result.raw_roles = {}
         
+        assert words is not None, "words cannot be None because statement parsing needs a token sequence"
         if not words:
             return result
         
@@ -469,10 +571,8 @@ class SyntacticProcessor:
         if words[0] in self.QUESTION_WORDS:
             result = self._parse_question(words, result)
         elif words[0] in self.COPULA:
-            # "Is X Y?" type question
             result = self._parse_copula_question(words, result)
         else:
-            # Statement
             result = self._parse_statement(words, result)
         
         # Postcondition
@@ -495,6 +595,157 @@ class SyntacticProcessor:
         q_word = words[0]
         result.question_focus = self.QUESTION_WORDS.get(q_word, 'unknown')
         result.raw_roles[q_word] = SyntacticRole.QUESTION_FOCUS
+
+        if q_word == 'where' and len(words) >= 4 and words[1] in ('will', 'would'):
+            subject_idx = 2
+            while subject_idx < len(words) and words[subject_idx] in ('a', 'an', 'the'):
+                subject_idx += 1
+            if subject_idx < len(words):
+                result.subject = words[subject_idx]
+                result.raw_roles[words[subject_idx]] = SyntacticRole.SUBJECT
+            verb_idx = subject_idx + 1
+            if verb_idx < len(words) and words[verb_idx] in self.DIRECTIONAL_VERBS:
+                result.question_focus = 'motivation_destination'
+                result.verb = words[verb_idx]
+                result.raw_roles[words[verb_idx]] = SyntacticRole.VERB
+                return result
+
+        if q_word == 'why' and len(words) >= 5 and words[1] in ('did', 'does', 'do'):
+            subject_idx = 2
+            while subject_idx < len(words) and words[subject_idx] in ('a', 'an', 'the'):
+                subject_idx += 1
+            if subject_idx < len(words):
+                result.subject = words[subject_idx]
+                result.raw_roles[words[subject_idx]] = SyntacticRole.SUBJECT
+            action_idx = subject_idx + 1
+            if action_idx < len(words) and words[action_idx] in self.DIRECTIONAL_VERBS:
+                result.question_focus = 'motivation_reason'
+                result.verb = words[action_idx]
+                result.raw_roles[words[action_idx]] = SyntacticRole.VERB
+                for i in range(action_idx + 1, len(words)):
+                    if words[i] not in self.DIRECTIONAL_PREPS and words[i] not in self.LOCATIVE_PREPS:
+                        continue
+                    object_idx = i + 1
+                    while object_idx < len(words) and words[object_idx] in ('a', 'an', 'the'):
+                        object_idx += 1
+                    if object_idx < len(words):
+                        result.object = words[object_idx]
+                        result.raw_roles[words[object_idx]] = SyntacticRole.OBJECT
+                        if result.subject:
+                            result.relation_direction = (result.subject, result.object)
+                    return result
+            if action_idx < len(words) and words[action_idx] in self.POSSESSION_VERBS:
+                result.question_focus = 'motivation_reason'
+                result.verb = words[action_idx]
+                result.raw_roles[words[action_idx]] = SyntacticRole.VERB
+                for i in range(action_idx + 1, len(words)):
+                    if words[i] in ('a', 'an', 'the', 'there', 'down', 'up', 'back'):
+                        continue
+                    result.object = words[i]
+                    result.raw_roles[words[i]] = SyntacticRole.OBJECT
+                    break
+                return result
+
+        if (
+            q_word == 'how'
+            and len(words) >= 6
+            and words[1] == 'many'
+            and words[2] == 'objects'
+            and words[3] in self.COPULA
+            and words[-1] == 'carrying'
+        ):
+            result.question_focus = 'carrying_count'
+            result.verb = 'carrying'
+            result.raw_roles['carrying'] = SyntacticRole.VERB
+            for i in range(4, len(words) - 1):
+                if words[i] not in ('a', 'an', 'the'):
+                    result.subject = words[i]
+                    result.raw_roles[words[i]] = SyntacticRole.SUBJECT
+                    break
+            return result
+
+        if q_word == 'what' and len(words) >= 4 and words[1] in self.COPULA and words[-1] == 'carrying':
+            result.question_focus = 'carrying_list'
+            result.verb = 'carrying'
+            result.raw_roles['carrying'] = SyntacticRole.VERB
+            for i in range(2, len(words) - 1):
+                if words[i] not in ('a', 'an', 'the'):
+                    result.subject = words[i]
+                    result.raw_roles[words[i]] = SyntacticRole.SUBJECT
+                    break
+            return result
+
+        if q_word == 'what' and len(words) >= 6 and words[1] in ('does', 'do', 'did'):
+            subject_idx = 2
+            if words[subject_idx] in ('a', 'an', 'the'):
+                subject_idx += 1
+            if subject_idx < len(words):
+                result.subject = words[subject_idx]
+                result.raw_roles[words[subject_idx]] = SyntacticRole.SUBJECT
+            if subject_idx + 1 < len(words) and words[subject_idx + 1] in self.TRANSFER_VERBS:
+                result.question_focus = 'transfer_object'
+                result.verb = words[subject_idx + 1]
+                result.raw_roles[result.verb] = SyntacticRole.VERB
+                if 'to' in words[subject_idx + 2:]:
+                    to_idx = words.index('to', subject_idx + 2)
+                    receiver_idx = to_idx + 1
+                    while receiver_idx < len(words) and words[receiver_idx] in ('a', 'an', 'the'):
+                        receiver_idx += 1
+                    if receiver_idx < len(words):
+                        result.indirect_object = words[receiver_idx]
+                        result.raw_roles[words[receiver_idx]] = SyntacticRole.OBJECT
+                return result
+
+        if q_word == 'who' and len(words) >= 4 and words[1] == 'received':
+            result.question_focus = 'transfer_receiver'
+            result.verb = 'received'
+            result.raw_roles['received'] = SyntacticRole.VERB
+            object_idx = 2
+            while object_idx < len(words) and words[object_idx] in ('a', 'an', 'the'):
+                object_idx += 1
+            if object_idx < len(words):
+                result.object = words[object_idx]
+                result.raw_roles[words[object_idx]] = SyntacticRole.OBJECT
+            return result
+
+        if q_word == 'who' and len(words) >= 4 and words[1] in self.TRANSFER_VERBS:
+            result.question_focus = 'transfer_giver'
+            result.verb = words[1]
+            result.raw_roles[words[1]] = SyntacticRole.VERB
+            object_idx = 2
+            while object_idx < len(words) and words[object_idx] in ('a', 'an', 'the'):
+                object_idx += 1
+            if object_idx < len(words):
+                result.object = words[object_idx]
+                result.raw_roles[words[object_idx]] = SyntacticRole.OBJECT
+            if 'to' in words[object_idx + 1:]:
+                to_idx = words.index('to', object_idx + 1)
+                receiver_idx = to_idx + 1
+                while receiver_idx < len(words) and words[receiver_idx] in ('a', 'an', 'the'):
+                    receiver_idx += 1
+                if receiver_idx < len(words):
+                    result.indirect_object = words[receiver_idx]
+                    result.raw_roles[words[receiver_idx]] = SyntacticRole.OBJECT
+            return result
+
+        if q_word == 'who' and len(words) >= 7 and words[1] in ('does', 'do', 'did'):
+            subject_idx = 2
+            if words[subject_idx] in ('a', 'an', 'the'):
+                subject_idx += 1
+            if subject_idx < len(words):
+                result.subject = words[subject_idx]
+                result.raw_roles[words[subject_idx]] = SyntacticRole.SUBJECT
+            if subject_idx + 1 < len(words) and words[subject_idx + 1] in self.TRANSFER_VERBS:
+                result.question_focus = 'transfer_receiver'
+                result.verb = words[subject_idx + 1]
+                result.raw_roles[result.verb] = SyntacticRole.VERB
+                object_idx = subject_idx + 2
+                while object_idx < len(words) and words[object_idx] in ('a', 'an', 'the'):
+                    object_idx += 1
+                if object_idx < len(words):
+                    result.object = words[object_idx]
+                    result.raw_roles[words[object_idx]] = SyntacticRole.OBJECT
+                return result
         
         # "What happens when X?" pattern — CAUSE-EFFECT questions
         # BIOLOGY: Causal reasoning is fundamental to cognition
@@ -521,6 +772,32 @@ class SyntacticProcessor:
             result.verb = 'happens'
             result.raw_roles['happens'] = SyntacticRole.VERB
             return result
+
+        if (
+            q_word == 'where'
+            and len(words) >= 5
+            and words[1] in self.COPULA
+            and any(marker in words for marker in ('before', 'after'))
+        ):
+            temporal_idx = next(i for i, token in enumerate(words) if token in ('before', 'after'))
+            result.verb = words[1]
+            result.raw_roles[words[1]] = SyntacticRole.VERB
+            result.modifiers.append(words[temporal_idx])
+            result.raw_roles[words[temporal_idx]] = SyntacticRole.CONNECTOR
+
+            for i in range(2, temporal_idx):
+                if words[i] not in self.COPULA and words[i] not in ('a', 'an', 'the'):
+                    result.subject = words[i]
+                    result.raw_roles[words[i]] = SyntacticRole.SUBJECT
+                    break
+
+            reference_idx = temporal_idx + 1
+            while reference_idx < len(words) and words[reference_idx] in ('a', 'an', 'the'):
+                reference_idx += 1
+            if reference_idx < len(words):
+                result.object = words[reference_idx]
+                result.raw_roles[words[reference_idx]] = SyntacticRole.OBJECT
+            return result
         
         # "What does X verb Y?" pattern
         if len(words) >= 4 and words[1] in ('does', 'do', 'did'):
@@ -528,6 +805,7 @@ class SyntacticProcessor:
             subject_idx = 2
             if words[subject_idx] in ('a', 'an', 'the'):
                 subject_idx = 3
+        
             if subject_idx < len(words):
                 result.subject = words[subject_idx]
                 result.raw_roles[words[subject_idx]] = SyntacticRole.SUBJECT
@@ -570,6 +848,59 @@ class SyntacticProcessor:
                     result.raw_roles[words[i]] = SyntacticRole.SUBJECT
                     break
         
+        if q_word == 'what' and len(words) >= 5 and words[1] in self.COPULA:
+            if words[2] in self.SPATIAL_RELATIONS and 'of' in words[3:]:
+                result.question_focus = 'spatial_relation'
+                result.predicate = words[2]
+                result.raw_roles[words[2]] = SyntacticRole.PREDICATE
+                object_idx = words.index('of', 3) + 1
+                while object_idx < len(words) and words[object_idx] in ('a', 'an', 'the'):
+                    object_idx += 1
+                if object_idx < len(words):
+                    result.object = words[object_idx]
+                    result.raw_roles[words[object_idx]] = SyntacticRole.OBJECT
+                return result
+
+            for phrase_tokens, relation_name in self.SPATIAL_RELATION_PHRASES.items():
+                phrase_length = len(phrase_tokens)
+                if words[2:2 + phrase_length] == list(phrase_tokens):
+                    result.question_focus = 'spatial_relation'
+                    result.predicate = relation_name
+                    result.raw_roles[relation_name] = SyntacticRole.PREDICATE
+                    object_idx = 2 + phrase_length
+                    while object_idx < len(words) and words[object_idx] in ('a', 'an', 'the'):
+                        object_idx += 1
+                    if object_idx < len(words):
+                        result.object = words[object_idx]
+                        result.raw_roles[words[object_idx]] = SyntacticRole.OBJECT
+                    return result
+
+            if words[-1] == 'of' and len(words) >= 5:
+                relation_token = words[-2]
+                if relation_token in self.SPATIAL_RELATIONS:
+                    result.question_focus = 'spatial_relation'
+                    result.predicate = relation_token
+                    result.raw_roles[relation_token] = SyntacticRole.PREDICATE
+                    for i in range(2, len(words) - 2):
+                        if words[i] not in ('a', 'an', 'the'):
+                            result.subject = words[i]
+                            result.raw_roles[words[i]] = SyntacticRole.SUBJECT
+                            break
+                    return result
+
+            for phrase_tokens, relation_name in self.SPATIAL_RELATION_PHRASES.items():
+                phrase_length = len(phrase_tokens)
+                if words[-phrase_length:] == list(phrase_tokens):
+                    result.question_focus = 'spatial_relation'
+                    result.predicate = relation_name
+                    result.raw_roles[relation_name] = SyntacticRole.PREDICATE
+                    for i in range(2, len(words) - phrase_length):
+                        if words[i] not in ('a', 'an', 'the'):
+                            result.subject = words[i]
+                            result.raw_roles[words[i]] = SyntacticRole.SUBJECT
+                            break
+                    return result
+        
         return result
     
     # ANCHOR: PARSE_COPULA_QUESTION - parse "Is X Y?" questions
@@ -582,6 +913,7 @@ class SyntacticProcessor:
         - "Is winter cold or hot?" → subject=winter, focus=property_choice
         - "Is a turtle faster than a rabbit?" → subject=turtle, comparison=rabbit
         """
+        assert words is not None, "words cannot be None because copula-question parsing needs a token sequence"
         if len(words) < 3:
             return result
         
@@ -596,6 +928,24 @@ class SyntacticProcessor:
         if subject_idx < len(words):
             result.subject = words[subject_idx]
             result.raw_roles[words[subject_idx]] = SyntacticRole.SUBJECT
+
+        locative_idx = subject_idx + 1
+        if locative_idx < len(words) and words[locative_idx] == 'not':
+            locative_idx += 1
+        if locative_idx < len(words) and words[locative_idx] in self.LOCATIVE_PREPS:
+            result.question_focus = 'location_polar'
+            result.predicate = words[locative_idx]
+            result.raw_roles[words[locative_idx]] = SyntacticRole.PREDICATE
+            object_idx = locative_idx + 1
+            while object_idx < len(words) and words[object_idx] in ('a', 'an', 'the'):
+                object_idx += 1
+            if object_idx < len(words):
+                result.object = words[object_idx]
+                result.raw_roles[words[object_idx]] = SyntacticRole.OBJECT
+                if result.subject:
+                    result.relation_direction = (result.subject, result.object)
+            assert result.question_focus == 'location_polar', "locative copula questions must be marked explicitly because downstream yes/no routing depends on it"
+            return result
         
         # Check for comparative "than"
         if 'than' in words:
@@ -605,7 +955,6 @@ class SyntacticProcessor:
                 if words[i] in self.COMPARATIVES:
                     result.predicate = words[i]
                     result.raw_roles[words[i]] = SyntacticRole.PREDICATE
-                    break
             
             # Object is after "than"
             obj_idx = than_idx + 1
@@ -630,6 +979,7 @@ class SyntacticProcessor:
             
             result.question_focus = 'binary_choice'
         
+        assert result is not None, "copula-question parsing must return a ParsedSentence because downstream retrieval expects structured syntax"
         return result
     
     # ANCHOR: PARSE_STATEMENT - parse declarative sentences
@@ -642,6 +992,7 @@ class SyntacticProcessor:
         - "The Earth goes around the Sun" → subject=Earth, verb=goes, object=Sun, direction=(Earth, Sun)
         - "Ice is frozen water" → subject=ice, predicate=frozen water
         """
+        assert words is not None, "words cannot be None because statement parsing needs a token sequence"
         if not words:
             return result
         
@@ -660,7 +1011,7 @@ class SyntacticProcessor:
         # Find verb
         for i in range(start_idx + 1, len(words)):
             word = words[i]
-            if word in self.COPULA or word in self.DIRECTIONAL_VERBS:
+            if word in self.COPULA or word in self.DIRECTIONAL_VERBS or word in self.POSSESSION_VERBS or word in self.TRANSFER_VERBS:
                 result.verb = word
                 result.raw_roles[word] = SyntacticRole.VERB
                 
@@ -672,11 +1023,101 @@ class SyntacticProcessor:
                 
                 if remaining:
                     if word in self.COPULA:
-                        result.predicate = ' '.join(remaining)
-                    else:
-                        result.object = remaining[-1] if remaining else None
-                        if result.object:
+                        locative_tokens = list(remaining)
+                        if locative_tokens[:2] == ['no', 'longer']:
+                            result.is_negated = True
+                            result.modifiers.append('no_longer')
+                            locative_tokens = locative_tokens[2:]
+                        elif locative_tokens and locative_tokens[0] == 'not':
+                            result.is_negated = True
+                            result.modifiers.append('not')
+                            locative_tokens = locative_tokens[1:]
+
+                        if locative_tokens and locative_tokens[0] == 'either':
+                            result.modifiers.append('either')
+                            locative_tokens = locative_tokens[1:]
+                            if locative_tokens and locative_tokens[0] in self.LOCATIVE_PREPS:
+                                result.predicate = locative_tokens[0]
+                                result.raw_roles[locative_tokens[0]] = SyntacticRole.PREDICATE
+                                option_buffer: List[str] = []
+                                for token in locative_tokens[1:]:
+                                    if token == 'or':
+                                        if option_buffer:
+                                            result.alternatives.append(option_buffer[-1])
+                                            option_buffer = []
+                                        continue
+                                    option_buffer.append(token)
+                                if option_buffer:
+                                    result.alternatives.append(option_buffer[-1])
+                                if result.alternatives:
+                                    result.object = result.alternatives[0]
+                                    result.raw_roles[result.object] = SyntacticRole.OBJECT
+                            else:
+                                result.predicate = ' '.join(['either'] + locative_tokens)
+                        elif locative_tokens and locative_tokens[0] in self.SPATIAL_RELATIONS and locative_tokens[1] == 'of':
+                            result.predicate = locative_tokens[0]
+                            result.raw_roles[locative_tokens[0]] = SyntacticRole.PREDICATE
+                            result.object = locative_tokens[2]
                             result.raw_roles[result.object] = SyntacticRole.OBJECT
+                            if result.subject:
+                                result.relation_direction = (result.subject, result.object)
+                        elif locative_tokens and locative_tokens[0] in self.LOCATIVE_PREPS:
+                            result.predicate = locative_tokens[0]
+                            result.raw_roles[locative_tokens[0]] = SyntacticRole.PREDICATE
+                            if len(locative_tokens) > 1:
+                                result.object = locative_tokens[1]
+                                result.raw_roles[result.object] = SyntacticRole.OBJECT
+                                if result.subject and not result.is_negated:
+                                    result.relation_direction = (result.subject, result.object)
+                        else:
+                            matched_spatial_phrase = False
+                            for phrase_tokens, relation_name in self.SPATIAL_RELATION_PHRASES.items():
+                                phrase_length = len(phrase_tokens)
+                                if locative_tokens[:phrase_length] == list(phrase_tokens) and len(locative_tokens) > phrase_length:
+                                    result.predicate = relation_name
+                                    result.raw_roles[relation_name] = SyntacticRole.PREDICATE
+                                    result.object = locative_tokens[phrase_length]
+                                    result.raw_roles[result.object] = SyntacticRole.OBJECT
+                                    if result.subject:
+                                        result.relation_direction = (result.subject, result.object)
+                                    matched_spatial_phrase = True
+                                    break
+                            if matched_spatial_phrase:
+                                pass
+                            else:
+                                result.predicate = ' '.join(remaining)
+                    else:
+                        # For possession/directional verbs, object is the remaining phrase
+                        # We might need to handle "put down the football" vs "got the football there"
+                        # For now just grab the first content noun if it exists
+                        # "got the football there" -> object = football
+                        # "put down the football" -> object = football
+                        if word in self.TRANSFER_VERBS:
+                            if 'to' in remaining:
+                                to_idx = remaining.index('to')
+                                transfer_object_tokens = [token for token in remaining[:to_idx] if token not in ('there', 'down', 'up', 'back')]
+                                if transfer_object_tokens:
+                                    result.object = transfer_object_tokens[0]
+                                    result.raw_roles[result.object] = SyntacticRole.OBJECT
+                                receiver_idx = to_idx + 1
+                                while receiver_idx < len(remaining) and remaining[receiver_idx] in ('a', 'an', 'the'):
+                                    receiver_idx += 1
+                                if receiver_idx < len(remaining):
+                                    result.indirect_object = remaining[receiver_idx]
+                                    result.raw_roles[result.indirect_object] = SyntacticRole.OBJECT
+                            elif remaining:
+                                result.object = remaining[0]
+                                result.raw_roles[result.object] = SyntacticRole.OBJECT
+                        elif word in self.POSSESSION_VERBS:
+                            for w in remaining:
+                                if w not in ('there', 'down', 'up', 'back'):
+                                    result.object = w
+                                    result.raw_roles[w] = SyntacticRole.OBJECT
+                                    break
+                        else:
+                            result.object = remaining[-1] if remaining else None
+                            if result.object:
+                                result.raw_roles[result.object] = SyntacticRole.OBJECT
                 
                 # Set direction for directional verbs
                 if word in self.DIRECTIONAL_VERBS and result.object:
@@ -684,6 +1125,7 @@ class SyntacticProcessor:
                 
                 break
         
+        assert result is not None, "statement parsing must return a ParsedSentence because downstream memory routing expects structured syntax"
         return result
     
     # ANCHOR: GET_SUBJECT - extract subject from question

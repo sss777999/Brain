@@ -1,6 +1,6 @@
 # Brain Model Test Results
 
-**Date:** February 21, 2026 (auto-generated)
+**Date:** April 17, 2026 (auto-generated)
 **Model:** brain_model
 **Training:** curriculum → preschool → grade1 → bAbI → FineWeb-Edu
 
@@ -27,36 +27,28 @@
 
 | Test Suite | Passed | Total | Accuracy | Time | Description |
 |------------|--------|-------|----------|------|-------------|
-| **CURRICULUM** | 50 | 50 | **100.0%** | 60.3s | Core knowledge tests |
-| **STRICT** | 3 | 3 | **100.0%** | 4.8s | "I do not know" tests |
-| **PRESCHOOL** | 48 | 48 | **100.0%** | 58.8s | Ages 3-6 knowledge |
-| **GRADE1** | 64 | 64 | **100.0%** | 93.4s | Grade 1 world knowledge |
-| **FINEWEB** | 9 | 9 | **100.0%** | 10.3s | Educational text facts |
-| **PARAPHRASE** | 50 | 50 | **100.0%** | 57.2s | Surface form robustness |
-| **TOTAL** | **224** | **224** | **100.0%** | | All tests combined |
+| **CURRICULUM** | 49 | 50 | **98.0%** | 35.4s | Core knowledge tests |
+| **STRICT** | 3 | 3 | **100.0%** | 2.0s | "I do not know" tests |
+| **TOTAL** | **52** | **53** | **98.1%** | | All tests combined |
 
 ---
 
 ## Baseline Comparison
 
-QA baselines (TF-IDF, BM25) trained on **identical data**. Working memory baselines (MemNet, NTM) tested on bAbI Task 1 only.
+QA baselines (TF-IDF, BM25) trained on **identical data**. Working memory baselines (MemNet, NTM) tested on all bAbI tasks.
+QA SUITE AVG is a macro-average across QA suites, not weighted by question count.
 
 | Test | Brain | TF-IDF | BM25 | MemNet | NTM |
 |------|-------|--------|------|--------|-----|
-| CURRICULUM | **100.0%** | 64.0% | 70.0% | N/A | N/A |
+| CURRICULUM | **98.0%** | 64.0% | 70.0% | N/A | N/A |
 | STRICT | **100.0%** | 33.3% | 33.3% | N/A | N/A |
-| PRESCHOOL | **100.0%** | 81.2% | 87.5% | N/A | N/A |
-| GRADE1 | **100.0%** | 68.8% | 71.9% | N/A | N/A |
-| FINEWEB | **100.0%** | 11.1% | 33.3% | N/A | N/A |
-| PARAPHRASE | **100.0%** | 48.0% | 48.0% | N/A | N/A |
-| **QA AVG** | **100.0%** | **51.1%** | **57.3%** | N/A | N/A |
+| **QA SUITE AVG** | **99.0%** | **48.7%** | **51.7%** | N/A | N/A |
 
 *bAbI requires working memory — TF-IDF/BM25 cannot track entity states. MemNet/NTM tested on all 20 tasks.*
 
 ### Key Findings
 
-1. **Brain significantly outperforms simple IR methods** (+48-88%)
-3. **Paraphrase robustness** — 100% accuracy on surface form variation
+1. **Brain significantly outperforms simple IR methods** (+50-66%)
 4. **"I don't know" capability** — Brain correctly abstains on unknown queries
 
 
@@ -64,7 +56,10 @@ QA baselines (TF-IDF, BM25) trained on **identical data**. Working memory baseli
 
 ## Failed Tests Analysis
 
-**No failures!** All tests pass at 100%.
+### CURRICULUM (1 failures)
+| Question | Brain Answer | Expected |
+|----------|--------------|----------|
+| What is the moon? | and stars appear in the sky at night | ['satellite', 'round', 'night'] |
 
 ---
 
@@ -75,7 +70,7 @@ QA baselines (TF-IDF, BM25) trained on **identical data**. Working memory baseli
 python train.py
 
 # Run all tests with baseline comparison
-python test_brain.py --no-gpt --no-llm
+python test_brain.py --no-gpt --no-llm --babi-limit 5
 
 # Run specific test suite
 python test_brain.py --curriculum --no-gpt --no-llm

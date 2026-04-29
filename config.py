@@ -523,4 +523,14 @@ def print_config():
     print("=" * 60)
     for key, value in CONFIG.items():
         print(f"  {key}: {value}")
-    print("=" * 60)
+
+
+# ANCHOR: CONFIG_LEARNED_SDR_OVERLAP - semantic overlap via Hebbian learning
+#
+# BIOLOGY: Content-content co-activation builds overlapping distributed codes
+# (McClelland et al. 1995, Binder et al. 2009). Fractions are intentionally
+# small — each promotion adds at most fraction * SDR_NUM_ACTIVE shared bits;
+# the _learned_overlaps cache saturates naturally at the set-size cap.
+
+SDR_LEARN_OVERLAP_ON_USED: float = 0.05        # ~2 bits at SDR_NUM_ACTIVE=40
+SDR_LEARN_OVERLAP_ON_MYELINATED: float = 0.15  # ~6 bits at SDR_NUM_ACTIVE=40

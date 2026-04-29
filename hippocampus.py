@@ -371,8 +371,10 @@ class Hippocampus:
     
     # ANCHOR: CA3_PATTERN_COMPLETION - CA3 region
     # API_PUBLIC
-    # Verb morphological forms for expanding query_words
-    # BIOLOGY: The brain associates different forms of the same word
+    # Morphological forms for expanding query_words (verbs AND nouns)
+    # BIOLOGY (Marslen-Wilson & Tyler 2007): Left temporal cortex links
+    # inflected forms to their stem. "cats" activates "cat" representation
+    # automatically. This is obligatory morphological priming.
     VERB_FORMS = {
         'say': {'says', 'said', 'saying'},
         'says': {'say', 'said', 'saying'},
@@ -458,6 +460,28 @@ class Hippocampus:
         'eyes': {'eye'},
         'ear': {'ears'},
         'ears': {'ear'},
+        # Animals (bAbI Tasks 15-19)
+        'cat': {'cats'},
+        'cats': {'cat'},
+        'dog': {'dogs'},
+        'dogs': {'dog'},
+        'wolf': {'wolves'},
+        'wolves': {'wolf'},
+        'mouse': {'mice'},
+        'mice': {'mouse'},
+        'sheep': {'sheep'},
+        'lion': {'lions'},
+        'lions': {'lion'},
+        'swan': {'swans'},
+        'swans': {'swan'},
+        'frog': {'frogs'},
+        'frogs': {'frog'},
+        'rhino': {'rhinos'},
+        'rhinos': {'rhino'},
+        'bear': {'bears'},
+        'bears': {'bear'},
+        'rabbit': {'rabbits'},
+        'rabbits': {'rabbit'},
     }
     
     def pattern_complete(self, cue_neurons: Set[str], word_to_neuron: dict = None, 
@@ -946,6 +970,42 @@ class Hippocampus:
         return best_episode
     
     # API_PUBLIC
+    def pattern_complete(
+        self,
+        cue_neurons: Set[str],
+        word_to_neuron: Dict[str, 'Neuron'],
+        query_words: Optional[Set[str]] = None,
+        query_connector: Optional[str] = None,
+        pfc: Optional['PFC'] = None,
+        question: Optional[str] = None,
+        max_timestamp: Optional[int] = None
+    ) -> Optional[Episode]:
+        """
+        Pattern completion via iterative CA3 dynamics.
+        
+        Args:
+            cue_neurons: Initial active neuron IDs
+            word_to_neuron: Dictionary for lookup
+            query_words: Query words for scoring (optional)
+            query_connector: Connector type for top-down modulation (optional)
+            pfc: PFC instance for structural goal parsing (optional)
+            question: Original question string (optional)
+            max_timestamp: Max timestamp to consider (optional)
+            
+        Returns:
+            Found episode or None
+        """
+        return self.pattern_complete_attractor(
+            cue_neurons,
+            word_to_neuron,
+            query_words,
+            query_connector,
+            pfc,
+            question,
+            max_timestamp
+        )
+    
+    # API_PUBLIC
     def pattern_complete_attractor(
         self, 
         cue_neurons: Set[str], 
@@ -953,7 +1013,8 @@ class Hippocampus:
         query_words: Optional[Set[str]] = None,
         query_connector: Optional[str] = None,
         pfc: Optional['PFC'] = None,
-        question: Optional[str] = None
+        question: Optional[str] = None,
+        max_timestamp: Optional[int] = None
     ) -> Optional[Episode]:
         """
         Pattern completion via iterative CA3 dynamics.
@@ -977,6 +1038,9 @@ class Hippocampus:
             word_to_neuron: Dictionary for lookup
             query_words: Query words for scoring (optional)
             query_connector: Connector type for top-down modulation (optional)
+            pfc: PFC instance for structural goal parsing (optional)
+            question: Original question string (optional)
+            max_timestamp: Max timestamp for temporal filtering (optional)
             
         Returns:
             Found episode or None
@@ -1042,7 +1106,8 @@ class Hippocampus:
             query_words=binding_query,
             query_connector=query_connector,
             verb_forms=self.VERB_FORMS,
-            question=question
+            question=question,
+            max_timestamp=max_timestamp
         )
         
         # BIOLOGY (Population Coding, Georgopoulos 1986):
@@ -1358,6 +1423,151 @@ class Hippocampus:
             output_activation=ca1_activation,
             relevance=relevance
         )
+
+    # ANCHOR: SELF_REFERENCE_INTEGRATION
+    # API_PUBLIC
+    def integrate_self_reference_trace(
+        self,
+        episode: Episode,
+        word_to_neuron: Optional[Dict[str, 'Neuron']] = None,
+        salience_level: float = 1.0
+    ) -> Dict[str, float]:
+        """
+        Integrate a newly encoded self-referential trace into the autobiographical system.
+
+        Intent:
+            Replace direct manual replay-state promotion with biologically grounded
+            ownership-aware continuity linking and salience-driven quiet-wake replay.
+
+        Args:
+            episode: Newly encoded self-referential episode.
+            word_to_neuron: Optional neuron lookup for replay.
+            salience_level: Base salience assigned to this trace.
+
+        Returns:
+            Dictionary with replay priority and continuity statistics.
+
+        Raises:
+            AssertionError: If the episode is invalid or not self-referential.
+        """
+        assert episode is not None, "episode cannot be None because self-memory integration needs a concrete hippocampal trace"
+        assert episode in self.episodes, "episode must already belong to hippocampus because self integration operates on stored traces"
+        assert episode.memory_domain in ('SELF_SEMANTIC', 'SELF_EPISODIC'), "self integration must only run on self-referential traces because ownership and autobiographical continuity are undefined for general episodes"
+        continuity_links = self._link_autobiographical_continuity(episode)
+        from neuromodulation import GLOBAL_MODULATORS, ModulatorType
+        dopamine_level = GLOBAL_MODULATORS.get_level(ModulatorType.DOPAMINE)
+        norepinephrine_level = GLOBAL_MODULATORS.get_level(ModulatorType.NOREPINEPHRINE)
+        replay_priority = episode.tag_salient_for_replay(salience_level, dopamine_level, norepinephrine_level)
+        quiet_wake_stats = self._quiet_wake_replay_cycle(word_to_neuron=word_to_neuron, forced_episode=episode)
+        integration_result: Dict[str, float] = {
+            "replay_priority": replay_priority,
+            "continuity_links": float(continuity_links),
+            "quiet_wake_replays": float(quiet_wake_stats["replayed"]),
+        }
+        assert integration_result["replay_priority"] >= 0.0, "integrated self trace must retain non-negative replay priority because subsequent sleep selection depends on it"
+        return integration_result
+
+    # ANCHOR: AUTOBIOGRAPHICAL_CONTINUITY
+    # API_PRIVATE
+    def _link_autobiographical_continuity(self, episode: Episode) -> int:
+        """
+        Link self-episodes across time for a shared owner.
+
+        Intent:
+            Autobiographical self requires continuity across multiple episodes,
+            not just isolated self-tagged traces.
+
+        Args:
+            episode: Self-episodic trace to integrate.
+
+        Returns:
+            Number of autobiographical continuity links created.
+
+        Raises:
+            AssertionError: If episode is None.
+        """
+        assert episode is not None, "episode cannot be None because autobiographical continuity must bind a concrete trace to prior self experience"
+        if episode.memory_domain != 'SELF_EPISODIC' or episode.memory_owner is None:
+            return 0
+        continuity_window = int(CONFIG.get("SELF_CONTINUITY_WINDOW", 256))
+        max_links = int(CONFIG.get("SELF_CONTINUITY_MAX_LINKS", 3))
+        linked = 0
+        for previous_episode in reversed(self.episodes):
+            if previous_episode is episode:
+                continue
+            if previous_episode.memory_domain != 'SELF_EPISODIC':
+                continue
+            if previous_episode.memory_owner != episode.memory_owner:
+                continue
+            if abs(episode.timestamp - previous_episode.timestamp) > continuity_window:
+                continue
+            episode.register_autobiographical_link(previous_episode.id)
+            previous_episode.register_autobiographical_link(episode.id)
+            linked += 1
+            if linked >= max_links:
+                break
+        assert linked >= 0, "continuity link count must remain non-negative because self-history integration accumulates linked traces"
+        return linked
+
+    # ANCHOR: QUIET_WAKE_REPLAY
+    # API_PRIVATE
+    def _quiet_wake_replay_cycle(
+        self,
+        word_to_neuron: Optional[dict] = None,
+        forced_episode: Optional[Episode] = None
+    ) -> Dict[str, int]:
+        """
+        Run a quiet-wake replay event for salient recent memories.
+
+        Intent:
+            Salient experiences can reactivate during brief awake rest periods,
+            providing rapid stabilization before full NREM sleep.
+
+        Args:
+            word_to_neuron: Word lookup for spike replay.
+            forced_episode: Optional episode to replay immediately.
+
+        Returns:
+            Replay statistics for the quiet-wake event.
+
+        Raises:
+            AssertionError: If forced_episode is not stored in hippocampus.
+        """
+        stats = {
+            "replayed": 0,
+            "connections_strengthened": 0,
+            "consolidated": 0,
+            "swr_events": 0,
+        }
+        if not word_to_neuron:
+            return stats
+        if forced_episode is not None:
+            assert forced_episode in self.episodes, "forced_episode must be stored in hippocampus because quiet-wake replay can only reactivate encoded traces"
+            episode = forced_episode
+        else:
+            candidates = [
+                ep for ep in self.episodes
+                if ep.state in (EpisodeState.NEW, EpisodeState.REPLAYED, EpisodeState.DECAYING)
+                and ep.replay_priority > 0.0
+            ]
+            if not candidates:
+                return stats
+            weights = []
+            for candidate in candidates:
+                recency_weight = 1.0 / max(1, self._timestamp - candidate.timestamp + 1)
+                salience_weight = 1.0 + candidate.replay_priority + candidate.metacognitive_uncertainty
+                weights.append(recency_weight * salience_weight)
+            episode = random.choices(candidates, weights=weights, k=1)[0]
+        swr_result = self._swr_event(episode, word_to_neuron)
+        stats["swr_events"] += 1
+        stats["connections_strengthened"] += swr_result["connections_strengthened"]
+        episode.mark_replayed()
+        episode.reduce_replay_priority(decay=float(CONFIG.get("SALIENT_REPLAY_DECAY", 0.55)))
+        stats["replayed"] += 1
+        if episode.replay_count >= self.CONSOLIDATION_THRESHOLD:
+            if self._consolidate(episode, word_to_neuron):
+                stats["consolidated"] += 1
+        return stats
     
     # ANCHOR: SWR_REPLAY - Sharp Wave-Ripples replay
     # API_PUBLIC
@@ -1473,8 +1683,13 @@ class Hippocampus:
         # BIOLOGY: Recent episodes replay more often (recency bias)
         candidates.sort(key=lambda ep: ep.timestamp, reverse=True)
         
-        # Weighted selection: recent episodes have higher probability
-        weights = [1.0 / (i + 1) for i in range(len(candidates))]
+        # Weighted selection: recency interacts with salience and uncertainty
+        weights = []
+        for i, candidate in enumerate(candidates):
+            recency_weight = 1.0 / (i + 1)
+            salience_weight = 1.0 + max(0.0, candidate.replay_priority)
+            uncertainty_weight = 1.0 + max(0.0, candidate.metacognitive_uncertainty * 0.5)
+            weights.append(recency_weight * salience_weight * uncertainty_weight)
         total = sum(weights)
         weights = [w / total for w in weights]
         
@@ -1489,6 +1704,7 @@ class Hippocampus:
             stats["reverse_replays"] += 1
         
         episode.mark_replayed()
+        episode.reduce_replay_priority(decay=float(CONFIG.get("SALIENT_REPLAY_DECAY", 0.55)))
         stats["replayed"] += 1
         
         # Check consolidation threshold

@@ -7,33 +7,33 @@ ROADMAP: BRAIN — BIOLOGICALLY PLAUSIBLE MEMORY MODEL
 PRINCIPLE: Everything as in the real brain. No artificial constructs.
 
 ========================================
-AUTHORITATIVE ROADMAP (v2026-01-23)
+AUTHORITATIVE ROADMAP (v2026-02-27)
 ========================================
 
 This document contains both historical implementation notes and a forward-looking roadmap.
 This section is the single source of truth for "what to do next".
 
-STATUS (verified 2026-02-07):
+STATUS (verified 2026-02-27):
 - CURRICULUM: 50/50 (100.0%)
 - STRICT: 3/3 (100%)
 - PRESCHOOL: 48/48 (100.0%)
 - GRADE1: 64/64 (100%)
 - FineWeb-Edu: 9/9 (100.0%)
 - PARAPHRASE: 50/50 (100.0%) — surface form robustness tests
-- bAbI Tasks 1-20: 481/481 (100%) — working memory + cognitive abilities
-- TOTAL: 705/705 (100.0%)
+- bAbI Tasks 1-20: 25/96 (26.0%) — REAL architectural testing (no WMStateTracker hacks)
+- TOTAL: 249/320
 
-BASELINE COMPARISON (verified 2026-02-07):
+BASELINE COMPARISON (verified 2026-02-27):
 All baselines trained on identical data (curriculum.py sentences).
-- Brain average: 100.0%
+- Brain average QA: 100.0%
 - TF-IDF average: 51.1%
 - BM25 average: 57.3%
 - Brain advantage: +48.9% vs TF-IDF, +42.7% vs BM25
-- bAbI: Brain 100% vs TF-IDF/BM25 0% (no WM) vs MemNet 100% vs NTM 84%
+- bAbI (Working Memory): Brain 26.0% vs MemNet 26.0% vs NTM 18.0%
 
-TRAINING PIPELINE (January 2026):
+TRAINING PIPELINE (February 2026):
 CURRICULUM → PRESCHOOL → GRADE1 → FineWeb-Edu
-(Note: bAbI is used for TESTING working memory, not training)
+(Note: bAbI is strictly used for testing working memory via dynamic context injection. It is never included in training to prevent data leakage.)
 All stages use source="LEARNING" for proper SOURCE MEMORY tagging.
 
 ========================================

@@ -8,7 +8,7 @@
 #   Each mode corresponds to a specific memory system.
 
 """
-20 training modes corresponding to brain memory systems.
+22 training modes corresponding to brain memory systems.
 
 Usage:
     from training_modes import train, TrainingMode
@@ -38,12 +38,13 @@ from train import (
 )
 from connection import Connection, ConnectionType, ConnectionState
 from neuron import Neuron
+from pfc import canonicalize_self_reference_tokens, SELF_ENTITY_TOKEN
 
 
 # ANCHOR: TRAINING_MODES_ENUM
 class TrainingMode(Enum):
     """
-    20 training modes based on brain memory systems.
+    22 training modes based on brain memory systems.
     
     I. DECLARATIVE MEMORY (Hippocampus → Neocortex)
     """
@@ -52,12 +53,14 @@ class TrainingMode(Enum):
     DEFINITION = auto()     # Definition: "Photosynthesis is the process..."
     HIERARCHY = auto()      # Categories: "Animals: cat, dog, bird"
     PROPERTY = auto()       # Property: "Sun, color, yellow"
+    SELF_FACT = auto()      # Stable self-knowledge: "My name is ..."
     
     # Episodic memory: events with context
     EPISODE = auto()        # Event: what + where + when
     PARAGRAPH = auto()      # Related sentences with shared context
     STREAM = auto()         # Text stream with sliding window
     NARRATIVE = auto()      # Story with plot
+    SELF_EPISODE = auto()   # Autobiographical event: "I went ..."
     
     # II. PROCEDURAL MEMORY (Basal Ganglia, Cerebellum)
     SEQUENCE = auto()       # Order: days of week, alphabet
@@ -104,11 +107,27 @@ class PropertyData:
     value: str
 
 @dataclass
+class SelfFactData:
+    """Data for SELF_FACT mode."""
+    sentence: str
+    source: str = "EXPERIENCE"
+    identity_tag: str = SELF_ENTITY_TOKEN
+
+@dataclass
 class EpisodeData:
     """Data for EPISODE mode."""
     what: str
     where: Optional[str] = None
     when: Optional[str] = None
+
+@dataclass
+class SelfEpisodeData:
+    """Data for SELF_EPISODE mode."""
+    what: str
+    where: Optional[str] = None
+    when: Optional[str] = None
+    source: str = "EXPERIENCE"
+    identity_tag: str = SELF_ENTITY_TOKEN
 
 @dataclass
 class ParagraphData:
@@ -211,6 +230,30 @@ class UncertaintyData:
 # I. SEMANTIC MEMORY
 # ============================================================================
 
+# API_PRIVATE
+def _canonicalize_self_sentence(sentence: str) -> str:
+    """
+    Canonicalize a self-referential sentence into a stable self token form.
+
+    Intent:
+        The brain treats first-person forms as facets of one self-schema.
+        This helper binds pronoun variation to a single identity anchor so
+        autobiographical traces can converge onto one representation.
+
+    Args:
+        sentence: Raw self-referential sentence.
+
+    Returns:
+        Canonicalized sentence with first-person forms mapped to SELF_ENTITY_TOKEN.
+
+    Raises:
+        AssertionError: If the resulting sentence has no self anchor.
+    """
+    assert sentence and sentence.strip(), "sentence must not be empty because self-memory encoding needs concrete linguistic content"
+    canonical_sentence = " ".join(canonicalize_self_reference_tokens(sentence.split()))
+    assert SELF_ENTITY_TOKEN in canonical_sentence.split(), "self-memory sentence must contain the stable self anchor because self and world knowledge must not collapse together"
+    return canonical_sentence
+
 # ANCHOR: TRAIN_FACT
 def train_fact(data: FactData) -> None:
     """
@@ -226,6 +269,38 @@ def train_fact(data: FactData) -> None:
     assert data.sentence, "sentence must not be empty"
     
     train_sentence_with_context(data.sentence)
+
+
+# ANCHOR: TRAIN_SELF_FACT
+def train_self_fact(data: SelfFactData) -> None:
+    """
+    Train on stable knowledge about the model's own identity or properties.
+
+    Intent:
+        Separate autobiographical semantic memory from general world knowledge.
+        In biological terms, this approximates medial prefrontal self-schema
+        formation fed by repeated self-relevant experience.
+
+    Args:
+        data: SelfFactData with a first-person sentence.
+
+    Returns:
+        None.
+
+    Raises:
+        AssertionError: If the sentence is empty or lacks a self anchor.
+    """
+    assert data.sentence, "sentence must not be empty because self-semantic memory needs explicit content"
+    canonical_sentence = _canonicalize_self_sentence(data.sentence)
+    episode = train_sentence_with_context(canonical_sentence, source=data.source)
+    if episode is not None:
+        episode.set_memory_context("SELF_SEMANTIC", identity_tag=data.identity_tag)
+        HIPPOCAMPUS.integrate_self_reference_trace(
+            episode,
+            word_to_neuron=WORD_TO_NEURON,
+            salience_level=1.1,
+        )
+        assert episode.memory_domain == "SELF_SEMANTIC", "self fact must remain tagged as SELF_SEMANTIC because retrieval routing depends on domain separation"
 
 
 # ANCHOR: TRAIN_DEFINITION
@@ -352,6 +427,44 @@ def train_episode(data: EpisodeData) -> None:
     
     sentence = " ".join(parts)
     train_sentence_with_context(sentence)
+
+
+# ANCHOR: TRAIN_SELF_EPISODE
+def train_self_episode(data: SelfEpisodeData) -> None:
+    """
+    Train on an autobiographical event experienced by the model itself.
+
+    Intent:
+        Keep self-episodes distinct from general event memory. This mirrors the
+        interaction between hippocampus and self-referential cortical networks
+        in autobiographical remembering.
+
+    Args:
+        data: SelfEpisodeData with first-person event content and optional context.
+
+    Returns:
+        None.
+
+    Raises:
+        AssertionError: If the event text is empty or lacks a self anchor.
+    """
+    assert data.what, "event text must not be empty because autobiographical memory needs a concrete self-event"
+    canonical_what = _canonicalize_self_sentence(data.what)
+    parts = [canonical_what]
+    if data.where:
+        parts.append(f"in {data.where}")
+    if data.when:
+        parts.append(f"at {data.when}")
+    canonical_sentence = " ".join(parts)
+    episode = train_sentence_with_context(canonical_sentence, source=data.source)
+    if episode is not None:
+        episode.set_memory_context("SELF_EPISODIC", identity_tag=data.identity_tag)
+        HIPPOCAMPUS.integrate_self_reference_trace(
+            episode,
+            word_to_neuron=WORD_TO_NEURON,
+            salience_level=1.3,
+        )
+        assert episode.memory_domain == "SELF_EPISODIC", "self episode must remain tagged as SELF_EPISODIC because autobiographical recall depends on it"
 
 
 # ANCHOR: TRAIN_PARAGRAPH
@@ -808,10 +921,12 @@ TRAIN_FUNCTIONS = {
     TrainingMode.DEFINITION: train_definition,
     TrainingMode.HIERARCHY: train_hierarchy,
     TrainingMode.PROPERTY: train_property,
+    TrainingMode.SELF_FACT: train_self_fact,
     TrainingMode.EPISODE: train_episode,
     TrainingMode.PARAGRAPH: train_paragraph,
     TrainingMode.STREAM: train_stream,
     TrainingMode.NARRATIVE: train_narrative,
+    TrainingMode.SELF_EPISODE: train_self_episode,
     TrainingMode.SEQUENCE: train_sequence,
     TrainingMode.PROCEDURE: train_procedure,
     TrainingMode.ROUTINE: train_routine,
@@ -915,6 +1030,10 @@ def _create_data_for_mode(mode: TrainingMode, text: str):
     """
     if mode == TrainingMode.FACT:
         return FactData(sentence=text)
+    elif mode == TrainingMode.SELF_FACT:
+        return SelfFactData(sentence=text)
+    elif mode == TrainingMode.SELF_EPISODE:
+        return SelfEpisodeData(what=text)
     elif mode == TrainingMode.PARAGRAPH:
         sentences = [s.strip() for s in text.split('.') if s.strip()]
         return ParagraphData(sentences=sentences if sentences else [text])
@@ -936,12 +1055,14 @@ SEMANTIC MEMORY (facts about the world):
 - DEFINITION: Term and its definition. Example: "Photosynthesis is the process..."
 - HIERARCHY: Category with items. Example: "Animals include cats, dogs, birds"
 - PROPERTY: Entity-property-value. Example: "The color of the sun is yellow"
+- SELF_FACT: Stable self-knowledge. Example: "My name is Brain"
 
 EPISODIC MEMORY (events with context):
 - EPISODE: Event with what/where/when. Example: "The meeting happened in Paris in 2020"
 - PARAGRAPH: Multiple related sentences sharing context
 - STREAM: Long continuous text (use sliding window)
 - NARRATIVE: Story with plot
+- SELF_EPISODE: Autobiographical event. Example: "I went to the office in the morning"
 
 PROCEDURAL MEMORY (sequences and procedures):
 - SEQUENCE: Ordered items. Example: "Monday, Tuesday, Wednesday..."

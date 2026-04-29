@@ -111,25 +111,17 @@ class CA3:
         query_words: Optional[Set[str]] = None,
         query_connector: Optional[str] = None,
         verb_forms: Optional[Dict[str, Set[str]]] = None,
-        question: Optional[str] = None
+        question: Optional[str] = None,
+        max_timestamp: Optional[int] = None
     ) -> Tuple[Set[str], int]:
         """
-        Pattern completion via iterative attractor dynamics.
+        Perform pattern completion via CA3 attractor dynamics.
         
-        BIOLOGY (Rolls 2013, Attractor Dynamics in CA3):
-        1. Cue activates initial set of neurons
-        2. Activation spreads via recurrent connections
-        3. Lateral inhibition limits activity (sparsity)
-        4. Process repeats until stabilization
-        5. Final pattern is matched against episode engrams
-        
-        TOP-DOWN MODULATION (Zanto et al. 2011):
-        - query_connector boosts connections with matching connector type
-        - This implements PFC modulation of retrieval
-        
-        TEMPORAL CONTEXT (Howard & Kahana 2002):
-        - Recency bias for working_memory episodes
-        - Tense markers (is/was) influence temporal matching
+        BIOLOGY (Rolls 2013, Attractor Dynamics):
+        - Initial cue activates a subset of neurons
+        - Recurrent collaterals spread activation
+        - Lateral inhibition creates competition (Winner-Take-All)
+        - Process repeats until network settles into stable attractor state
         
         Args:
             cue_neurons: Initial active neurons (post-DG)
@@ -137,6 +129,9 @@ class CA3:
             episodes: List of episodes to match against
             query_words: Query words for scoring (optional)
             query_connector: Connector type for top-down modulation (optional)
+            verb_forms: Dict mapping words to morphological variants
+            question: Original question string
+            max_timestamp: Maximum timestamp to filter episodes (temporal reasoning)
         
         Note:
             word_to_neuron should be obtained from Lexicon (PHASE 3 API boundaries).
@@ -151,79 +146,95 @@ class CA3:
         
         if not cue_neurons:
             return set(), -1
-        
-        # Initial activation: cue neurons
+            
+        # 1. Initialize activation from cue
         activation: Dict[str, float] = {}
         for neuron in cue_neurons:
             activation[neuron.id] = 1.0
+            
+        # 2. Iterate until stable (attractor dynamics)
+        prev_activation = {}
+        iterations = 0
         
-        # Iterative dynamics
-        prev_active: Set[str] = set()
-        
-        for iteration in range(self.MAX_ITERATIONS):
-            # 1. Spread activation via recurrent connections
+        while iterations < self.MAX_ITERATIONS:
+            # Spread activation via recurrent collaterals
             new_activation = self._spread_recurrent(
-                activation, word_to_neuron, query_connector
+                activation, 
+                word_to_neuron,
+                query_connector
             )
             
-            # 2. Apply lateral inhibition (WTA)
-            new_activation = self._apply_inhibition(new_activation)
+            # Combine with previous (leaky integration) and apply WTA inhibition
+            combined = {nid: a for nid, a in activation.items()}
+            for nid, a in new_activation.items():
+                if nid in combined:
+                    combined[nid] = max(combined[nid], a)
+                else:
+                    combined[nid] = a
+                    
+            activation = self._apply_inhibition(combined)
             
-            # 3. Check stability
-            current_active = {
-                nid for nid, a in new_activation.items() 
-                if a > self.ACTIVATION_THRESHOLD
-            }
+            # Check stability (simple dictionary equivalence check)
+            is_stable = True
+            if len(activation) == len(prev_activation):
+                for nid, a in activation.items():
+                    if nid not in prev_activation or abs(prev_activation[nid] - a) > 0.01:
+                        is_stable = False
+                        break
+            else:
+                is_stable = False
+                
+            if is_stable:
+                break
+                
+            prev_activation = activation.copy()
+            iterations += 1
             
-            if current_active == prev_active:
-                break  # Attractor reached
-            
-            prev_active = current_active
-            activation = new_activation
-        
-        # Final pattern
-        completed = {
+        # 3. Form completed pattern (neurons above threshold)
+        completed_pattern = {
             nid for nid, a in activation.items() 
-            if a > self.ACTIVATION_THRESHOLD
+            if a >= self.ACTIVATION_THRESHOLD
         }
         
-        # Find best episode using FULL scoring logic (connection strength, 2-hop, context, etc.)
-        best_idx, scored_candidates = self._score_episodes(
-            completed, episodes, query_words, query_connector, word_to_neuron, verb_forms, question
+        # 4. Find best matching episode using biologically-grounded scoring
+        # CA3 acts as an autoassociative memory, settling into the closest stored pattern
+        best_idx, scored = self._score_episodes(
+            completed_pattern, 
+            episodes,
+            query_words,
+            query_connector,
+            word_to_neuron,
+            verb_forms,
+            question,
+            max_timestamp
         )
         
-        # Postconditions
-        assert best_idx == -1 or 0 <= best_idx < len(episodes), \
-            f"best_idx {best_idx} out of range for {len(episodes)} episodes"
+        self._last_scored_candidates = scored
         
-        # Store scored candidates for population coding (CA1 readout)
-        self._last_scored_candidates = scored_candidates
+        return completed_pattern, best_idx
         
-        return completed, best_idx
-    
     # API_PRIVATE
     def _score_episodes(
-        self,
-        completed: Set[str],
+        self, 
+        completed: Set[str], 
         episodes: List['Episode'],
-        query_words: Optional[Set[str]],
-        query_connector: Optional[str],
-        word_to_neuron: Optional[Dict[str, Neuron]] = None,
+        query_words: Optional[Set[str]] = None,
+        query_connector: Optional[str] = None,
+        word_to_neuron: Dict[str, Neuron] = None,
         verb_forms: Optional[Dict[str, Set[str]]] = None,
-        question: Optional[str] = None
-    ) -> int:
+        question: Optional[str] = None,
+        max_timestamp: Optional[int] = None
+    ) -> Tuple[int, List[Tuple[int, float]]]:
         """
-        Score episodes against completed pattern (FULL LOGIC from legacy pattern_complete).
+        Score episodes against completed pattern and top-down goals.
         
-        BIOLOGY:
-        - Query overlap (primary filter)
-        - Connection strength with context multiplier (top-down modulation)
-        - 2-hop paths (multi-hop context in CA3)
-        - Context diversity bonus
-        - Connector matching (is_a, after, before)
-        - Unconnected context filtering
+        BIOLOGY: Scoring incorporates:
+        - Pattern overlap (autoassociative recall)
+        - Top-down modulation (PFC goals bias retrieval)
+        - Source memory gating (trusted sources preferred)
         - Recency bias for working_memory
         - Consolidation bonus
+        - Temporal filtering via max_timestamp (hippocampal time cells)
         
         Args:
             completed: Completed pattern from CA3 dynamics
@@ -232,6 +243,8 @@ class CA3:
             query_connector: Connector for top-down boost
             word_to_neuron: Neuron lookup for connection strength
             verb_forms: VERB_FORMS dict for morphological expansion
+            question: Original question string
+            max_timestamp: Max timestamp for temporal filtering
             
         Returns:
             Tuple of (best_idx, scored_candidates) where scored_candidates is
@@ -239,55 +252,61 @@ class CA3:
         """
         import math
         from episode import EpisodeState
-        from pfc import classify_question, get_preferred_sources, QuestionType
+        from pfc import canonicalize_self_reference_word, classify_question, get_expected_roles, get_preferred_sources, is_self_referential_query, QuestionType
+        from broca import SyntacticProcessor
+        
+        assert completed is not None, "completed cannot be None because CA3 overlap scoring requires an active pattern representation"
+        assert episodes is not None, "episodes cannot be None because hippocampal competition needs a concrete candidate pool"
         
         if not episodes:
             return -1, []
-        
-        # BROCA'S AREA: Extract syntactic subject from question
-        # BIOLOGY (Friederici 2011): BA44 builds syntactic structure
-        # Episodes containing the SUBJECT of the question get bonus
+            
+        # Extract syntactic roles from question for goal-directed retrieval
         question_subject = None
         parsed = None
+        broca = None
+        expected_roles: List[str] = []
         if question:
             broca = SyntacticProcessor()
             parsed = broca.parse(question)
             question_subject = parsed.subject
-        
+            if question_subject:
+                question_subject = canonicalize_self_reference_word(question_subject)
+            expected_roles = get_expected_roles(question)
+            
         # SOURCE MEMORY (Johnson et al., 1993): Preferred source filter + selective inclusion
-        # BIOLOGY: The brain preferentially retrieves from trusted sources
-        # (teacher, parent). Less-trusted sources (TV, hearsay) are recalled
-        # only when the memory trace is STRONGLY associated with the query
-        # — all key content words activate the same engram.
-        # Implementation: preferred sources are always included.
-        # Non-preferred sources are included ONLY if they contain ALL content
-        # query words (highly specific match). This prevents noise from
-        # thousands of loosely-related MEDIA episodes while allowing
-        # MEDIA-specific knowledge through when relevant.
         question_type = classify_question(query_words) if query_words else QuestionType.UNKNOWN
         preferred_source_types = get_preferred_sources(question_type)
+        is_self_query = is_self_referential_query(query_words or set(), question)
         
         INTERROGATIVE = {'what', 'who', 'where', 'when', 'why', 'how', 'which'}
         quick_content_query = (query_words - INTERROGATIVE) if query_words else set()
         
-        if preferred_source_types:
-            # Start with preferred sources
-            filtered_episodes = [
-                (i, ep) for i, ep in enumerate(episodes) 
-                if ep.source.upper() in preferred_source_types
-            ]
-            # Selective inclusion: non-preferred episodes containing ALL content
-            # query words — these are specifically relevant, not coincidental
-            if quick_content_query:
-                for i, ep in enumerate(episodes):
-                    if ep.source.upper() not in preferred_source_types:
-                        if quick_content_query.issubset(ep.input_neurons):
-                            filtered_episodes.append((i, ep))
-            # Fallback: if nothing from preferred sources, use all
-            if not filtered_episodes:
-                filtered_episodes = [(i, ep) for i, ep in enumerate(episodes)]
-        else:
-            filtered_episodes = [(i, ep) for i, ep in enumerate(episodes)]
+        filtered_episodes = []
+        for i, ep in enumerate(episodes):
+            # Apply temporal filter FIRST
+            if max_timestamp is not None and ep.timestamp > max_timestamp:
+                continue
+            
+            # BIOLOGY (Baddeley 2000): Working memory is the active PFC buffer.
+            # It is ALWAYS accessible regardless of source memory routing.
+            # Source memory (Johnson et al. 1993) only filters long-term stores.
+            if ep.source == "working_memory":
+                filtered_episodes.append((i, ep))
+            elif preferred_source_types:
+                if is_self_query and getattr(ep, 'memory_domain', 'GENERAL') in ('SELF_SEMANTIC', 'SELF_EPISODIC'):
+                    filtered_episodes.append((i, ep))
+                elif ep.source.upper() in preferred_source_types:
+                    filtered_episodes.append((i, ep))
+                elif quick_content_query and quick_content_query.issubset(ep.input_neurons):
+                    filtered_episodes.append((i, ep))
+            else:
+                filtered_episodes.append((i, ep))
+                
+        if not filtered_episodes and preferred_source_types:
+            # Fallback if filtered out everything, still respect timestamp
+            filtered_episodes = [(i, ep) for i, ep in enumerate(episodes) 
+                                 if (max_timestamp is None or ep.timestamp <= max_timestamp)]
         
         # Config weights
         w1 = CONFIG.get("SCORE_WEIGHT_QUERY_OVERLAP", 50000)
@@ -301,6 +320,9 @@ class CA3:
         
         query_has_past = bool(query_words and (query_words & PAST_MARKERS))
         query_has_present = bool(query_words and (query_words & PRESENT_MARKERS))
+        temporal_location_replay = bool(
+            question and 'location' in expected_roles and 'before' in question.lower()
+        )
         
         # Filter interrogative words
         INTERROGATIVE_WORDS = {'what', 'who', 'where', 'when', 'why', 'how', 'which'}
@@ -360,6 +382,27 @@ class CA3:
                 # Strong bonus for short episodes (more likely to be direct cause-effect)
                 if len(engram) <= 5:
                     subject_bonus += 5
+
+            # ANCHOR: CA3_SPATIAL_GOAL_GATING - suppress non-spatial possession distractors during location retrieval
+            parsed_episode = None
+            episode_has_location_signal = False
+            if broca and question_subject and 'location' in expected_roles:
+                ep_text = ' '.join(episode.input_words) if hasattr(episode, 'input_words') else ' '.join(episode.input_neurons)
+                parsed_episode = broca.parse(ep_text)
+                episode_roles = episode.semantic_roles if hasattr(episode, 'semantic_roles') and episode.semantic_roles else {}
+                episode_has_location_signal = (
+                    bool(getattr(parsed_episode, 'relation_direction', None))
+                    or bool(episode_roles.get('location'))
+                    or any(token in engram for token in ('in', 'to', 'at'))
+                )
+                if (
+                    parsed_episode.subject == question_subject
+                    and parsed_episode.verb in broca.POSSESSION_VERBS
+                    and not episode_has_location_signal
+                ):
+                    subject_bonus = 0
+                if episode_has_location_signal and question_subject not in engram:
+                    continue
             
             # Context words = query words NOT in episode (for top-down modulation)
             context_words = query_words - episode_expanded if query_words else set()
@@ -473,15 +516,21 @@ class CA3:
             # coincidental — not a true memory match.
             # Non-preferred sources with ALL content words (selective inclusion)
             # bypass this naturally: they have full query overlap, no unconnected.
-            SKIP_FOR_UNCONNECTED = {
-                'what', 'who', 'where', 'when', 'why', 'how', 'which',
-                'many', 'much', 'some', 'any', 'few', 'several',
-                'is', 'are', 'am', 'was', 'were', 'be', 'been',
-            }
-            filtered_context = {cw for cw in context_words if cw not in SKIP_FOR_UNCONNECTED}
-            unconnected = filtered_context - context_words_connected
-            if unconnected:
-                continue  # Skip irrelevant episode
+            # EXCEPTION: Working memory episodes (Baddeley 2000) are ALWAYS
+            # accessible — PFC maintains all recent representations simultaneously.
+            # Multi-hop chains traverse ACROSS working-memory sentences via
+            # temporary Hebbian bindings, not direct query→episode connections.
+            is_wm_episode = episode.source == "working_memory"
+            if not is_wm_episode:
+                SKIP_FOR_UNCONNECTED = {
+                    'what', 'who', 'where', 'when', 'why', 'how', 'which',
+                    'many', 'much', 'some', 'any', 'few', 'several',
+                    'is', 'are', 'am', 'was', 'were', 'be', 'been',
+                }
+                filtered_context = {cw for cw in context_words if cw not in SKIP_FOR_UNCONNECTED}
+                unconnected = filtered_context - context_words_connected
+                if unconnected:
+                    continue  # Skip irrelevant episode
             
             # Normalize connection strength
             num_other = len(engram) - query_overlap
@@ -501,7 +550,9 @@ class CA3:
             recency_bonus = 0
             if episode.source == "working_memory":
                 recency_bonus = w1 * 2
-                if query_has_past and not query_has_present:
+                if temporal_location_replay:
+                    recency_bonus += episode.timestamp * w1
+                elif query_has_past and not query_has_present:
                     recency_bonus += w1 * 3
                     recency_bonus -= episode.timestamp * w1
                 else:
@@ -517,6 +568,35 @@ class CA3:
             # making them easier to retrieve — analogous to +1 query overlap.
             source_bonus = 1 if (preferred_source_types and 
                                  episode.source.upper() in preferred_source_types) else 0
+
+            self_memory_bonus = 0
+            if is_self_query:
+                episode_memory_domain = getattr(episode, 'memory_domain', 'GENERAL')
+                if episode_memory_domain in ('SELF_SEMANTIC', 'SELF_EPISODIC'):
+                    semantic_self_roles = {'category', 'property'}
+                    autobiographical_roles = {'location', 'time', 'agent', 'theme', 'cause', 'effect', 'manner'}
+                    prefers_self_semantic = bool(set(expected_roles) & semantic_self_roles)
+                    prefers_self_episodic = bool(set(expected_roles) & autobiographical_roles)
+                    ownership_confidence = float(getattr(episode, 'ownership_confidence', 0.0))
+                    continuity_support = len(getattr(episode, 'autobiographical_links', set()))
+                    metacognitive_uncertainty = float(getattr(episode, 'metacognitive_uncertainty', 1.0))
+                    self_memory_bonus = w1
+                    if prefers_self_semantic and episode_memory_domain == 'SELF_SEMANTIC':
+                        self_memory_bonus += w1 * 2
+                    elif prefers_self_semantic and episode_memory_domain == 'SELF_EPISODIC':
+                        self_memory_bonus += w1 // 4
+                    elif prefers_self_episodic and episode_memory_domain == 'SELF_EPISODIC':
+                        self_memory_bonus += w1 * 2
+                    elif prefers_self_episodic and episode_memory_domain == 'SELF_SEMANTIC':
+                        self_memory_bonus += w1 // 4
+                    else:
+                        self_memory_bonus += w1
+                    if getattr(episode, 'memory_owner', None) == getattr(episode, 'identity_tag', None):
+                        self_memory_bonus += w1
+                    self_memory_bonus += int(w1 * ownership_confidence)
+                    self_memory_bonus += min(w1, continuity_support * (w1 // 4))
+                    self_memory_bonus -= int((w1 // 2) * max(0.0, min(1.0, metacognitive_uncertainty)))
+                    self_memory_bonus = max(0, self_memory_bonus)
             
             # SEMANTIC ROLE BONUS (Goal-conditioned Retrieval)
             # BIOLOGY (Desimone & Duncan 1995, Miller & Cohen 2001):
@@ -524,12 +604,21 @@ class CA3:
             # Episodes with matching roles get bonus.
             role_bonus = 0
             if question and hasattr(episode, 'semantic_roles') and episode.semantic_roles:
-                from pfc import get_expected_roles
-                expected_roles = get_expected_roles(question)
                 for role in expected_roles:
                     if role in episode.semantic_roles and episode.semantic_roles[role]:
                         role_bonus += w1 // 2  # Significant bonus for role match
                         break  # One match is enough
+
+            location_replay_bonus = 0
+            if (
+                max_timestamp is not None
+                and 'location' in expected_roles
+                and parsed_episode
+                and question_subject
+                and parsed_episode.subject == question_subject
+                and episode_has_location_signal
+            ):
+                location_replay_bonus = w1 * 8
             
             # TEMPORAL CONCEPT INFERENCE (Hippocampal Time Cells)
             # BIOLOGY (Eichenbaum 2014): When PFC sends "temporal" goal
@@ -539,8 +628,6 @@ class CA3:
             # temporal content via activated temporal concept representations.
             # Anterior temporal lobe distinguishes temporal from spatial context.
             if question and role_bonus == 0:
-                from pfc import get_expected_roles
-                expected_roles = get_expected_roles(question)
                 if 'time' in expected_roles:
                     # ANCHOR: TEMPORAL_CONCEPTS - temporal nouns primed by PFC
                     # BIOLOGY (Eichenbaum 2014): PFC temporal goal primes
@@ -596,7 +683,7 @@ class CA3:
             
             # Final score with trust weighting and source preference
             # BROCA'S AREA: subject_bonus adds weight for episodes with question subject
-            base_score = (query_overlap + subject_bonus + source_bonus) * w1 + avg_strength * w2 + overlap * w3 + consolidation_bonus + recency_bonus + role_bonus
+            base_score = (query_overlap + subject_bonus + source_bonus) * w1 + avg_strength * w2 + overlap * w3 + consolidation_bonus + recency_bonus + role_bonus + location_replay_bonus + self_memory_bonus
             
             # SDR OVERLAP BONUS (Hawkins HTM Theory)
             # BIOLOGY: Sparse Distributed Representations capture semantic similarity
@@ -640,7 +727,8 @@ class CA3:
             
             if score > 0:
                 scored_candidates.append((original_idx, score))
-        
+
+        assert best_idx == -1 or 0 <= best_idx < len(episodes), "best_idx must stay within episode bounds so CA1 can map the winning attractor back to memory"
         return best_idx, scored_candidates
     
     # API_PRIVATE

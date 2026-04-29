@@ -89,11 +89,11 @@ class SequenceGenerator:
         
         # Get words in TIME CELL order (original encoding order)
         ordered_words = getattr(episode, 'input_words', tuple(episode.input_neurons))
+        prefix_tokens = _get_answer_prefix_tokens(episode, query_words, word_to_neuron) if exclude_query else []
         
         # Filter out query words (lateral inhibition)
         if exclude_query and query_words:
-            # Keep words that are NOT in query (answer words)
-            answer_words = [w for w in ordered_words if w.lower() not in {q.lower() for q in query_words}]
+            answer_words = _get_answer_words(episode, query_words)
         else:
             answer_words = list(ordered_words)
         
@@ -107,7 +107,7 @@ class SequenceGenerator:
         # (learned syntactic links in dorsal stream during training).
         # This mirrors how Broca's area reconstructs grammar during speech production.
         answer_with_connectors = self._insert_connectors(answer_words, word_to_neuron)
-        return ' '.join(answer_with_connectors)
+        return ' '.join(prefix_tokens + answer_with_connectors)
     
     # API_PRIVATE
     def _insert_connectors(
@@ -263,6 +263,7 @@ def generate_from_population(
     # 1. Generate primary answer from best episode (CA3 strongest attractor)
     generator = SequenceGenerator()
     primary_answer_words = _get_answer_words(primary_episode, query_words)
+    primary_prefix_tokens = _get_answer_prefix_tokens(primary_episode, query_words, word_to_neuron)
     
     if not primary_answer_words:
         # Fallback: use full episode
@@ -316,7 +317,7 @@ def generate_from_population(
     answer_with_connectors = generator._insert_connectors(combined_words, word_to_neuron)
     
     # Postcondition
-    result = ' '.join(answer_with_connectors)
+    result = ' '.join(primary_prefix_tokens + answer_with_connectors)
     assert isinstance(result, str), "generate_from_population must return a string"
     return result
 
@@ -341,8 +342,60 @@ def _get_answer_words(
     """
     ordered_words = getattr(episode, 'input_words', tuple(episode.input_neurons))
     query_lower = {q.lower() for q in query_words}
+    matched_query_indices = [index for index, word in enumerate(ordered_words) if word.lower() in query_lower]
+    if matched_query_indices:
+        last_query_index = matched_query_indices[-1]
+        suffix_answer_words = [word for word in ordered_words[last_query_index + 1:] if word.lower() not in query_lower]
+        if suffix_answer_words:
+            return suffix_answer_words
     answer_words = [w for w in ordered_words if w.lower() not in query_lower]
     return answer_words if answer_words else list(ordered_words)
+
+
+# API_PRIVATE
+def _get_answer_prefix_tokens(
+    episode: 'Episode',
+    query_words: Set[str],
+    word_to_neuron: dict
+) -> List[str]:
+    """
+    Recover an informative connector from suppressed query frame into the answer span.
+
+    BIOLOGY:
+    When Broca's area suppresses repeated query words, it can still preserve the
+    function-word frame that links the omitted question scaffold to the retained
+    answer content, especially for temporal and spatial relations.
+
+    Args:
+        episode: Episode providing the answer trace.
+        query_words: Suppressed question words.
+        word_to_neuron: Neuron lookup dictionary.
+
+    Returns:
+        Connector tokens that should prefix the overt answer.
+    """
+    assert episode is not None, "episode must exist because frame recovery inspects a concrete episodic trace"
+    ordered_words = getattr(episode, 'input_words', tuple(episode.input_neurons))
+    query_lower = {q.lower() for q in query_words}
+    retained_indices = [index for index, word in enumerate(ordered_words) if word.lower() not in query_lower]
+    if not retained_indices:
+        return []
+
+    first_retained_index = retained_indices[0]
+    if first_retained_index == 0:
+        return []
+
+    generator = SequenceGenerator()
+    ignored_connectors = {'is', 'are', 'am', 'was', 'were', 'be', 'is_a'}
+    for index in range(first_retained_index - 1, -1, -1):
+        previous_word = ordered_words[index]
+        if previous_word.lower() not in query_lower:
+            continue
+        connector = generator._find_connector(previous_word, ordered_words[first_retained_index], word_to_neuron)
+        if connector and connector not in ignored_connectors:
+            return connector.split('_')
+
+    return []
 
 
 # API_PRIVATE

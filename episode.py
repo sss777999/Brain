@@ -100,6 +100,12 @@ class Episode:
         'quantity',    # How many: "three" in "has three sides"
         'purpose',     # For what: "learn" in "to learn"
     })
+    MEMORY_DOMAINS = frozenset({
+        'GENERAL',
+        'SELF_SEMANTIC',
+        'SELF_EPISODIC',
+    })
+    DEFAULT_SELF_OWNER = 'self_entity'
     
     _id_counter: int = 0
     
@@ -166,7 +172,15 @@ class Episode:
         self.context_neurons: FrozenSet[str] = frozenset(context_neurons)
         self.timestamp: int = timestamp
         self.source: str = source
-        
+        self.memory_domain: str = 'GENERAL'
+        self.identity_tag: Optional[str] = None
+        self.memory_owner: Optional[str] = None
+        self.ownership_confidence: float = 0.0
+        self.salience_level: float = 0.0
+        self.replay_priority: float = 0.0
+        self.autobiographical_links: Set[str] = set()
+        self.metacognitive_uncertainty: float = 1.0
+
         # SOURCE MEMORY (Johnson et al., 1993): Trust level based on source
         # BIOLOGY: Brain remembers not just WHAT but WHERE/HOW knowledge was acquired
         self.trust: float = self._get_trust_for_source(source)
@@ -203,6 +217,181 @@ class Episode:
         
         # Postcondition
         assert len(self.pattern_neurons) > 0, "episode must contain neurons"
+
+    # API_PUBLIC
+    def set_memory_context(self, memory_domain: str, identity_tag: Optional[str] = None) -> None:
+        """
+        Assign self-related memory context to the episode.
+
+        Intent:
+            Keep memory source separate from memory ownership.
+            Source answers "how was this acquired?", while memory_domain
+            answers "is this general world knowledge or part of self-model?"
+
+        Args:
+            memory_domain: GENERAL, SELF_SEMANTIC, or SELF_EPISODIC.
+            identity_tag: Stable identity token for autobiographical traces.
+
+        Returns:
+            None.
+
+        Raises:
+            AssertionError: If memory_domain is unknown.
+        """
+        assert memory_domain in self.MEMORY_DOMAINS, "memory_domain must be a supported autobiographical/semantic domain because retrieval routing depends on it"
+        self.memory_domain = memory_domain
+        resolved_identity = identity_tag
+        if memory_domain in ('SELF_SEMANTIC', 'SELF_EPISODIC'):
+            resolved_identity = identity_tag or self.identity_tag or self.DEFAULT_SELF_OWNER
+        self.identity_tag = resolved_identity
+        if memory_domain == 'GENERAL':
+            self.set_memory_owner(None, 0.0)
+        else:
+            owner_confidence = 1.0 if self.source.upper() == 'EXPERIENCE' else max(0.4, self.trust)
+            self.set_memory_owner(resolved_identity, owner_confidence)
+        self._recompute_metacognitive_uncertainty()
+        assert self.memory_domain == memory_domain, "memory_domain assignment must persist because CA3 competition uses it during retrieval"
+
+    # ANCHOR: EPISODE_MEMORY_OWNER
+    # API_PUBLIC
+    def set_memory_owner(self, owner_tag: Optional[str], ownership_confidence: float) -> None:
+        """
+        Assign memory ownership separately from memory domain.
+
+        Intent:
+            Memory domain answers whether a trace belongs to self-model or general knowledge.
+            Ownership answers whose perspective the trace belongs to, enabling future
+            self-versus-other distinctions without collapsing them into source memory.
+
+        Args:
+            owner_tag: Stable owner token or None if the trace is not self-owned.
+            ownership_confidence: Confidence that the trace belongs to the owner.
+
+        Returns:
+            None.
+
+        Raises:
+            AssertionError: If ownership_confidence is outside [0.0, 1.0].
+        """
+        assert 0.0 <= ownership_confidence <= 1.0, "ownership_confidence must stay within probability bounds because metacognitive uncertainty derives from it"
+        self.memory_owner = owner_tag
+        self.ownership_confidence = ownership_confidence if owner_tag is not None else 0.0
+        self._recompute_metacognitive_uncertainty()
+        assert (self.memory_owner is None) or (self.ownership_confidence > 0.0), "owned memories must carry non-zero ownership confidence because self-vs-other routing depends on it"
+
+    # ANCHOR: EPISODE_META_UNCERTAINTY
+    # API_PRIVATE
+    def _recompute_metacognitive_uncertainty(self) -> None:
+        """
+        Derive uncertainty about this trace's contribution to the self-model.
+
+        Intent:
+            Self-knowledge should become more certain when ownership is clear,
+            replay has occurred, and autobiographical continuity supports the trace.
+
+        Args:
+            None.
+
+        Returns:
+            None.
+
+        Raises:
+            AssertionError: If derived uncertainty leaves [0.0, 1.0].
+        """
+        assert 0.0 <= self.ownership_confidence <= 1.0, "ownership_confidence must be normalized because uncertainty estimation treats it as probability-like evidence"
+        if self.memory_owner is None:
+            self.metacognitive_uncertainty = 1.0
+        else:
+            certainty = 0.55 * self.ownership_confidence
+            certainty += min(0.15, self.replay_count * 0.05)
+            certainty += min(0.15, len(self.autobiographical_links) * 0.05)
+            certainty += min(0.10, self.salience_level * 0.05)
+            certainty += min(0.10, self.strength * 0.10)
+            self.metacognitive_uncertainty = max(0.0, 1.0 - min(1.0, certainty))
+        assert 0.0 <= self.metacognitive_uncertainty <= 1.0, "metacognitive uncertainty must remain bounded because replay prioritization uses it as a normalized drive"
+
+    # ANCHOR: EPISODE_SALIENCE_REPLAY
+    # API_PUBLIC
+    def tag_salient_for_replay(self, salience_level: float, dopamine_level: float, norepinephrine_level: float) -> float:
+        """
+        Tag an episode for prioritized replay based on salience and neuromodulators.
+
+        Intent:
+            Salient memories should be more likely to reactivate during quiet rest and sleep.
+            This replaces direct state promotion with a biologically grounded replay drive.
+
+        Args:
+            salience_level: Base salience assigned by the current task.
+            dopamine_level: Current dopamine level.
+            norepinephrine_level: Current norepinephrine level.
+
+        Returns:
+            The updated replay priority.
+
+        Raises:
+            AssertionError: If inputs are negative.
+        """
+        assert salience_level >= 0.0, "salience_level must be non-negative because salience is an unsigned priority signal"
+        assert dopamine_level >= 0.0, "dopamine_level must be non-negative because it modulates replay gain rather than reversing it"
+        assert norepinephrine_level >= 0.0, "norepinephrine_level must be non-negative because arousal raises replay probability rather than negating it"
+        effective_salience = salience_level * (1.0 + 0.5 * dopamine_level + 0.5 * norepinephrine_level)
+        if self.memory_domain in ('SELF_SEMANTIC', 'SELF_EPISODIC'):
+            effective_salience += 0.25
+        self.salience_level = max(self.salience_level, effective_salience)
+        self.replay_priority = max(self.replay_priority, self.salience_level + self.metacognitive_uncertainty)
+        self._recompute_metacognitive_uncertainty()
+        assert self.replay_priority > 0.0, "tagging a memory for replay must produce positive replay drive because replay competition depends on it"
+        return self.replay_priority
+
+    # ANCHOR: EPISODE_REPLAY_PRIORITY_DECAY
+    # API_PUBLIC
+    def reduce_replay_priority(self, decay: float = 0.6) -> None:
+        """
+        Reduce replay priority after the trace has been replayed.
+
+        Intent:
+            Replay priority should decay after reactivation so one salient trace
+            does not monopolize subsequent SWR events.
+
+        Args:
+            decay: Multiplicative decay factor in [0.0, 1.0].
+
+        Returns:
+            None.
+
+        Raises:
+            AssertionError: If decay is outside [0.0, 1.0].
+        """
+        assert 0.0 <= decay <= 1.0, "decay must be in [0, 1] because replay priority should attenuate rather than invert"
+        self.replay_priority *= decay
+        self.salience_level *= min(1.0, decay + 0.2)
+        self._recompute_metacognitive_uncertainty()
+        assert self.replay_priority >= 0.0, "replay priority must stay non-negative because candidate sampling treats it as probability mass"
+
+    # ANCHOR: EPISODE_AUTOBIOGRAPHICAL_LINKS
+    # API_PUBLIC
+    def register_autobiographical_link(self, other_episode_id: str) -> None:
+        """
+        Register continuity between autobiographical episodes.
+
+        Intent:
+            Autobiographical self is not a bag of isolated traces; continuity across
+            episodes provides structural support for a stable self-model over time.
+
+        Args:
+            other_episode_id: Identifier of a related autobiographical episode.
+
+        Returns:
+            None.
+
+        Raises:
+            AssertionError: If the identifier is empty.
+        """
+        assert other_episode_id, "other_episode_id must not be empty because autobiographical continuity requires a concrete linked trace"
+        if other_episode_id != self.id:
+            self.autobiographical_links.add(other_episode_id)
+            self._recompute_metacognitive_uncertainty()
+        assert other_episode_id == self.id or other_episode_id in self.autobiographical_links, "autobiographical continuity registration must persist because self-model stability depends on linked traces"
     
     # API_PUBLIC
     def mark_replayed(self) -> None:
@@ -219,6 +408,7 @@ class Episode:
             self.state = EpisodeState.REPLAYED
         elif self.state == EpisodeState.DECAYING:
             self.state = EpisodeState.REPLAYED
+        self._recompute_metacognitive_uncertainty()
     
     # API_PUBLIC
     def mark_consolidating(self) -> None:
@@ -272,6 +462,7 @@ class Episode:
             decay_factor = min(1.0, decay_factor + 0.05)
             
         self.strength *= decay_factor
+        self._recompute_metacognitive_uncertainty()
         
         # Pruning thresholds
         # 1. Original heuristic: remove if no replays after 7 cycles
@@ -341,6 +532,11 @@ class Episode:
         Returns:
             True if episodes are similar.
         """
+        if self.memory_domain != other.memory_domain:
+            return False
+        if self.identity_tag != other.identity_tag:
+            return False
+
         # Compare by original input neurons
         overlap = len(self.input_neurons & other.input_neurons)
         min_size = min(len(self.input_neurons), len(other.input_neurons))

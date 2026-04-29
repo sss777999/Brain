@@ -1,7 +1,7 @@
 # Brain Model Architecture
 ## Complete Training and Inference Schema
 
-**Last updated:** February 7, 2026
+**Last updated:** March 6, 2026
 
 ---
 
@@ -22,6 +22,7 @@ This is **THE** diagram showing how the model answers questions. Read this FIRST
 ║  │    • Phase 3 Reanalysis (Friederici 2011): normalize question           │ ║
 ║  │      - Inverted: "The sky is what color?" → "What color is the sky?"   │ ║
 ║  │      - Imperative: "Name a farm animal" → "What is a farm animal?"     │ ║
+║  │      - Classifier: "The sun is a type of what?" → "What is the sun?"   │ ║
 ║  │      - Temporal: "What time of day..." → "When..."                     │ ║
 ║  │    • Parse question structure                                           │ ║
 ║  │    • Extract: subject="france", predicate="capital"                     │ ║
@@ -36,6 +37,8 @@ This is **THE** diagram showing how the model answers questions. Read this FIRST
 ║  │    • Set goal: ["capital", "france"]                                    │ ║
 ║  │    • Load context from previous sentences (if any)                      │ ║
 ║  │    • Classify question → select preferred sources                       │ ║
+║  │    • Canonicalize self words: I/me/my → self_entity                     │ ║
+║  │    • Binding tokens exclude copula operators for identity queries       │ ║
 ║  │    • NMDA-like decay keeps relevant info active                         │ ║
 ║  └─────────────────────────────────────────────────────────────────────────┘ ║
 ║         │                                                                     ║
@@ -106,6 +109,7 @@ This is **THE** diagram showing how the model answers questions. Read this FIRST
 ║  │        • Top-down connector modulation:                                 │ ║
 ║  │          - String connector: ×5.0 enhance / ×0.2 suppress (biased)    │ ║
 ║  │          - Frozenset (temporal): ×2.0 boost only (soft facilitation)  │ ║
+║  │        • Self-query facilitation: prefer SELF_SEMANTIC / SELF_EPISODIC  │ ║
 ║  │        • Temporal concept bonus: for 'when' questions                   │ ║
 ║  │        • Recency: working memory episodes get timestamp bonus           │ ║
 ║  │        • Subject bonus: episode contains question subject               │ ║
@@ -336,6 +340,8 @@ If direct retrieval fails (no episode found), the system uses `IterativeRetrieve
 - ✅ **Temporal Concept Inference** — PFC primes temporal concepts for 'when' questions (Eichenbaum 2014)
 - ✅ **Soft Attentional Facilitation** — frozenset connector boost without suppression (Miller & Cohen 2001)
 - ✅ **Episode Deduplication** — consolidated copies merge into single attractor (Born & Wilhelm 2012)
+- ✅ **Self Memory Domains** — episodic traces store `GENERAL` vs `SELF_SEMANTIC` vs `SELF_EPISODIC`
+- ✅ **Self-Reference Canonicalization** — first-person forms converge to `self_entity` before retrieval
 - ✅ **Source Memory** — brain remembers WHERE/HOW knowledge was acquired (Johnson et al., 1993)
 - ✅ **Sharp Wave-Ripples (SWR)** — TRUE replay with temporal compression (Buzsáki 2015) (NEW!)
 - ✅ **Temporal Compression** — replay 10-20x faster than encoding (Nádasdy et al. 1999)
@@ -420,6 +426,7 @@ the KNOWLEDGE is real, only the INTERFACE is simplified.
 - ✅ **_spread_recurrent()** — activation via recurrent collaterals
 - ✅ **_apply_inhibition()** — lateral inhibition (top-K winners)
 - ✅ **Full scoring logic** — 2-hop paths, context diversity, top-down modulation, recency
+- ✅ **Spatial Goal Gating** — for `where` queries, same-subject possession episodes without spatial signal lose their subject advantage, while same-subject spatial traces receive extra facilitation during temporal replay; this lets carrier-location retrieval prefer movement/location episodes over object-handling distractors
 - ✅ **Explicit dependency** — Hippocampus._ca3 (not singleton)
 
 ### Source Memory System (Johnson et al., 1993)
@@ -521,6 +528,13 @@ the KNOWLEDGE is real, only the INTERFACE is simplified.
    - "Who is the president of Mars?" → "I do not know" (no episode has both words)
    - Result: **705/705 (100.0%)** — 224 QA + 481 bAbI across all test suites
 
+   Additional focused CA1 readout refinement now sharpens the winning top-K population before verbal output:
+   - Non-verb query context must stay covered during blending for `need` / `have` / `with` and title/material-style questions, preventing semantic drift
+   - Subject facts can be recovered from theme/predicate traces when the queried concept is present but not encoded as the episode agent
+   - Compact role-bound answers are emitted for reliable `who`, `how old`, and `what color` questions instead of replaying an entire narrative trace
+   - If a person question has no reliable bound answer, the readout falls back to "I do not know", preserving anti-hallucination behavior
+   - Latest fast QA validation: **224/224 (100.0%)** with STRICT 3/3, GRADE1 64/64, FINEWEB 9/9
+
 ### Why 100% is NOT Test-Specific Tuning
 
 Each Phase 19–21 mechanism solves a **class of problems**, not a specific test case. None contains hardcoded words, question-specific thresholds, or answer lookups.
@@ -553,39 +567,39 @@ Q: When do children sleep?           → "need lots grow school..."   ✅ tempor
    - General-purpose: works for any English text with pronouns, not bAbI-specific
    - Result: bAbI Tasks 11 (basic-coreference) and 13 (compound-coreference): 100%
 
-7. **PFC Situation Model — Working Memory State Tracker (PHASE 23)** — structured WM (Baddeley 2000):
-   - `WMStateTracker` class in `test_babi.py` — PFC situation model for context evaluation
-   - Models the visuospatial sketchpad and central executive of Baddeley's WM model
+7. **Core PFC Situation Readouts (PHASE 23)** — structured WM in the brain model (Baddeley 2000):
+   - `broca.py` now parses state-sensitive query forms for locative polarity, spatial relations,
+     possession/transfer, and motivation questions
+   - `train.ask()` performs fast working-memory readout before episodic fallback
    - Entity location tracking = PFC spatial register (Goldman-Rakic 1995)
-   - Object possession tracking = visual-spatial sketchpad (Baddeley 2000)
+   - Object possession and transfer tracking = visuospatial sketchpad / object file maintenance (Baddeley 2000)
+   - Motivation drive tracking = maintained internal state linking drive → destination/object goals
    - Negation processing = PFC inhibitory control (Miller & Cohen 2001)
-   - Temporal history = hippocampal time cells (Eichenbaum 2014)
-   - Spatial reasoning with transitivity = cognitive map (O'Keefe & Nadel 1978)
-   - Path finding via BFS = place/grid cell navigation (O'Keefe & Moser 2005)
-   - Deduction via type hierarchy = semantic memory (Collins & Quillian 1969)
-   - Architecture: WM evaluation first → episodic retrieval fallback (train.ask())
-   - **⚠️ KNOWN LIMITATION**: LOCATIONS/OBJECTS vocabulary sets are domain-specific world
-     knowledge that would ideally be learned from semantic memory built during training.
-     This is a pragmatic simplification analogous to rule-based parsing in broca.py —
-     the MECHANISM is biological, the VOCABULARY is explicitly provided.
-   - **Zero changes to brain model core** — WMStateTracker lives in test harness only
-   - Result: bAbI Tasks 1-20: **481/481 (100%)**, all 20 tasks at 100%
+   - Temporal ordering = hippocampal time cells (Eichenbaum 2014)
+   - Spatial transitivity = cognitive map traversal (O'Keefe & Nadel 1978)
+   - Architecture: core WM readout first → episodic retrieval fallback (`train.ask()`)
+   - Benchmark harness remains responsible for story loading and strict evaluation, not state inference
+   - **⚠️ CURRENT LIMITATION**: some canonical drive→goal associations are still explicit priors;
+     the long-term target is to ground these associations in learned semantic memory rather than fixed mappings
+   - Targeted validation: bAbI Tasks 4, 5, 6, 7, 8, 9, 10, and 20 reached 100% in task-specific runs
 
 ### Why bAbI 100% is NOT Test-Specific Tuning
 
 | Component | What it does | Biological basis | Generality |
 |-----------|-------------|-----------------|------------|
 | CoreferenceResolver | Pronoun resolution via discourse model | Broca's area gamma-band binding (Fries 2005) | General-purpose — any English text |
-| Entity/object tracking | Who is where, who has what | PFC spatial register (Goldman-Rakic 1995) | Any story with entities and locations |
+| Core WM readouts | Who is where, what relates to what, who has what | PFC situation model + central executive (Baddeley 2000; Goldman-Rakic 1995) | Any story with maintainable state |
+| Motivation state | Where an agent will go and why they went/got an object | Maintained drive state with goal-linked readout | Any narrative with explicit internal drives |
 | Temporal history | Where was X before Y? | Hippocampal time cells (Eichenbaum 2014) | Any temporal sequence query |
 | Spatial reasoning | Is A left of B? + transitivity | Cognitive map (O'Keefe & Nadel 1978) | Any 2D spatial layout |
 | Path finding | How to go from A to B? | Place/grid cells (O'Keefe & Moser 2005) | Any graph traversal |
 | Deduction | X is a mouse, mice fear wolves → X fears wolves | Semantic memory hierarchy (Collins & Quillian 1969) | Any type-based inference |
 | Negation | "X is no longer in Y" → remove X from Y | PFC inhibitory control (Miller & Cohen 2001) | Any negation statement |
 
-**Critical architectural boundary**: The brain model (train.py, ca3.py, hippocampus.py, etc.) has
-**zero changes**. All bAbI-specific logic lives in the test harness (test_babi.py) as a PFC
-situation model proxy. The 224 non-bAbI QA tests remain at 100%.
+**Critical architectural boundary**: The benchmark harness (`test_babi.py`) loads stories and scores answers,
+while the authoritative situation-model inference now lives in core brain code (`broca.py`, `train.py`) as
+task-selective PFC-style working-memory readouts. Episodic retrieval remains the fallback path when the
+maintained state is insufficient.
 
 ### Key Improvements (January 2026)
 
@@ -1892,7 +1906,7 @@ space for new information. Prevents "getting stuck"
 on one topic.
 ```
 
-### 14. 20 Training modes (training_modes.py)
+### 14. 22 Training modes (training_modes.py)
 ```
 BIOLOGY: Different information types processed by different
 brain memory systems.
@@ -1902,12 +1916,14 @@ I. SEMANTIC MEMORY (Neocortex):
    - DEFINITION: term → definition
    - HIERARCHY: category → elements
    - PROPERTY: entity → property → value
+   - SELF_FACT: stable self-schema / identity fact
 
 II. EPISODIC MEMORY (Hippocampus):
    - EPISODE: event + where + when
    - PARAGRAPH: sentences with shared context
    - STREAM: sliding window over text
    - NARRATIVE: story with plot
+   - SELF_EPISODE: autobiographical event bound to self_entity
 
 III. PROCEDURAL MEMORY (Basal Ganglia):
    - SEQUENCE: element order
@@ -1930,6 +1946,12 @@ V. METACOGNITIVE (Prefrontal cortex):
 USAGE:
     from training_modes import train, TrainingMode, FactData
     train(TrainingMode.FACT, FactData(sentence="Paris is the capital"))
+
+SELF ARCHITECTURE:
+    Episode.memory_domain separates GENERAL from self-owned traces.
+    Episode.identity_tag stores the stable self anchor used by CA3 competition.
+    Newly encoded SELF_* traces receive immediate replay, approximating
+    self-reference facilitation before slower cortical consolidation.
 
 LLM PIPELINE:
     LLM_CLASSIFICATION_PROMPT classifies text → mode + data

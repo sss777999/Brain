@@ -536,8 +536,10 @@ def union_sdr(sdrs: List[SDR]) -> SDR:
 def intersection_sdr(sdrs: List[SDR]) -> SDR:
     """Compute intersection of multiple SDRs."""
     assert sdrs, "Cannot compute intersection of empty list"
-    
+
     result = sdrs[0]
     for sdr in sdrs[1:]:
         result = result.intersection(sdr)
     return result
+
+
