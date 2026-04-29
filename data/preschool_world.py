@@ -13,7 +13,7 @@ All data is in English as the Brain model is trained on English.
 Format: (word1, word2) tuples representing connections for Hebbian learning.
 """
 
-from typing import List, Tuple
+from typing import Any, List, Tuple
 
 # =============================================================================
 # ANCHOR: BABY_ANIMALS_SENTENCES - Baby animals and their adult names (sentences)
@@ -956,7 +956,7 @@ def get_preschool_sentences() -> List[str]:
     
     return sentences
 
-def get_preschool_questions() -> List[Tuple[str, List[str]]]:
+def get_preschool_questions() -> List[Tuple[str, Any]]:
     """Test questions with expected answer keywords."""
     return PRESCHOOL_QUESTIONS
 
@@ -966,9 +966,9 @@ def get_preschool_questions() -> List[Tuple[str, List[str]]]:
 
 PRESCHOOL_QUESTIONS = [
     # Baby animals
-    ("What is a puppy?", ["baby dog", "young dog", "dog"]),
-    ("What is a kitten?", ["baby cat", "young cat", "cat"]),
-    ("What is a calf?", ["baby cow", "young cow", "cow"]),
+    ("What is a puppy?", {"any_of": ["baby dog", "young dog"]}),
+    ("What is a kitten?", {"any_of": ["baby cat", "young cat"]}),
+    ("What is a calf?", {"any_of": ["baby cow", "young cow"]}),
     ("What does a tadpole become?", ["frog"]),
     ("What does a caterpillar become?", ["butterfly"]),
     
@@ -994,9 +994,9 @@ PRESCHOOL_QUESTIONS = [
     ("Is a knife sharp?", ["yes", "sharp", "cut"]),
     
     # Hygiene
-    ("When should you wash your hands?", ["before eating", "after toilet", "eating"]),
-    ("When should you brush your teeth?", ["morning", "night", "day", "every"]),
-    ("What do you use to wash hands?", ["soap", "water"]),
+    ("When should you wash your hands?", {"any_of": ["before eating", "after toilet"]}),
+    ("When should you brush your teeth?", {"any_of": ["morning night", "every day"]}),
+    ("What do you use to wash hands?", {"all_of": ["soap", "water"]}),
     
     # Manners
     ("What do you say when you ask for something?", ["please"]),

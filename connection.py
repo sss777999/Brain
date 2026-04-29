@@ -526,6 +526,7 @@ class Connection:
         Example: "sun is yellow" -> is, "sun is a star" -> is_a
         For the question "What is the sun?" we choose is_a (category).
         """
+        self._synchronize_connector_storage()
         if connector not in self.connectors:
             self.connectors[connector] = 0
             
@@ -543,6 +544,39 @@ class Connection:
         
         # Update cache: most frequent connector
         self.connector = max(self.connectors, key=self.connectors.get)
+
+    # ANCHOR: CONNECTOR_STORAGE_SYNC
+    # API_PRIVATE
+    def _synchronize_connector_storage(self) -> None:
+        """
+        Synchronize legacy connector counts with SDR-backed connector storage.
+
+        Intent:
+            Loaded models may restore the legacy connector dictionary without
+            rebuilding SDR connector representations. This helper restores the
+            internal invariant so loaded connections can keep learning.
+
+        Args:
+            None.
+
+        Returns:
+            None.
+
+        Raises:
+            AssertionError: If connector storage lengths remain inconsistent.
+        """
+        assert isinstance(self.connectors, dict), "connectors must remain a dictionary because connector counts are restored from serialized models"
+        if len(self._connector_sdrs) == len(self.connectors) and len(self._sdr_counts) == len(self.connectors):
+            return
+        from sdr import GLOBAL_SDR_ENCODER
+        connector_items = list(self.connectors.items())
+        self._connector_sdrs = [GLOBAL_SDR_ENCODER.encode(name) for name, _ in connector_items]
+        self._sdr_counts = [int(count) for _, count in connector_items]
+        if self.connectors:
+            self.connector = max(self.connectors, key=self.connectors.get)
+        else:
+            self.connector = None
+        assert len(self._connector_sdrs) == len(self.connectors) == len(self._sdr_counts), "connector SDR storage must stay aligned with legacy connector counts because learning updates both representations"
     
     # API_PUBLIC
     def has_connector(self, connector: str) -> bool:
@@ -555,6 +589,7 @@ class Connection:
         """
         # Precondition
         assert isinstance(connector, str) and connector, "connector must be a non-empty string"
+        self._synchronize_connector_storage()
 
         # Legacy fast-path for exact matches
         if connector in self.connectors:
@@ -645,6 +680,7 @@ class Connection:
         - CaMKII (many repetitions): baseline threshold
         - PKA + dopamine (fewer repetitions + salience): reduced threshold
         """
+        prev_state = self.state
         if self.state == ConnectionState.NEW:
             if self.usage_count >= self.THRESHOLD_NEW_TO_USED:
                 self.state = ConnectionState.USED
@@ -658,8 +694,57 @@ class Connection:
                 self.from_neuron._myelinated_out_count += 1
                 self.to_neuron._myelinated_in_count += 1
         # MYELINATED does not change: this is the final stable state
-    
-    # API_PRIVATE  
+
+        # PHASE B: learned SDR overlap on successful promotions
+        if self.state is not prev_state:
+            if prev_state is ConnectionState.NEW and self.state is ConnectionState.USED:
+                self._sdr_learn_overlap_hook("NEW_TO_USED")
+            elif prev_state is ConnectionState.USED and self.state is ConnectionState.MYELINATED:
+                self._sdr_learn_overlap_hook("USED_TO_MYELINATED")
+
+    # ANCHOR: CONN_SDR_LEARN_OVERLAP_HOOK - Phase B learned-SDR integration
+    # API_PRIVATE
+    def _sdr_learn_overlap_hook(self, transition: str) -> None:
+        """
+        Apply Hebbian SDR overlap learning on a connection-state transition.
+
+        BIOLOGY (McClelland et al. 1995, Binder et al. 2009):
+        Content-content co-activation in ventral-stream regions builds
+        overlapping distributed codes; repeated co-promotion is a proxy for
+        such co-activation. Function words (dorsal stream) and syntactic
+        connections do not participate in this semantic overlap.
+
+        Args:
+            transition: one of "NEW_TO_USED" or "USED_TO_MYELINATED".
+                        Any other value is silently ignored (no-op).
+
+        Returns:
+            None.
+        """
+        from config import is_inference_mode
+        if is_inference_mode():
+            return
+        if self.connection_type is not ConnectionType.SEMANTIC:
+            return
+        from graph_storage import FUNCTION_WORDS
+        pre_word = self.from_neuron.id
+        post_word = self.to_neuron.id
+        if pre_word in FUNCTION_WORDS or post_word in FUNCTION_WORDS:
+            return
+        from config import (
+            SDR_LEARN_OVERLAP_ON_MYELINATED,
+            SDR_LEARN_OVERLAP_ON_USED,
+        )
+        if transition == "NEW_TO_USED":
+            fraction = SDR_LEARN_OVERLAP_ON_USED
+        elif transition == "USED_TO_MYELINATED":
+            fraction = SDR_LEARN_OVERLAP_ON_MYELINATED
+        else:
+            return
+        from sdr import GLOBAL_SDR_ENCODER
+        GLOBAL_SDR_ENCODER.learn_overlap(pre_word, post_word, fraction)
+
+    # API_PRIVATE
     def _compute_effective_myelination_threshold(self) -> int:
         """
         Compute an effective myelination threshold accounting for biological factors.
@@ -722,7 +807,8 @@ class Connection:
         # Get thresholds from config
         threshold_new_to_used = CONFIG.get("STDP_THRESHOLD_NEW_TO_USED", 0.5)
         threshold_used_to_myelinated = CONFIG.get("STDP_THRESHOLD_USED_TO_MYELINATED", 5.0)
-        
+
+        prev_state = self.state
         if self.state == ConnectionState.NEW:
             if self.accumulated_stdp_strength >= threshold_new_to_used:
                 self.state = ConnectionState.USED
@@ -731,12 +817,19 @@ class Connection:
             capture_bonus = self._compute_stdp_capture_bonus()
             effective_threshold = threshold_used_to_myelinated - capture_bonus
             effective_threshold = max(effective_threshold, threshold_new_to_used * 2)
-            
+
             if self.accumulated_stdp_strength >= effective_threshold:
                 self.state = ConnectionState.MYELINATED
                 self.from_neuron._myelinated_out_count += 1
                 self.to_neuron._myelinated_in_count += 1
         # MYELINATED is the final state
+
+        # PHASE B: learned SDR overlap on successful promotions
+        if self.state is not prev_state:
+            if prev_state is ConnectionState.NEW and self.state is ConnectionState.USED:
+                self._sdr_learn_overlap_hook("NEW_TO_USED")
+            elif prev_state is ConnectionState.USED and self.state is ConnectionState.MYELINATED:
+                self._sdr_learn_overlap_hook("USED_TO_MYELINATED")
     
     # API_PRIVATE
     def _compute_stdp_capture_bonus(self) -> float:

@@ -39,7 +39,7 @@ for task_num in range(1, 21):
     for story in stories:
         for qa in story["qa"]:
             load_story_to_pfc(qa["context_facts"])
-            is_ok, actual = test_question(qa["question"], qa["answer"])
+            is_ok, actual = test_question(qa["question"], qa["answer"], task_num)
             total += 1
             if is_ok:
                 correct += 1

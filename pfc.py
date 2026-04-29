@@ -30,8 +30,10 @@ PHASE 9.4 - PERSISTENT ACTIVITY (Wang 2001, Compte et al. 2000):
 
 from __future__ import annotations
 
+import re
+
 from dataclasses import dataclass, field
-from typing import List, Dict, Set, Optional, Any, Tuple
+from typing import List, Dict, Set, Optional, Any, Tuple, Sequence
 from enum import Enum, auto
 
 from config import CONFIG
@@ -57,6 +59,134 @@ class QuestionType(Enum):
     LOCATION = auto()         # "Where is X?" → WORKING_MEMORY, CONVERSATION
     TEMPORAL = auto()         # "When does X?" → LEARNING, EXPERIENCE
     UNKNOWN = auto()          # Default fallback (no filtering)
+
+
+# ANCHOR: SELF_REFERENCE_CANONICALIZATION - stable self token for autobiographical memory
+SELF_REFERENCE_TOKENS = frozenset({'i', 'me', 'my', 'mine', 'myself'})
+SELF_ENTITY_TOKEN = 'self_entity'
+
+
+# API_PUBLIC
+def canonicalize_self_reference_word(word: str) -> str:
+    """
+    Map first-person tokens to a stable self representation.
+
+    Intent:
+        The brain maintains a relatively stable self-schema despite surface-form
+        variation (I/me/my/myself). A single canonical token prevents fragmented
+        storage of autobiographical traces.
+
+    Args:
+        word: Raw or cleaned token.
+
+    Returns:
+        Canonical token, either the original lowercased word or SELF_ENTITY_TOKEN.
+
+    Raises:
+        AssertionError: If word is empty.
+    """
+    assert word is not None and str(word).strip(), "word must be non-empty because self-canonicalization needs a concrete lexical token"
+    normalized_word = str(word).lower().strip()
+    canonical_word = SELF_ENTITY_TOKEN if normalized_word in SELF_REFERENCE_TOKENS else normalized_word
+    assert canonical_word, "canonical self token must stay non-empty because lexical routing depends on it"
+    return canonical_word
+
+
+# API_PUBLIC
+def canonicalize_self_reference_tokens(tokens: Sequence[str]) -> Tuple[str, ...]:
+    """
+    Canonicalize first-person tokens in an ordered token sequence.
+
+    Intent:
+        Preserve order while binding different first-person surface forms to the
+        same self representation used by autobiographical memory.
+
+    Args:
+        tokens: Ordered token sequence.
+
+    Returns:
+        Tuple of canonicalized tokens.
+
+    Raises:
+        AssertionError: If tokens is None.
+    """
+    assert tokens is not None, "tokens cannot be None because autobiographical normalization needs an ordered sequence"
+    canonical_tokens = tuple(
+        canonicalize_self_reference_word(token)
+        for token in tokens
+        if token is not None and str(token).strip()
+    )
+    assert len(canonical_tokens) <= len(tokens), "canonicalization must preserve or reduce token count because it should bind forms, not invent content"
+    return canonical_tokens
+
+
+# API_PUBLIC
+def is_self_referential_query(query_words: Set[str], question: Optional[str] = None) -> bool:
+    """
+    Detect whether a query refers to the model's own self-representation.
+
+    Intent:
+        Self-related retrieval should be routed toward autobiographical and
+        self-semantic traces instead of competing equally with general memory.
+
+    Args:
+        query_words: Parsed query words used for retrieval.
+        question: Optional raw question string.
+
+    Returns:
+        True if the query is self-referential, otherwise False.
+
+    Raises:
+        None.
+    """
+    normalized_query_words = {
+        canonicalize_self_reference_word(word)
+        for word in (query_words or set())
+        if word
+    }
+    if SELF_ENTITY_TOKEN in normalized_query_words:
+        return True
+    if question:
+        stripped_question_tokens = [
+            token.strip("?.!,;:\"'()[]{}")
+            for token in question.lower().split()
+        ]
+        question_tokens = canonicalize_self_reference_tokens(stripped_question_tokens)
+        return SELF_ENTITY_TOKEN in question_tokens
+    return False
+
+
+# ANCHOR: SELF_IDENTITY_QUERY
+# API_PUBLIC
+def is_self_identity_query(question: Optional[str]) -> bool:
+    """
+    Detect whether a question asks about stable self-identity rather than an event.
+
+    Intent:
+        Self-identity questions should route retrieval toward self-schema traces
+        instead of autobiographical event memory.
+
+    Args:
+        question: Raw question string.
+
+    Returns:
+        True if the question is a self-identity query, otherwise False.
+
+    Raises:
+        None. This helper is best-effort and returns False on malformed input.
+    """
+    if not question:
+        return False
+    stripped_tokens = [token.strip("?.!,;:\"'()[]{}") for token in question.lower().split()]
+    tokens = canonicalize_self_reference_tokens(stripped_tokens)
+    if len(tokens) < 3 or SELF_ENTITY_TOKEN not in tokens:
+        return False
+    copula = {'is', 'are', 'am', 'was', 'were'}
+    if tokens[0] in {'who', 'what'} and tokens[1] in copula:
+        return True
+    if len(tokens) >= 4 and tokens[0] == 'what' and tokens[2] in copula:
+        return True
+    return False
 
 
 # ANCHOR: PFC_SLOT_TYPE - types of information in PFC
@@ -283,6 +413,8 @@ def get_expected_roles(question: str) -> List[str]:
     """
     if not question:
         return []
+    if is_self_identity_query(question):
+        return ['category', 'property']
     
     words = question.lower().split()
     
@@ -715,14 +847,30 @@ class PFC:
             query_words: Original query words
             
         Returns:
-            Expanded cues (query + PFC active tokens)
+            Expanded cues (query + relevant PFC active tokens)
         """
         # Start with query words
         cues = set(query_words)
         
-        # Add all active tokens from PFC (intermediate results)
-        cues.update(self.get_active_tokens())
+        # BIOLOGY (Top-down attention):
+        # We don't just dump all of PFC into the cue, we only include the most 
+        # RELEVANT recent additions. If PFC contains 5 facts, dumping them all
+        # creates a noisy cue.
+        # We find the slots that are most relevant to the current cues.
+        for slot in self.slots:
+            if slot.slot_type == SlotType.CONTEXT:
+                # If the slot was added as a retrieval hop result, include its key tokens
+                if slot.metadata.get("source") == "retrieval_hop":
+                    # Only add content that is strongly activated (recent focus)
+                    if slot.activation > 0.5:
+                        # Don't add function words from the hop
+                        from broca import SyntacticProcessor
+                        for w in slot.content:
+                            cues.add(w)
         
+        # If we didn't add anything from hops, just return the query words
+        # The main issue was that get_active_tokens() included EVERYTHING in PFC (all story facts)
+        # which overwhelmed the retrieval with noise.
         return cues
     
     # ANCHOR: PFC_ADD_RETRIEVAL_RESULT - store intermediate result
@@ -743,8 +891,16 @@ class PFC:
         Returns:
             True if new information was added
         """
+        # Precondition
+        assert episode_words is not None, "episode_words must be provided so PFC can maintain a task-relevant trace"
+
+        from train import is_function_word
+
         # Filter out query words — only keep NEW information
-        new_info = episode_words - query_words
+        new_info = {
+            word for word in (episode_words - query_words)
+            if word and not is_function_word(word)
+        }
         
         if not new_info:
             return False  # No new information
@@ -833,13 +989,13 @@ class PFC:
         assert isinstance(question, str), "Goal metadata 'question' must be a string so structural parsing is deterministic"
 
         raw_tokens = question.lower().split()
-        tokens = [t.strip("?.!,;:\"'()[]{}") for t in raw_tokens]
-        tokens = [t for t in tokens if t]
+        stripped_tokens = [t.strip("?.!,;:\"'()[]{}") for t in raw_tokens]
+        tokens = [canonicalize_self_reference_word(t) for t in stripped_tokens if t]
 
         if len(tokens) < 3:
             return set()
 
-        COPULA: Set[str] = {'is', 'are', 'was', 'were'}
+        COPULA: Set[str] = {'is', 'are', 'am', 'was', 'were'}
 
         # Pattern 1: "What is/are <NP> made of?" → content = <NP>, operator = made/of
         # NOTE: The 'of' check makes this a structural operator, not a word list.
@@ -866,6 +1022,15 @@ class PFC:
 
         # Pattern 3: "What is/was <NP>?" → content = <NP>
         if tokens[0] == 'what' and len(tokens) >= 3 and tokens[1] in COPULA:
+            content = {t for t in tokens[2:] if t not in COPULA}
+            filtered = content & goal_tokens
+            # Postcondition
+            assert all(isinstance(t, str) and t for t in content), "Binding tokens must be non-empty strings to map to neurons"
+            assert all(isinstance(t, str) and t for t in filtered), "Binding tokens must be non-empty strings to map to neurons"
+            return filtered if filtered else content
+
+        # Pattern 4: "Who is/am <NP>?" → content = <NP>
+        if tokens[0] == 'who' and len(tokens) >= 3 and tokens[1] in COPULA:
             content = {t for t in tokens[2:] if t not in COPULA}
             filtered = content & goal_tokens
             # Postcondition
@@ -1409,64 +1574,256 @@ class IterativeRetriever:
         self._history = []
         
         # Set goal in PFC
-        self.pfc.set_goal(goal, metadata={"type": "iterative_retrieval"})
+        existing_goal = self.pfc.get_goal()
+        question_metadata = None
+        if existing_goal and existing_goal.metadata:
+            question_metadata = existing_goal.metadata.get("question")
+        goal_metadata = {"type": "iterative_retrieval"}
+        if question_metadata:
+            goal_metadata["question"] = question_metadata
+        self.pfc.set_goal(goal, metadata=goal_metadata)
         
-        # Initialize cue
+        # Initialize cue and goal
+        original_goal = set(goal)
+        current_goal = set(goal)
         current_cue = initial_cue if initial_cue else set(goal)
         best_episode = None
         best_confidence = 0.0
+        accepted_goal_tokens = None
+        max_timestamp = None
+        original_question_words = re.findall(r"[a-z0-9_'-]+", question_metadata.lower()) if question_metadata else []
+        temporal_anchor_connector = next((token for token in original_question_words if token in ('before', 'after')), None)
+        reference_location = None
+        if temporal_anchor_connector is not None:
+            anchor_idx = original_question_words.index(temporal_anchor_connector)
+            for token in original_question_words[anchor_idx + 1:]:
+                if token not in {'a', 'an', 'the'}:
+                    reference_location = token
+                    break
+        goal_anchor_tokens = {token for token in (temporal_anchor_connector, reference_location) if token}
+        before_anchor_reached = False
         
         for iteration in range(self.max_iterations):
             # STEP 1: Expand cue with PFC working memory contents
             # BIOLOGY: PFC accumulates context across iterations
             expanded_cue = self.pfc.get_multi_hop_cues(current_cue)
+            active_question = question_metadata
+            if question_metadata and ('where' in current_goal):
+                tracked_entities = current_goal - {'where', 'is', 'are', 'was', 'were', 'the', 'a', 'an', 'what', 'who'} - goal_anchor_tokens
+                tracked_entity = next(iter(tracked_entities), None)
+                if tracked_entity:
+                    active_question = f"where is {tracked_entity}"
             
             # STEP 2: Query hippocampus
             # BIOLOGY: Hippocampus performs pattern completion
             episode = hippocampus.pattern_complete(
                 cue_neurons=expanded_cue,
                 word_to_neuron=word_to_neuron,
-                query_words=goal,
-                pfc=self.pfc
+                query_words=current_goal,
+                pfc=self.pfc,
+                question=active_question,
+                max_timestamp=max_timestamp
             )
             
-            # STEP 3: Evaluate retrieval
-            confidence = self._compute_confidence(episode, goal) if episode else 0.0
+            # STEP 3: Evaluate retrieval against the CURRENT goal
+            confidence = self._compute_confidence(episode, current_goal) if episode else 0.0
             
             # Record history
             step_info = {
                 "iteration": iteration,
                 "cue": set(current_cue),
                 "expanded_cue": set(expanded_cue),
+                "current_goal": set(current_goal),
                 "episode_found": episode is not None,
                 "confidence": confidence,
             }
             self._history.append(step_info)
             
-            # STEP 4: Check if goal achieved
-            if episode and confidence > best_confidence:
+            # Goal check (custom or default) against the ORIGINAL goal
+            goal_achieved = False
+            if goal_check_func and episode:
+                # If a custom check is provided, it is the ABSOLUTE authority
+                goal_achieved = goal_check_func(episode, current_goal)
+            elif episode and confidence >= self.MIN_CONFIDENCE:
+                # Default behavior if no custom check is provided
+                goal_achieved = True
+            if (
+                temporal_anchor_connector == 'before'
+                and reference_location
+                and not before_anchor_reached
+                and episode
+            ):
+                goal_achieved = False
+            
+            # STEP 4: Check if goal achieved or update best episode
+            # If the goal is achieved, this is definitively our best episode.
+            # Otherwise, we keep the episode with the highest confidence as a fallback.
+            if goal_achieved:
+                best_episode = episode
+                best_confidence = confidence
+                accepted_goal_tokens = set(current_goal)
+                # BIOLOGY: PFC "accepts" retrieval, stops loop
+                break
+            elif episode and confidence > best_confidence:
                 best_episode = episode
                 best_confidence = confidence
             
-            # Goal check (custom or default)
-            goal_achieved = False
-            if goal_check_func and episode:
-                goal_achieved = goal_check_func(episode, goal)
-            elif episode and confidence >= self.MIN_CONFIDENCE:
-                goal_achieved = True
-            
-            if goal_achieved:
-                # BIOLOGY: PFC "accepts" retrieval, stops loop
-                break
-            
             # STEP 5: Update working memory for next iteration
-            # BIOLOGY: PFC accumulates partial results
+            # BIOLOGY: PFC accumulates partial results and SHIFTS FOCUS
             if episode:
-                new_info = set(episode.input_neurons) - goal - current_cue
+                new_info = set(episode.input_neurons) - current_goal - current_cue
                 if new_info:
-                    self.pfc.add_retrieval_result(set(episode.input_neurons), goal)
-                    # Expand cue with new information
-                    current_cue = current_cue | new_info
+                    # FOCUS SHIFT: the new entity becomes the primary cue for the next hop.
+                    from broca import SyntacticProcessor
+                    broca = SyntacticProcessor()
+                    # The episode text is just the words joined
+                    ep_text = ' '.join(episode.input_words) if hasattr(episode, 'input_words') else ' '.join(episode.input_neurons)
+                    parsed_ep = broca.parse(ep_text)
+                    
+                    if 'where' in original_goal and not goal_achieved:
+                        tracked_entities = current_goal - {'where', 'is', 'are', 'was', 'were', 'the', 'a', 'an', 'what', 'who'} - goal_anchor_tokens
+                        tracked_entity = next(iter(tracked_entities), None)
+
+                        if (
+                            temporal_anchor_connector == 'before'
+                            and reference_location
+                            and tracked_entity
+                            and parsed_ep.relation_direction
+                            and parsed_ep.subject == tracked_entity
+                        ):
+                            current_location = parsed_ep.relation_direction[1]
+                            if (not before_anchor_reached) or current_location == reference_location:
+                                if current_location == reference_location:
+                                    before_anchor_reached = True
+                                max_timestamp = getattr(episode, 'timestamp', 1) - 1
+                                shifted_goal = {tracked_entity, 'where'}
+                                self.pfc.add_retrieval_result(set(shifted_goal), current_goal)
+                                current_cue = set(shifted_goal)
+                                current_goal = set(shifted_goal)
+                                shift_metadata = {"type": "iterative_retrieval_shifted"}
+                                if question_metadata:
+                                    shift_metadata["question"] = question_metadata
+                                self.pfc.set_goal(current_goal, metadata=shift_metadata)
+                                continue
+
+                        # Handle object dropping/discarding
+                        if parsed_ep.verb in broca.POSSESSION_VERBS and parsed_ep.verb in ('dropped', 'discarded', 'left', 'put'):
+                            # BIOLOGY (Temporal Constraints, Eichenbaum 2014):
+                            # A drop event fixes the object's location at the holder's location
+                            # at the moment of release, so retrieval must search just before the drop.
+                            max_timestamp = getattr(episode, 'timestamp', 1) - 1
+                            # We must also drop the object itself from the cue, otherwise it will pull
+                            # us back to the drop event or other irrelevant events.
+                            if parsed_ep.subject:
+                                shifted_goal = {parsed_ep.subject, 'where'}
+                            else:
+                                shifted_goal = {'where'}
+                            self.pfc.add_retrieval_result(set(shifted_goal), current_goal)
+                            current_cue = set(shifted_goal)
+                            current_goal = set(shifted_goal)
+                            shift_metadata = {"type": "iterative_retrieval_shifted"}
+                            if question_metadata:
+                                shift_metadata["question"] = question_metadata
+                            self.pfc.set_goal(current_goal, metadata=shift_metadata)
+                            continue
+
+                        if (
+                            parsed_ep.verb in broca.POSSESSION_VERBS
+                            and parsed_ep.subject
+                            and tracked_entity == parsed_ep.subject
+                            and ('there' in episode.input_neurons or 'there.' in episode.input_neurons)
+                        ):
+                            max_timestamp = getattr(episode, 'timestamp', 1) - 1
+                            shifted_goal = {parsed_ep.subject, 'where'}
+                            self.pfc.add_retrieval_result(set(shifted_goal), current_goal)
+                            current_cue = set(shifted_goal)
+                            current_goal = set(shifted_goal)
+                            shift_metadata = {"type": "iterative_retrieval_shifted"}
+                            if question_metadata:
+                                shift_metadata["question"] = question_metadata
+                            self.pfc.set_goal(current_goal, metadata=shift_metadata)
+                            continue
+
+                        if (
+                            max_timestamp is not None
+                            and parsed_ep.verb in broca.POSSESSION_VERBS
+                            and parsed_ep.subject
+                            and ('there' in episode.input_neurons or 'there.' in episode.input_neurons)
+                        ):
+                            max_timestamp = getattr(episode, 'timestamp', 1) - 1
+                            shifted_goal = {parsed_ep.subject, 'where'}
+                            self.pfc.add_retrieval_result(set(shifted_goal), current_goal)
+                            current_cue = set(shifted_goal)
+                            current_goal = set(shifted_goal)
+                            shift_metadata = {"type": "iterative_retrieval_shifted"}
+                            if question_metadata:
+                                shift_metadata["question"] = question_metadata
+                            self.pfc.set_goal(current_goal, metadata=shift_metadata)
+                            continue
+
+                        if parsed_ep.verb in broca.POSSESSION_VERBS and parsed_ep.subject:
+                            max_timestamp = None
+                            shifted_goal = {parsed_ep.subject, 'where'}
+                            self.pfc.add_retrieval_result(set(shifted_goal), current_goal)
+                            current_cue = set(shifted_goal)
+                            current_goal = set(shifted_goal)
+                            shift_metadata = {"type": "iterative_retrieval_shifted"}
+                            if question_metadata:
+                                shift_metadata["question"] = question_metadata
+                            self.pfc.set_goal(current_goal, metadata=shift_metadata)
+                            continue
+
+                        # BIOLOGY (Anaphora Resolution):
+                        # When 'there' is encountered, it refers to the most recently established location
+                        # in the environmental context, regardless of which subject established it.
+                        if 'there' in episode.input_neurons or 'there.' in episode.input_neurons:
+                            if 'where' in original_goal:
+                                max_timestamp = getattr(episode, 'timestamp', 1) - 1
+                                # We search strictly for the previous location, dropping the subject requirement
+                                shifted_goal = {'where'}
+                                self.pfc.add_retrieval_result(set(shifted_goal), current_goal)
+                                current_cue = set(shifted_goal)
+                                current_goal = set(shifted_goal)
+                                shift_metadata = {"type": "iterative_retrieval_shifted"}
+                                if question_metadata:
+                                    shift_metadata["question"] = question_metadata
+                                self.pfc.set_goal(current_goal, metadata=shift_metadata)
+                                continue
+                            
+                        # If it's a generic action (e.g., "picked up the apple"), shift to finding the subject's location
+                        if parsed_ep.subject and parsed_ep.subject in episode.input_neurons:
+                            # BIOLOGY: carrying updates object location to the carrier's CURRENT location,
+                            # so we should query the carrier without forcing backward temporal search.
+                            max_timestamp = None
+                            shifted_goal = {parsed_ep.subject, 'where'}
+                            self.pfc.add_retrieval_result(set(shifted_goal), current_goal)
+                            current_cue = set(shifted_goal)
+                            current_goal = set(shifted_goal)
+                            shift_metadata = {"type": "iterative_retrieval_shifted"}
+                            if question_metadata:
+                                shift_metadata["question"] = question_metadata
+                            self.pfc.set_goal(current_goal, metadata=shift_metadata)
+                            continue
+                    
+                    if parsed_ep.subject and parsed_ep.subject in episode.input_neurons:
+                        # Shift focus to the subject of the new episode
+                        shifted_goal = {parsed_ep.subject} | (original_goal - {'where', 'is', 'the', 'what', 'who'})
+                        if 'where' in original_goal:
+                            shifted_goal.add('where')
+                        self.pfc.add_retrieval_result(set(shifted_goal), current_goal)
+                        current_cue = set(shifted_goal)
+                        current_goal = set(shifted_goal)
+                        
+                        # Update PFC Goal explicitly
+                        shift_metadata = {"type": "iterative_retrieval_shifted"}
+                        if question_metadata:
+                            shift_metadata["question"] = question_metadata
+                        self.pfc.set_goal(current_goal, metadata=shift_metadata)
+                    else:
+                        # Expand cue with all new information
+                        self.pfc.add_retrieval_result(set(episode.input_neurons), current_goal)
+                        current_cue = current_cue | new_info
+                        current_goal = current_goal | new_info
                 else:
                     # No new info — try different strategy
                     # BIOLOGY: PFC shifts attention to different aspects
@@ -1477,12 +1834,17 @@ class IterativeRetriever:
                 break
         
         # Return result
+        # Evaluate goal achieved on the best_episode
+        final_goal_achieved = accepted_goal_tokens is not None
+        if best_episode and (not goal_check_func):
+            final_goal_achieved = best_confidence >= self.MIN_CONFIDENCE
+
         result = RetrievalResult(
             episode=best_episode,
             confidence=best_confidence,
             iterations=len(self._history),
             history=self._history.copy(),
-            goal_achieved=best_confidence >= self.MIN_CONFIDENCE
+            goal_achieved=final_goal_achieved
         )
         
         # Postcondition

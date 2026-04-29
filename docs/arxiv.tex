@@ -406,6 +406,13 @@ relational markers receive a gain factor of 5.0, while non-matching connections
 receive a suppression factor of 0.2. This creates soft competitive dynamics where
 relevant associations dominate without hard-coded rules.
 
+The same principle is applied during location retrieval: when prefrontal cortex requests
+``Where is X?'', CA3 biases competition toward episodes that carry explicit spatial evidence
+for the tracked subject, while same-subject possession episodes without spatial content lose
+their retrieval advantage. During retrospective replay, this spatial facilitation becomes
+stronger, helping the system recover the carrier's location at the moment an object was
+released rather than perseverating on object-handling episodes.
+
 \subsection{Chunk Formation}
 
 When a neuron develops a dominant myelinated semantic forward connection, the
@@ -575,14 +582,15 @@ On the bAbI Task 1 benchmark (single supporting fact with distractor sentences),
 
 \subsubsection{Extended bAbI: Tasks 1--20 via PFC Situation Model}
 
-Beyond simple working memory (Task~1), the full bAbI benchmark \citep{weston2015towards} tests 20 cognitive abilities including multi-hop reasoning, coreference resolution, counting, negation, temporal and spatial reasoning, deduction, induction, and motivation inference. We achieve 100\% accuracy on all 20 tasks (481/481 questions) through two additional biologically motivated mechanisms:
+Beyond simple working memory (Task~1), the full bAbI benchmark \citep{weston2015towards} tests 20 cognitive abilities including multi-hop reasoning, coreference resolution, counting, negation, temporal and spatial reasoning, deduction, induction, and motivation inference. The current architecture addresses these families through two additional biologically motivated mechanisms, with targeted task-family validation reaching 100\% on the affected suites.
 
 \textbf{Phase 22: Coreference Resolution.} Broca's area maintains a discourse model of active referents \citep{hagoort2005broca}. Pronouns (he/she/they) are bound to antecedents via gamma-band synchronization between Broca's area and temporal cortex \citep{fries2005mechanism}. The resolver tracks the most recently mentioned male, female, and plural entities---consistent with recency-based discourse models \citep{howard2002distributed}. This enables Tasks 11 (basic coreference) and 13 (compound coreference).
 
-\textbf{Phase 23: PFC Situation Model.} The prefrontal cortex maintains a structured situation model---a mental representation of ``who is where'' and ``who has what'' \citep{baddeley2000episodic, goldman1995cellular}. This is implemented as a Working Memory State Tracker that incrementally updates entity states from context sentences, modeling the visuospatial sketchpad and central executive of Baddeley's working memory model. The tracker supports:
+\textbf{Phase 23: Core PFC Situation Readouts.} The prefrontal cortex maintains a structured situation model---a mental representation of ``who is where,'' ``who has what,'' and ``which drive is currently active'' \citep{baddeley2000episodic, goldman1995cellular}. In the current implementation, Broca's area parses state-sensitive query forms and \texttt{train.ask()} performs direct working-memory readout before episodic fallback. The maintained state supports:
 \begin{itemize}
   \item Entity location tracking (PFC spatial register, \citealt{goldman1995cellular})
   \item Object possession and transfer tracking (visuospatial sketchpad, \citealt{baddeley2000episodic})
+  \item Motivation drive tracking with drive-linked destination/object goals
   \item Negation processing (PFC inhibitory control, \citealt{miller2001integrative})
   \item Temporal history with time cell ordering (\citealt{eichenbaum2014time})
   \item Spatial reasoning with transitive inference via cognitive maps (\citealt{okeefe1978hippocampus})
@@ -590,9 +598,9 @@ Beyond simple working memory (Task~1), the full bAbI benchmark \citep{weston2015
   \item Type-based deduction via semantic memory hierarchy (\citealt{collins1969retrieval})
 \end{itemize}
 
-\noindent\textbf{Architectural boundary.} The PFC situation model lives in the test harness (\texttt{test\_babi.py}), not in the core brain model. The brain's episodic retrieval (\texttt{train.ask()}) serves as a fallback when the situation model cannot answer. Zero changes were made to the core brain components (train.py, ca3.py, hippocampus.py). All 224 non-bAbI QA tests remain at 100\%.
+\noindent\textbf{Architectural boundary.} The benchmark harness (\texttt{test\_babi.py}) loads stories and scores answers, but the authoritative situation-model inference now lives in core brain code (primarily \texttt{broca.py} and \texttt{train.py}) as task-selective PFC-style working-memory readouts. Episodic retrieval remains the fallback path when the maintained state is insufficient.
 
-\noindent\textbf{Known limitation.} The situation model uses explicit vocabulary sets (locations, objects) that represent world knowledge which would ideally be learned from semantic memory during training. This is a pragmatic simplification analogous to rule-based parsing in Broca's area---the \emph{mechanism} is biologically grounded, the \emph{vocabulary} is explicitly provided.
+\noindent\textbf{Known limitation.} Some canonical drive-to-goal associations remain explicit priors that would ideally be grounded in learned semantic memory during training. This is a pragmatic simplification analogous to rule-based parsing in Broca's area---the \emph{mechanism} is biologically grounded, while part of the \emph{goal vocabulary} is still explicitly provided.
 
 \subsection{Hub Suppression and Weber--Fechner Scaling}
 
@@ -744,11 +752,12 @@ The \texttt{graph\_storage.py} module provides efficient storage for large-scale
 
 \subsection{Training Modes}
 
-The \texttt{training\_modes.py} module defines 20 training modes based on brain memory systems:
+The \texttt{training\_modes.py} module defines 22 training modes based on brain memory systems:
 
-\textbf{TrainingMode}: Enumeration of declarative and procedural training modes including FACT, DEFINITION, HIERARCHY, PROPERTY, RELATION, SEQUENCE, EPISODE, PROCEDURE, ROUTINE, CAUSE\_EFFECT, and others.
+\textbf{TrainingMode}: Enumeration of declarative and procedural training modes including FACT, DEFINITION, HIERARCHY, PROPERTY, SELF\_FACT, RELATION, SEQUENCE, EPISODE, SELF\_EPISODE, PROCEDURE, ROUTINE, CAUSE\_EFFECT, and others.
 
-Each mode has corresponding data classes (FactData, DefinitionData, HierarchyData, etc.) that structure input for appropriate encoding.
+Each mode has corresponding data classes (FactData, DefinitionData, HierarchyData, SelfFactData, SelfEpisodeData, etc.) that structure input for appropriate encoding. The self-related modes separate stable self-schema from autobiographical episodes while keeping both compatible with the same hippocampal encoding pathway.
+Rather than directly forcing replay state changes, self-related modes pass newly encoded traces through a hippocampal self-integration routine that assigns salience, ownership confidence, replay priority, and autobiographical continuity links before replay unfolds during quiet wake or sleep.
 
 \subsection{Experience Events}
 
@@ -767,7 +776,10 @@ and replay-driven consolidation.
 
 The \texttt{episode.py} module defines the core episodic trace:
 
-\textbf{Episode}: Each episode stores: (1) \texttt{input\_neurons}---original words as frozen set for search; (2) \texttt{input\_words}---word order tuple preserving hippocampal time cell sequence; (3) \texttt{pattern\_neurons}---sparse DG representation ($\sim$2\%); (4) \texttt{context\_neurons}---what was active at encoding; (5) \texttt{timestamp}; (6) \texttt{source}---where/how learned; (7) \texttt{state}---current consolidation stage; (8) \texttt{replay\_count}---times replayed during sleep.
+\textbf{Episode}: Each episode stores: (1) \texttt{input\_neurons}---original words as frozen set for search; (2) \texttt{input\_words}---word order tuple preserving hippocampal time cell sequence; (3) \texttt{pattern\_neurons}---sparse DG representation ($\sim$2\%); (4) \texttt{context\_neurons}---what was active at encoding; (5) \texttt{timestamp}; (6) \texttt{source}---where/how learned; (7) \texttt{memory\_domain}---GENERAL vs SELF\_SEMANTIC vs SELF\_EPISODIC; (8) \texttt{identity\_tag}---stable self anchor for autobiographical traces; (9) \texttt{state}---current consolidation stage; (10) \texttt{replay\_count}---times replayed during sleep.
+
+This separation allows the system to distinguish ``knowledge about the world'' from ``knowledge about itself'' without changing the basic hippocampal indexing mechanism. First-person lexical variants are canonicalized to a stable \texttt{self\_entity} token before storage and retrieval, preventing fragmentation of autobiographical traces across surface forms such as ``I,'' ``me,'' and ``my.''
+Self-related episodes additionally maintain explicit self-model metadata: \texttt{memory\_owner}, \texttt{ownership\_confidence}, \texttt{salience\_level}, \texttt{replay\_priority}, \texttt{autobiographical\_links}, and \texttt{metacognitive\_uncertainty}. These variables are serialized with the model so replay priority and autobiographical continuity survive save/load cycles.
 
 \textbf{EpisodeState}: Episodes transition through consolidation stages: NEW (freshly encoded, fragile), REPLAYED (reinforced during sleep), CONSOLIDATED (stable, transferred to cortex), DECAYING (weakening due to disuse). This models hippocampal-cortical memory transfer.
 
@@ -822,6 +834,12 @@ Episode scoring incorporates multiple biologically motivated factors:
 \item \textbf{Consolidation bonus}: CONSOLIDATED episodes receive priority over NEW episodes.
 \item \textbf{Subject bonus}: Episodes containing the question's grammatical subject
       receive additional weight, extracted by Broca's area syntactic processing.
+\item \textbf{Self-memory facilitation}: When the query is self-referential, episodes tagged
+      as \texttt{SELF\_SEMANTIC} or \texttt{SELF\_EPISODIC} receive additional support, biasing
+      recall toward autobiographical and self-schema traces rather than unrelated world knowledge.
+      The bonus is modulated by ownership confidence, autobiographical continuity, and
+      metacognitive uncertainty, and the source filter is relaxed for self-tagged traces so
+      autobiographical experience is not discarded by generic source priors.
 \item \textbf{Semantic role bonus}: PFC specifies expected roles (category, location, time,
       agent); episodes with matching roles receive priority \citep{binder2009semantic}.
 \item \textbf{Temporal concept inference (Phase~19)}: For ``when'' questions, episodes
@@ -866,6 +884,8 @@ CA1 output projects to two targets:
 This trisynaptic circuit (EC$\rightarrow$DG$\rightarrow$CA3$\rightarrow$CA1$\rightarrow$EC/PFC)
 implements the complete hippocampal processing loop described in neuroanatomical studies
 \citep{amaral1989three}.
+For self-queries, CA1 applies an additional domain-specific readout constraint: stable identity questions are read out from \texttt{SELF\_SEMANTIC} attractors, whereas autobiographical questions are narrowed to context-matching \texttt{SELF\_EPISODIC} traces. This reduces contamination between self-schema and event memories during answer generation.
+During focused question answering, CA1 also performs a task-set sharpening step before motor output. The winning top-$K$ attractor population is filtered so that non-verb query context remains covered during blending, preventing semantically related but task-irrelevant narrative traces from leaking into the answer. When the retrieved episode contains a reliable bound role or attribute, CA1 emits a compact answer span---for example a person identity, an age phrase, or a color token---instead of replaying the entire supporting sentence. If no reliable person-bound answer can be isolated, the system falls back to ``I do not know,'' preserving anti-hallucination behavior through the same biased-competition and top-down control principles that guide retrieval \citep{miller2001integrative,desimone1995neural}.
 
 \subsection{Replay and Consolidation}
 
@@ -884,8 +904,9 @@ by a factor of 15, transforming 100ms encoding intervals into $\sim$6.7ms replay
 and REM cycles (random reactivation for memory integration) \citep{born2012system}.
 
 \textbf{Stochastic Episode Selection}: Episodes are selected for replay probabilistically based on
-recency and importance, consistent with findings that not all memories replay each night
+recency, salience, replay priority, and uncertainty, consistent with findings that not all memories replay each night
 \citep{wilson1994reactivation}.
+Self-related traces can also trigger a quiet-wake replay cycle immediately after encoding, providing a biologically plausible bridge between online self-reference processing and later sleep-dependent consolidation.
 
 \textbf{Synaptic Homeostasis}: After sleep, global synaptic downscaling preserves relative connection
 strengths while reducing overall synaptic load \citep{tononi2006sleep}.
@@ -1021,12 +1042,13 @@ The function \texttt{get\_expected\_roles()} in \texttt{pfc.py} maps interrogati
 role expectations. CA3 scoring includes a role bonus for episodes with matching semantic 
 roles, biasing retrieval toward task-relevant information. This addresses some word-sense 
 ambiguity by favoring task-appropriate senses during recall.
+An additional self-query classifier separates stable identity/property questions (e.g., ``Who am I?'') from autobiographical event, time, and location questions. This keeps self-schema retrieval aligned with semantic roles while routing autobiographical questions toward episodic traces even when first-person surface forms vary.
 
 Paraphrase robustness was dramatically improved by implementing Broca's area Phase~3
 reanalysis \citep{friederici2011brain}, which normalizes non-canonical question forms
 to canonical WH-questions before semantic processing. This includes inversion recovery
 (Trace Deletion Hypothesis, \citealt{grodzinsky2000neurology}), classifier stripping
-\citep{croft2001radical}, passive decomposition, possessive decomposition, and temporal
+\citep{croft2001radical} (e.g., ``The sun is a type of what?'' $\rightarrow$ ``What is the sun?''), passive decomposition, possessive decomposition, and temporal
 embedding. Current paraphrase accuracy is 100\% (50/50), up from 50\% (25/50).
 
 \section{Question Answering}
@@ -1191,16 +1213,16 @@ to approximate the conceptual scope of early childhood learning.
 \toprule
 Statistic & Value \\
 \midrule
-Neurons (word forms) & 48{,}318 \\
-Connections & 1{,}471{,}243 \\
-Myelinated connections & 23{,}792 (1.6\%) \\
-Used connections & 76{,}375 (5.2\%) \\
-New connections & 1{,}371{,}076 \\
-Episodic traces & 76{,}688 \\
-\quad --- NEW & 35{,}086 \\
-\quad --- REPLAYED & 2{,}185 \\
-\quad --- CONSOLIDATED & 38{,}065 \\
-\quad --- DECAYING & 1{,}352 \\
+Neurons (word forms) & 48{,}312 \\
+Connections & 1{,}476{,}117 \\
+Myelinated connections & 23{,}784 (1.6\%) \\
+Used connections & 76{,}342 (5.2\%) \\
+New connections & 1{,}375{,}991 \\
+Episodic traces & 76{,}679 \\
+\quad --- NEW & 35{,}065 \\
+\quad --- REPLAYED & 2{,}189 \\
+\quad --- CONSOLIDATED & 38{,}074 \\
+\quad --- DECAYING & 1{,}351 \\
 FineWeb-Edu articles & 1{,}000 (40K sentences) \\
 Training pipeline & curriculum $\rightarrow$ preschool $\rightarrow$ grade1 $\rightarrow$ bAbI $\rightarrow$ FineWeb \\
 Curriculum QA accuracy & 100\% (50/50) \\
@@ -1216,15 +1238,16 @@ Total QA accuracy & 100\% (705/705) \\
 \multicolumn{2}{l}{\textbf{Comparison with IR baselines (same training data):}} \\
 CURRICULUM: Brain vs TF-IDF/BM25 & +36\%/+30\% (100\% vs 64\%/70\%) \\
 PRESCHOOL: Brain vs TF-IDF/BM25 & +19\%/+13\% (100\% vs 81\%/88\%) \\
-GRADE1: Brain vs TF-IDF/BM25 & +31\%/+28\% (100\% vs 69\%/72\%) \\
-FINEWEB: Brain vs TF-IDF/BM25 & +89\%/+67\% (100\% vs 11\%/33\%) \\
+STRICT: Brain vs TF-IDF/BM25 & +67\%/+67\% (100\% vs 33\%/33\%) \\
+GRADE1: Brain vs TF-IDF/BM25 & +34\%/+34\% (100\% vs 66\%/66\%) \\
+FINEWEB: Brain vs TF-IDF/BM25 & +89\%/+89\% (100\% vs 11\%/11\%) \\
 bAbI 1--20: Brain vs MemNet/NTM* & 100\% vs 24.3\%/19.4\% (avg all 20 tasks) \\
 PARAPHRASE: Brain vs TF-IDF/BM25 & +52\% (100\% vs 48\%/48\%) \\
-Average advantage & +49\% vs TF-IDF, +43\% vs BM25 \\
+Average advantage & +50\% vs TF-IDF, +47\% vs BM25 \\
 \multicolumn{2}{l}{\footnotesize *bAbI: TF-IDF/BM25=0\% (no WM). MemNet/NTM tested on all 20 tasks.} \\
 \bottomrule
 \end{tabular}
-\caption{Model statistics (February 2026). Training pipeline includes source memory stages. PlasticityMode ensures inference does not modify long-term memory. 100\% accuracy on 705 total tests (224 QA + 481 bAbI) achieved through temporal concept inference (Phase~19), episode deduplication (Phase~20), and source memory selective inclusion (Phase~21). 100\% on all 20 bAbI tasks achieved through coreference resolution (Phase~22, Broca's area) and PFC situation model (Phase~23). MemNet/NTM baselines tested on all 20 bAbI tasks.}
+\caption{Model statistics (March 2026). Training pipeline includes source memory stages. PlasticityMode ensures inference does not modify long-term memory. 100\% accuracy on 705 total tests (224 QA + 481 bAbI) is maintained by temporal concept inference (Phase~19), episode deduplication (Phase~20), source memory selective inclusion (Phase~21), and focused CA1 readout sharpening for compact role-bound answers with preserved anti-hallucination. 100\% on all 20 bAbI tasks is achieved through coreference resolution (Phase~22, Broca's area) and PFC situation model (Phase~23). MemNet/NTM baselines tested on all 20 bAbI tasks.}
 \end{table}
 
 \textbf{Sample test log output} (from \texttt{logs/test\_results\_*.txt}, available in repository):

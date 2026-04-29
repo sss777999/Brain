@@ -26,7 +26,7 @@ Usage:
 
 import os
 import json
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, List, Union
 from pathlib import Path
 
 from config import CONFIG
@@ -72,13 +72,50 @@ Rules:
 Return JSON: {{"raw": <1-10>, "final": <1-10>, "issue": "<problem if any score<7, else empty>"}}"""
 
 
+# ANCHOR: EXPECTATION_FORMATTING
+# API_PRIVATE
+def _format_expected_text(expected: Union[List[str], Dict[str, Any], str]) -> str:
+    """
+    Convert structured expectation specs into readable GPT prompt text.
+
+    Intent:
+        GPT-based evaluation must see the same semantic contract as the strict
+        symbolic evaluator even when tests use explicit `all_of`/`any_of`
+        expectation dictionaries.
+
+    Args:
+        expected: Legacy list/string or structured expectation spec.
+
+    Returns:
+        Readable expectation text.
+
+    Raises:
+        AssertionError: If the formatted text is empty.
+    """
+    if isinstance(expected, dict):
+        parts: List[str] = []
+        if expected.get('all_of'):
+            parts.append(f"ALL OF: {', '.join(expected['all_of'])}")
+        if expected.get('any_of'):
+            parts.append(f"ANY OF: {', '.join(expected['any_of'])}")
+        if expected.get('min_any_matches'):
+            parts.append(f"MIN ANY MATCHES: {expected['min_any_matches']}")
+        text = ' | '.join(parts)
+    elif isinstance(expected, str):
+        text = expected
+    else:
+        text = ', '.join(expected)
+    assert text, "formatted expectation text must stay non-empty because GPT evaluation needs explicit success criteria"
+    return text
+
+
 # ANCHOR: EVALUATE_FUNCTION
 # API_PUBLIC
 def evaluate_answer_quality(
     question: str,
     brain_raw: str,
     llm_fixed: str,
-    expected: list
+    expected: Union[List[str], Dict[str, Any], str]
 ) -> Dict[str, Any]:
     """
     Evaluates answer quality via GPT.
@@ -160,7 +197,7 @@ def _call_openai_api(
     question: str,
     brain_raw: str,
     llm_fixed: str,
-    expected: list
+    expected: Union[List[str], Dict[str, Any], str]
 ) -> Dict[str, Any]:
     """
     Calls OpenAI API to evaluate answer.
@@ -187,7 +224,7 @@ def _call_openai_api(
         question=question,
         brain_raw=brain_raw,
         llm_fixed=llm_fixed,
-        expected=", ".join(expected)
+        expected=_format_expected_text(expected)
     )
     
     headers = {
