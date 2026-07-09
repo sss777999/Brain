@@ -838,6 +838,39 @@ Status: DEFERRED. This phase is intentionally postponed until PHASE 3.6 (word or
 
 ---
 
+## PHASE 2.9: DELIBERATION GATE (thought loop, layer 3) [✅ LAYER 3 DONE]
+**Goal:** Let the brain itself DECIDE whether to answer reflexively or deliberate, and LEARN that decision from a TRUE reward-prediction error. Layer 3 of the "all like a brain" northstar (Layer 1 = online cognitive cycle; Layer 2 = sleep inference). With this, a mechanism for all three layers is now built.
+**Status:** Wired into `train.py` as a global `DELIBERATION_GATE`; opt-in via `ask(question, mode="deliberate")`. Learning is via an explicit `deliberation_feedback()` practice pass — NOT yet auto-wired into live QA.
+
+### Implemented:
+- [x] New module `deliberation.py`, class `DeliberationGate` — a learnable basal-ganglia-style gate that per query context selects REFLEX (1-tick) vs DELIBERATE (6-tick layer-1 cycle).
+- [x] Mechanism: action value = discrete `Go - NoGo` counts (the project's discrete substrate, NOT float weights); selection = `argmax(value)`, ties fall to the default (reflex); `predicted_success = value >= 0` (optimistic prior). RPE = realized − predicted in `{-1, 0, +1}`: failure of an expected-good action → −1 (dopamine dip, NoGo++); success of a currently-negative action (recovery) → +1 (dopamine burst, Go++); an expected outcome → 0 (no learning). `last_rpe` IS the dopamine signal — it replaces the fake novelty-DA (`is_novel = usage_count==0`) that the audit flagged.
+- [x] Wired into `train.py`: global `DELIBERATION_GATE`; `ask(question, mode="deliberate")` (gate picks 1-tick reflex vs 6-tick deliberation via the layer-1 cycle); `_deliberation_context` (context signature = sorted `expected_roles`); `deliberation_feedback(question, success)` to teach it.
+- [x] Forbidden-compliance held: integer discrete counts not float weights; `argmax` not softmax; RPE is realized-vs-predicted, not a gradient-minimized loss; no metrics, global search, or LLM.
+
+### Files changed:
+- `deliberation.py` — NEW module with `DeliberationGate` (value/select/learn on discrete Go/NoGo counts).
+- `train.py` — global `DELIBERATION_GATE`; `ask()` gains `mode="deliberate"`; `_deliberation_context`; `deliberation_feedback()`; `DELIBERATION_DEEP_TICKS=6`.
+
+### Biological basis:
+- Schultz 1998 — dopamine as reward prediction error.
+- Frank 2005 — D1/Go vs D2/NoGo striatal learning.
+- Alexander, DeLong & Strick 1986 — cortico-basal-ganglia-thalamic loops as a learnable controller.
+
+### Test Results:
+- New tests: 7/7 unit green (27/27 across the new test files: `tests/test_deliberation.py`).
+- Legacy curriculum regression intact: CURRICULUM 98.0%, STRICT 100.0%, QA AVG 99.0% (unchanged).
+- Live demo (`tests/probe_deliberation.py`): an empty gate defaults to reflex; after a reflex FAILURE on the "location" context (RPE=−1) the gate switches that context to DELIBERATE and holds it; a different easy context stays reflex.
+
+### Honest limitations:
+- The gate is USED in `ask(mode="deliberate")` but its LEARNING is NOT yet auto-wired into live QA (respecting the INFER-NO-LEARN boundary) — it learns via an explicit `deliberation_feedback()` practice pass, mirroring Layer 2's mechanism-built-and-demonstrated scoping.
+- Full online integration and tuning the context signature (currently sorted `expected_roles`) are follow-ups.
+- "All three layers built" means a mechanism exists for each layer; end-to-end online integration of the three together remains future work.
+
+**Spec:** `docs/superpowers/specs/2026-07-09-deliberation-gate-layer3-design.md`
+
+---
+
 ## PHASE 3: API BOUNDARIES (Lexicon/InputLayer) [✅ DONE — January 2026]
 **Goal:** Explicit interfaces instead of global dictionary access
 

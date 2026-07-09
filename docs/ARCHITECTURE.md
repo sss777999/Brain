@@ -956,6 +956,7 @@ COMBINED LEARNING MODIFIER:
 | **`cognition.py`** | **Predictive cognitive cycle (layer 1) — reached via `ask(mode="emergent")`, NOT the default** | **`CognitiveCycle`, `think()`, `_prediction_error()` (set-difference), `SettleResult`, `ThoughtTrace`** (Rao & Ballard 1999; Preston & Eichenbaum 2013; Wang 2001) |
 | **`cognition_adapters.py`** | **Real-organ adapters wiring the cycle to CA3 / graph / motor output** | **`predict_from_graph()` (top-down P_t), `settle_with_ca3()` (bottom-up S_t), `parse_question()`, `readout_population()`** |
 | **`sleep_inference.py`** | **Sleep inference (layer 2) — compose a transitive edge A→C from A→B + B→C during SWR replay** | **`compose_transitive_links()`** (pure function, graph ops dependency-injected; Kumaran & McClelland 2012; Buzsáki 2015; run from `Hippocampus._compose_inference_links` in `hippocampus.py`) |
+| **`deliberation.py`** | **Deliberation gate (layer 3) — a learnable basal-ganglia-style gate deciding REFLEX vs DELIBERATE per query, reached via `ask(mode="deliberate")`** | **`DeliberationGate`, `select()` (argmax of Go−NoGo counts), `learn()` (true reward-prediction error), `predicted_success()`, `salience()`** (Schultz 1998; Frank 2005; Alexander/DeLong/Strick 1986; wired in `train.py`: `DELIBERATION_GATE`, `_deliberation_context()`, `deliberation_feedback()`) |
 
 ---
 
@@ -2075,6 +2076,53 @@ STATUS (honest — this is a public research repo):
   answer reflexively vs. deliberate.
 
 Spec: docs/superpowers/specs/2026-07-09-sleep-inference-layer2-design.md
+```
+
+---
+
+### 17. Deliberation gate (reflex vs deliberate, layer 3)
+```
+BIOLOGY (Schultz 1998 dopamine = reward-prediction error; Frank 2005 D1/Go vs
+D2/NoGo striatal learning; Alexander, DeLong & Strick 1986 cortico-basal-
+ganglia-thalamic loops as a learnable controller):
+The basal ganglia gate an action by comparing a learned Go (D1) vs NoGo (D2)
+value; phasic dopamine encodes the reward-prediction error, and a dip (NoGo) or
+burst (Go) after the outcome updates that value.
+
+IMPLEMENTATION (deliberation.py DeliberationGate, wired in train.py):
+Per query the gate picks REFLEX (1-tick retrieval) vs DELIBERATE (a 6-tick
+layer-1 cognitive cycle), keyed by a context signature (sorted expected_roles,
+_deliberation_context()).
+- action value = discrete Go − NoGo COUNTS (the project's discrete substrate,
+  NOT float weights); selection = argmax(value), ties fall back to the default
+  (reflex); predicted_success = value ≥ 0 (an optimistic prior).
+- RPE = realized − predicted ∈ {−1, 0, +1}: a failure of an expected-good
+  action → −1 (dopamine dip, NoGo++); a success of a currently-negative action
+  (recovery) → +1 (dopamine burst, Go++); an expected outcome → 0 (no update).
+  last_rpe IS the dopamine signal — it replaces the fake novelty-DA
+  (is_novel = usage_count==0) that the audit flagged.
+- Reached via ask(question, mode="deliberate"); taught by an explicit
+  deliberation_feedback(question, success) practice pass that calls learn().
+
+FORBIDDEN-compatible: integer discrete counts (not float weights), argmax (not
+softmax), RPE is realized-vs-predicted (not a gradient-minimized loss); no
+metrics, global search, or LLM anywhere in the gate.
+
+STATUS (honest — this is a public research repo):
+- 7/7 unit tests pass (27/27 across the new test files); legacy curriculum
+  regression intact (CURRICULUM 98.0%, STRICT 100.0%, QA AVG 99.0%). Live demo
+  (tests/probe_deliberation.py): an empty gate answers reflexively; after a
+  reflex failure on the "location" context (RPE=−1) the gate switches that
+  context to DELIBERATE and holds, while a different easy context stays reflex.
+- Known limitation: the gate is USED in ask(mode="deliberate") but its LEARNING
+  is not yet auto-wired into live QA (respecting the INFER-NO-LEARN boundary) —
+  it learns only via the explicit deliberation_feedback() practice pass, like
+  layer 2's mechanism-built-and-demonstrated scoping. Full online integration
+  and tuning the context signature are follow-ups.
+- This is layer 3 of 3. With layers 1 (§15) and 2 (§16), mechanisms for all
+  three layers of the "all like a brain" northstar are now built.
+
+Spec: docs/superpowers/specs/2026-07-09-deliberation-gate-layer3-design.md
 ```
 
 ---

@@ -58,6 +58,11 @@ ATTENTION_GATE: AttentionGate = AttentionGate(PREFRONTAL_CORTEX)
 BASAL_GANGLIA: BasalGangliaThalamusGating = BasalGangliaThalamusGating()
 MEMORY_ROUTER: MemoryRouter = MemoryRouter(PREFRONTAL_CORTEX)
 
+# ANCHOR: DELIBERATION_GATE - Layer 3: learnable reflex-vs-deliberate gate (true RPE)
+from deliberation import DeliberationGate
+DELIBERATION_GATE: DeliberationGate = DeliberationGate(
+    ["reflex", "deliberate"], default_action="reflex")
+
 
 # ANCHOR: TEMPORARY_CONNECTIONS - track temporary connections for PFC
 # These are created when hearing a sentence and cleared between contexts
@@ -1847,8 +1852,8 @@ def ask(question: str, mode: str = "legacy") -> str:
     """
     Answer a question using a BIOLOGICALLY grounded activation model.
 
-    mode="legacy"   → the current scripted path (_ask_impl), behavior untouched.
-    mode="emergent" → the predictive thought loop (cognition.CognitiveCycle).
+    mode="legacy"   → current scripted path (_ask_impl), behavior untouched.
+    mode="emergent" → predictive thought loop (cognition.CognitiveCycle).
 
     BIOLOGICAL MODEL (Dual Stream):
     1. Question words activate the corresponding neurons
@@ -1879,6 +1884,12 @@ def ask(question: str, mode: str = "legacy") -> str:
     try:
         if mode == "emergent":
             answer = _build_emergent_cycle().think(question)
+        elif mode == "deliberate":
+            # LAYER 3: the basal-ganglia gate DECIDES reflex vs deliberate for THIS query.
+            ctx = _deliberation_context(question)
+            action = DELIBERATION_GATE.select(ctx)
+            ticks = 1 if action == "reflex" else DELIBERATION_DEEP_TICKS
+            answer = _build_emergent_cycle(max_ticks=ticks).think(question)
         else:
             answer = _ask_impl(question)
 
@@ -1896,7 +1907,7 @@ def ask(question: str, mode: str = "legacy") -> str:
         set_learning_mode()
 
 
-def _build_emergent_cycle():
+def _build_emergent_cycle(max_ticks: int = 6):
     """Assemble a CognitiveCycle with the real organs wired in as services (mode='emergent')."""
     from cognition import CognitiveCycle
     from cognition_adapters import (
@@ -1916,8 +1927,27 @@ def _build_emergent_cycle():
         expected_roles_fn=get_expected_roles,
         readout_fn=lambda res, qw, qc: readout_population(res, qw, qc, WORD_TO_NEURON),
         parse_fn=parse_question,
-        max_ticks=6,
+        max_ticks=max_ticks,
     )
+
+
+# ANCHOR: DELIBERATION_GATE_L3 - layer 3: learn reflex-vs-deliberate via true RPE
+DELIBERATION_DEEP_TICKS: int = 6  # tick budget when the gate chooses to deliberate
+
+
+def _deliberation_context(question: str) -> str:
+    """Discrete signature of the question, used as context for the deliberation gate."""
+    from pfc import get_expected_roles
+    return "|".join(sorted(get_expected_roles(question))) or "generic"
+
+
+def deliberation_feedback(question: str, success: bool) -> int:
+    """Train the gate on the outcome (for a training/practice pass, not INFER).
+
+    Returns the RPE (dopamine signal). Requires that ask(question, mode="deliberate")
+    was called beforehand — that call sets eligibility via select().
+    """
+    return DELIBERATION_GATE.learn(realized_success=bool(success))
 
 
 # ANCHOR: READOUT_ROLE_TOKEN_EXTRACTION

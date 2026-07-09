@@ -931,6 +931,16 @@ Brain/
 - **Honest limitation:** the `ask()` answer for a simple 2-hop chain does NOT visibly change yet — answers are read from EPISODES and there is no episode "zorp quix", only the edge. The composed edge is SEMANTIC knowledge that feeds graph-based inference (the layer-1 emergent loop's top-down prediction, `_attempt_inference`); surfacing it as a crisp episodic answer needs a semantic-readout path (the Cortex store is currently unused) — future work. The layer-1 emergent loop already composes simple chains online
 - Spec: `docs/superpowers/specs/2026-07-09-sleep-inference-layer2-design.md`
 
+### ✅ DELIBERATION GATE (reflex vs deliberate, learned) [DONE — layer 3 of 3]
+- **The brain itself decides whether to answer reflexively or deliberate** — new module `deliberation.py` (class `DeliberationGate`), a learnable basal-ganglia-style gate wired into `train.py` (global `DELIBERATION_GATE`) and reachable through `ask(question, mode="deliberate")`: the gate picks a 1-tick reflex vs a 6-tick deliberation via the layer-1 cognitive cycle, keyed on a context signature (`sorted(expected_roles)`), and is taught by `deliberation_feedback(question, success)`
+- **Mechanism:** action value = discrete Go − NoGo counts (the project's discrete substrate, NOT float weights); selection = `argmax(value)` with ties going to the default (reflex); `predicted_success = value >= 0` (optimistic prior). The reward-prediction error is realized − predicted ∈ {−1, 0, +1}: a failure of an expected-good action → −1 (dopamine dip, NoGo++), a success of a currently-negative action → +1 (dopamine burst, Go++), an expected outcome → 0 (no learning). `last_rpe` IS the dopamine signal — this replaces the fake novelty-DA (`is_novel = usage_count == 0`) the audit flagged
+- **FORBIDDEN complied with:** integer discrete counts not float weights, `argmax` not softmax, RPE is realized-vs-predicted (not a gradient-minimized loss), no metrics, no global search, no LLM
+- **Biology:** Schultz 1998 (DA = reward-prediction error), Frank 2005 (D1/Go vs D2/NoGo striatal learning), Alexander/DeLong/Strick 1986 (cortico-basal-ganglia-thalamic loops as a learnable controller)
+- **Evidence:** 7/7 unit tests (27/27 across the new test files); legacy curriculum regression intact (98.0/100.0/99.0%). Live demo (`tests/probe_deliberation.py`): an empty gate → reflex; after a reflex failure on the "location" context (RPE = −1) the gate switches that context to DELIBERATE and holds, while a different easy context stays reflex
+- **Honest limitation:** the gate is USED in `ask(mode="deliberate")` but its LEARNING is not yet auto-wired into live QA (respecting the INFER-NO-LEARN boundary) — it learns via an explicit `deliberation_feedback()` practice pass, like layer 2's mechanism-built-and-demonstrated scoping. Full online integration and tuning the context signature are follow-ups
+- **NORTHSTAR "all like a brain" = 3 layers — now complete:** mechanisms for all three layers are built (layer 1 predictive cognitive cycle, layer 2 sleep inference, layer 3 deliberation gate), each opt-in and demonstrated rather than made the default
+- Spec: `docs/superpowers/specs/2026-07-09-deliberation-gate-layer3-design.md`
+
 ### 🟡 PHASE 8: Learn VERB_FORMS [NEXT]
 - Remove hardcoded `VERB_FORMS` dict
 - Morphology via learning (like children)

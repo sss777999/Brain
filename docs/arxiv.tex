@@ -1559,7 +1559,13 @@ transitive edge A--C from consolidated A--B and B--C across cycles
 \citep{kumaran2012inference}---verified to mint the direct shortcut offline,
 though surfacing it as a crisp episodic answer awaits a semantic readout path; and
 layer~3, a basal-ganglia controller trained by reward-prediction error that decides
-when to answer reflexively versus deliberate. The cycle is not yet the
+when to answer reflexively versus deliberate (implemented): a gate whose per-context
+action values are discrete Go/NoGo counts, selected by argmax and updated by a true
+reward-prediction error $\delta = \text{realized} - \text{predicted}$ (a dopamine dip
+on an expected-good action that fails, a burst on the recovery of a failing one)
+\citep{schultz1998predictive}, so the system learns from experience
+which queries warrant deliberation; its learning is exercised through an explicit
+practice pass rather than yet being auto-wired into live inference. The cycle is not yet the
 default answer path, and broader evaluation---including fixing a pre-existing
 episode-storage limitation that currently blocks part of the composition
 probe---is ongoing.
