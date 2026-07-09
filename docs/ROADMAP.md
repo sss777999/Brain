@@ -18,6 +18,54 @@ Currently the model has a "flat" topology — all neurons are equal, all connect
 
 ---
 
+## Step 7: Thinking loop — predictive cognitive cycle (northstar "all like a brain")
+
+Northstar: make the model reason "all like a brain" in three layers. **Layer 1 (predictive cognitive cycle) is DONE.** Layers 2 and 3 are TODO.
+
+### Biology
+**Predictive processing (Rao & Ballard, 1999; Friston active inference):** cognition is a loop where a top-down prediction meets bottom-up evidence and the *prediction error* drives the next step. Thinking is not a scripted number of steps — it runs until the error settles.
+
+**Attractor dynamics (Hopfield, 1982):** "settling" the current state onto a stored memory is a fixpoint of recurrent CA3 excitation. A thought ends when the state stops changing.
+
+**PFC recurrent working memory:** the prefrontal cortex holds and updates a state across the loop (recurrent excitation + decay), so each tick can depend on the last.
+
+### Implementation (layer 1 — DONE)
+New module `cognition.py` (class `CognitiveCycle`), wired to the real organs via `cognition_adapters.py`, reachable through `ask(question, mode="emergent")` in `train.py`. The old scripted path stays as `ask(mode="legacy")` and is **still the default**.
+
+One "thought tick" is the missing recurrent loop `state_{t+1} = settle(memory, state_t)`:
+```
+one thought tick:
+  P_t = top-down prediction   # a SET of neurons reachable from the cue
+                              # via strong existing USED / MYELINATED edges
+  S_t = CA3.settle(cue)       # bottom-up attractor settling
+  surprise = S_t \ P_t        # prediction error = structural SET DIFFERENCE
+  miss     = P_t \ S_t
+  cue = surprise              # the surprising neurons become the next cue
+  PFC.step()                  # runs its recurrent excitation / decay
+  stop when: fixpoint reached / role-goal met / collapse / tick budget (~6)
+```
+The number of thought steps is *emergent*, not scripted.
+
+**Forbidden-compliance (kept deliberately un-connectionist):** no weights, no gradients, no backprop, no softmax, no distance metric, no global search, and no LLM anywhere in the reasoning path. Prediction is a *set*, error is a *set difference*, and "minimization" is attractor settling.
+
+### Evidence
+- 13/13 unit tests green, including transitive composition (`a->b`, `b->c` ⇒ `c`) settling to a fixpoint on a synthetic graph, with no verb-specific code.
+- On the **live trained model**: the facts "zorp is in blen" and "blen is in quix" were learned *separately* (never in one sentence). `ask("where is zorp", mode="emergent")` composes `zorp -> blen -> quix` and answers **"blen is in quix"** (the deep location), whereas legacy returns only the single hop **"is in blen"**. This is the first genuine multi-step reasoning in the project.
+- Legacy regression intact: CURRICULUM 98.0%, STRICT 100.0%, QA AVG 99.0% — unchanged.
+
+### Honest limits
+- Emergent mode is **not the default yet** (legacy is).
+- A composition probe (`tests/probe_composition.py`) scores 1/10 on the live model. 9 of those 10 failures are a **pre-existing storage bug**, not a failure of the cycle: `train.py:1583` `HIPPOCAMPUS.encode` returns `None` deterministically on some "X is in Y" sentences, so those facts never store. Verified: when facts store, the cycle composes; when `encode` returns `None`, both modes say "I don't know".
+- Prediction quality of `P_t` and population read-out still need tuning.
+
+### Layers 2 and 3 (TODO)
+- **Layer 2 — inference during sleep:** sharp-wave-ripple (SWR) replay composes a *new* edge `A-C` from `A-B` + `B-C` over multiple offline cycles, so the composition becomes a stored one-hop fact rather than being recomputed each query.
+- **Layer 3 — basal ganglia RPE gating:** a basal-ganglia loop with real reward-prediction-error learning (cf. Schultz, Step 5) so the brain itself decides whether to answer reflexively or to deliberate.
+
+Spec: `docs/superpowers/specs/2026-07-09-predictive-cognitive-cycle-design.md` · plan: `docs/superpowers/plans/2026-07-09-predictive-cognitive-cycle.md` · notes: `implementation-notes.md`.
+
+---
+
 ## Step 3: Community Outreach
 
 ### Platforms

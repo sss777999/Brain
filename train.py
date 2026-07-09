@@ -1843,10 +1843,13 @@ def _apply_synaptic_scaling() -> int:
 from activation import Activation
 
 # API_PUBLIC
-def ask(question: str) -> str:
+def ask(question: str, mode: str = "legacy") -> str:
     """
     Answer a question using a BIOLOGICALLY grounded activation model.
-    
+
+    mode="legacy"   → the current scripted path (_ask_impl), behavior untouched.
+    mode="emergent" → the predictive thought loop (cognition.CognitiveCycle).
+
     BIOLOGICAL MODEL (Dual Stream):
     1. Question words activate the corresponding neurons
     2. The Activation class spreads activation along SEMANTIC connections
@@ -1874,20 +1877,47 @@ def ask(question: str) -> str:
     GLOBAL_MODULATORS.update_on_query(is_novel=True)
     
     try:
-        answer = _ask_impl(question)
-        
+        if mode == "emergent":
+            answer = _build_emergent_cycle().think(question)
+        else:
+            answer = _ask_impl(question)
+
         # Evaluate success/confidence (heuristic for now: found answer vs "I don't know")
         success = answer not in ("I don't know.", "Unknown.", "I do not know.")
         confidence = 0.8 if success else 0.0
-        
+
         # BIOLOGY: Neuromodulators respond to outcome (reward/frustration)
         GLOBAL_MODULATORS.update_on_answer(success=success, confidence=confidence)
         GLOBAL_MODULATORS.decay_to_baseline()
-        
+
         return answer
     finally:
         # ARCHITECTURE: Restore LEARN mode after inference
         set_learning_mode()
+
+
+def _build_emergent_cycle():
+    """Assemble a CognitiveCycle with the real organs wired in as services (mode='emergent')."""
+    from cognition import CognitiveCycle
+    from cognition_adapters import (
+        predict_from_graph, settle_with_ca3, parse_question, readout_population,
+    )
+    from pfc import get_expected_roles
+    ca3 = HIPPOCAMPUS._ca3
+
+    def settle(cue_ids):
+        return settle_with_ca3(cue_ids, ca3=ca3, word_to_neuron=WORD_TO_NEURON,
+                               hippocampus=HIPPOCAMPUS)
+
+    return CognitiveCycle(
+        pfc=PREFRONTAL_CORTEX,
+        settle_fn=settle,
+        predict_fn=lambda cue: predict_from_graph(cue, WORD_TO_NEURON),
+        expected_roles_fn=get_expected_roles,
+        readout_fn=lambda res, qw, qc: readout_population(res, qw, qc, WORD_TO_NEURON),
+        parse_fn=parse_question,
+        max_ticks=6,
+    )
 
 
 # ANCHOR: READOUT_ROLE_TOKEN_EXTRACTION

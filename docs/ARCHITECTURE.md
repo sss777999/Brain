@@ -949,10 +949,12 @@ COMBINED LEARNING MODIFIER:
 | **`motor_output.py`** | **Motor output / Speech production** | **`SequenceGenerator`, `generate_answer_ordered()`** (Broca's area) |
 | **`broca.py`** | **Syntactic processing** | **`SyntacticProcessor`, `ParsedSentence`, `SyntacticRole`** (BA44/BA45) |
 | **`basal_ganglia.py`** | **Action selection** | **`BasalGangliaThalamusGating`, `select_action()`** (D1/D2, GPi/GPe, STN, Thalamus) |
-| `train.py` | Training and Q&A | `train_sentence_with_context()`, `ask()`, `ask_multi_hop()`, `context()`, `clear_context()`, `BASAL_GANGLIA` |
+| `train.py` | Training and Q&A | `train_sentence_with_context()`, `ask(mode="legacy"\|"emergent")`, `ask_multi_hop()`, `_build_emergent_cycle()`, `context()`, `clear_context()`, `BASAL_GANGLIA` |
 | `network.py` | General network | `Network` |
 | `config.py` | **Unified config** | `CONFIG`, `PlasticityMode`, `SpikingMode`, `SleepPhase`, `SOURCE_TRUST`, `QUESTION_TYPE_SOURCES` |
 | `llm_postprocess.py` | **LLM postprocessing** | `postprocess_answer()` — Broca's area |
+| **`cognition.py`** | **Predictive cognitive cycle (layer 1) — reached via `ask(mode="emergent")`, NOT the default** | **`CognitiveCycle`, `think()`, `_prediction_error()` (set-difference), `SettleResult`, `ThoughtTrace`** (Rao & Ballard 1999; Preston & Eichenbaum 2013; Wang 2001) |
+| **`cognition_adapters.py`** | **Real-organ adapters wiring the cycle to CA3 / graph / motor output** | **`predict_from_graph()` (top-down P_t), `settle_with_ca3()` (bottom-up S_t), `parse_question()`, `readout_population()`** |
 
 ---
 
@@ -1955,6 +1957,66 @@ SELF ARCHITECTURE:
 
 LLM PIPELINE:
     LLM_CLASSIFICATION_PROMPT classifies text → mode + data
+```
+
+### 15. Predictive Cognitive Cycle (thought loop)
+```
+BIOLOGY (Rao & Ballard 1999 predictive coding; Preston & Eichenbaum 2013
+hippocampal-PFC reentry; Wang 2001 PFC attractor working memory):
+The prefrontal cortex holds a goal and projects a top-down PREDICTION of the
+expected filler; the hippocampus settles bottom-up into an attractor; the
+mismatch between the two (not a scalar loss) drives the next step of thought.
+
+IMPLEMENTATION (cognition.py CognitiveCycle.think + cognition_adapters.py):
+One "thought tick":
+  1. top-down prediction P_t — the SET of neurons reachable from the current
+     cue via strong existing edges (USED / MYELINATED) — predict_from_graph()
+  2. bottom-up settle S_t — CA3 attractor completion — settle_with_ca3()
+  3. prediction error = structural SET DIFFERENCE:
+       surprise = S_t \ P_t   (active but unpredicted → drives the next cue)
+       miss     = P_t \ S_t   (predicted but silent)
+  4. the surprising neurons become the next cue; PFC.step() runs its real
+     recurrent excitation / decay, and get_multi_hop_cues() feeds the next tick
+  5. STOP when: the attractor is a fixpoint (S_t == S_{t-1}), the role-goal is
+     met (primary episode binds an expected role), it collapses (empty S_t), or
+     the tick budget (~6) is spent. The reason is recorded in
+     ThoughtTrace.stopped_by ('fixpoint'|'settled'|'collapse'|'budget').
+
+This is the missing recurrent loop state_{t+1} = settle(memory, state_t); the
+number of thought steps is EMERGENT, not scripted.
+
+FORBIDDEN-compatible: prediction is a set (not an optimized vector), error is a
+set-difference (not a loss), "minimization" = attractor settling (not gradient
+descent). No weights, gradients, backprop, softmax, distance metric, global
+search, or LLM anywhere in the reasoning path.
+
+STATUS (honest — this is a public research repo):
+- Reached via ask(question, mode="emergent"). It is NOT the default path:
+  ask() defaults to mode="legacy" (the scripted single-hop retrieval, _ask_impl),
+  which is unchanged.
+- First genuine multi-step reasoning in the project. On the live trained model,
+  the facts "zorp is in blen" and "blen is in quix" were learned in SEPARATE
+  sentences (never together); ask("where is zorp", mode="emergent") composes
+  zorp → blen → quix and answers "blen is in quix" (the deep location), whereas
+  legacy returns only the single hop "is in blen".
+- 13/13 unit tests pass, including transitive composition (a→b, b→c => c to a
+  fixpoint) on a synthetic graph, with no verb-specific code.
+- Legacy regression intact: CURRICULUM 98.0%, STRICT 100.0%, QA AVG 99.0%.
+- Limitations: P_t prediction quality and population read-out still need tuning.
+  A live composition probe (tests/probe_composition.py) scored 1/10, but 9 of
+  those failures are a pre-existing storage bug (HIPPOCAMPUS.encode() returns
+  None on some "X is in Y" sentences, so the facts never store) — not a failure
+  of the cycle: when the facts store, the cycle composes.
+
+NORTHSTAR "all like a brain" = 3 layers. This is layer 1 (done).
+  Layer 2 (TODO): inference during sleep — SWR replay composes a NEW edge A-C
+  from A-B + B-C over multiple cycles.
+  Layer 3 (TODO): basal ganglia with real reward-prediction-error learning that
+  decides whether to answer reflexively or deliberate.
+
+Spec:  docs/superpowers/specs/2026-07-09-predictive-cognitive-cycle-design.md
+Plan:  docs/superpowers/plans/2026-07-09-predictive-cognitive-cycle.md
+Notes: implementation-notes.md
 ```
 
 ---

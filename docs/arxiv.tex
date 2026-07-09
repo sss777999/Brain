@@ -1526,6 +1526,41 @@ formal neuroscientific validation is claimed.
 
 \textbf{Current status: 705/705 tests passing (100\% accuracy) --- 224 QA + 481 bAbI.}
 
+\textbf{Beyond retrieval: a predictive cognitive cycle (thought loop, layer 1 of 3).}
+The results reported above are produced by the retrieval-and-scoring pathway. A
+separate, opt-in mechanism targets \emph{thought formation} directly: closing a
+recurrent loop in which the network's own settled state drives the next retrieval,
+rather than a single scored lookup. We implement this as a \emph{predictive
+cognitive cycle} (\texttt{cognition.py}, class \texttt{CognitiveCycle}, reached via
+\texttt{ask(question, mode="emergent")}; the scripted path remains the default
+\texttt{ask(mode="legacy")}). One ``thought tick'' is predictive coding over
+discrete states \citep{rao1999predictive,preston2013interplay,wang2001synaptic}:
+the prefrontal buffer projects a top-down \emph{prediction} $P_t$ (the set of
+neurons reachable from the current cue through strong existing USED/MYELINATED
+edges); CA3 settles bottom-up into $S_t$; the \emph{prediction error} is the
+structural set difference (surprise $= S_t \setminus P_t$, miss $= P_t \setminus
+S_t$); the surprising neurons become the next cue while the prefrontal buffer runs
+its own recurrent excitation and decay; and the loop halts when the attractor
+reaches a fixed point, the expected semantic role is bound, the state collapses, or
+a small tick budget is spent. The number of reasoning steps is therefore
+\emph{emergent} rather than scripted, and the mechanism introduces no real-valued
+weights, gradients, distance metrics, global search, or language-model calls: the
+prediction is a set, the error is a set difference, and ``minimization'' is
+attractor settling.
+
+On the trained model this yields the first genuine multi-step composition in the
+system. Given ``zorp is in blen'' and ``blen is in quix'' learned as \emph{separate}
+facts (never co-stated), the emergent path answers ``where is zorp'' with ``blen is
+in quix''---traversing zorp $\rightarrow$ blen $\rightarrow$ quix---whereas the
+default path resolves only a single hop. This is an early prototype and layer~1 of a
+three-layer program (\textit{all like a brain}): layer~2, inference during sleep, in
+which sharp-wave-ripple replay composes a new edge A--C from A--B and B--C across
+cycles; and layer~3, a basal-ganglia controller trained by reward-prediction error
+that decides when to answer reflexively versus deliberate. The cycle is not yet the
+default answer path, and broader evaluation---including fixing a pre-existing
+episode-storage limitation that currently blocks part of the composition
+probe---is ongoing.
+
 \textbf{Previously failing tests now resolved:}
 \begin{itemize}
 \item \textbf{Word Sense Disambiguation} --- ``What is ice?'' and ``What happens when you fall?'' were resolved

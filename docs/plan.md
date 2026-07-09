@@ -767,6 +767,43 @@ Status: DEFERRED. This phase is intentionally postponed until PHASE 3.6 (word or
 
 ---
 
+## PHASE 2.7: PREDICTIVE COGNITIVE CYCLE (thought loop) [✅ LAYER 1 DONE]
+**Goal:** Add the missing recurrent loop `state_{t+1} = settle(memory, state_t)` so the number of reasoning steps is emergent instead of scripted. Layer 1 of the "all like a brain" northstar (3 layers total).
+**Status:** Opt-in via `ask(question, mode="emergent")`. The old scripted path stays as `ask(mode="legacy")` and is still the DEFAULT.
+
+### Implemented:
+- [x] New module `cognition.py`, class `CognitiveCycle`. One thought tick is:
+  - top-down prediction `P_t` — the SET of neurons reachable from the current cue via strong existing USED/MYELINATED edges;
+  - bottom-up settling `S_t` via `CA3.pattern_complete`;
+  - prediction error as a structural SET DIFFERENCE (surprise `= S_t \ P_t`, miss `= P_t \ S_t`);
+  - the surprising neurons become the next cue, `PFC.step()` runs its recurrent excitation/decay;
+  - stop when the attractor is a fixpoint / role-goal met / collapse / tick budget (~6).
+- [x] The number of thought steps is emergent, not scripted — this is the recurrent loop that was missing.
+- [x] Wired to the real organs via `cognition_adapters.py` (no new memory; reads existing hippocampus/CA3/PFC).
+- [x] Forbidden-compliance held: no weights, gradients, backprop, softmax, distance metric, global search, or LLM in the reasoning path. Prediction is a set, error is a set-difference, "minimization" is attractor settling.
+
+### Files changed:
+- `cognition.py` — NEW module with `CognitiveCycle` (the thought loop).
+- `cognition_adapters.py` — NEW adapters binding the cycle to hippocampus/CA3/PFC.
+- `train.py` — `ask()` gains `mode="emergent"`; `mode="legacy"` stays the default.
+
+### Test Results:
+- Unit: 13/13 green (`tests/test_cognition.py`, `tests/test_cognition_adapters.py`), incl. transitive composition `a->b, b->c => c` settling to a fixpoint on a synthetic graph (no verb-specific code).
+- Live model: the facts "zorp is in blen" and "blen is in quix" were learned in SEPARATE sentences (never together). `ask("where is zorp", mode="emergent")` composes `zorp->blen->quix` and answers "blen is in quix", while legacy returns only "is in blen" (single hop). First genuine multi-step reasoning in the project.
+- Legacy regression intact: CURRICULUM 98.0%, STRICT 100.0%, QA AVG 99.0% (unchanged).
+
+### Honest limitations:
+- Emergent mode is NOT the default yet (opt-in only).
+- `tests/probe_composition.py` scores 1/10 on the live model, but 9 of those 10 failures are a PRE-EXISTING storage bug (`train.py:1583` `HIPPOCAMPUS.encode` returns `None` deterministically on some "X is in Y" sentences, so those facts never store) — not a failure of the cycle. Verified: when facts store, the cycle composes; when `encode` returns `None`, both modes say "I don't know".
+- Prediction quality of `P_t` and population-readout still need tuning.
+- Next: Layer 2 (TODO) — inference during sleep, where SWR replay composes a NEW edge A-C from A-B + B-C over multiple cycles; Layer 3 (TODO) — basal ganglia with real reward-prediction-error learning so the brain itself decides whether to answer reflexively or deliberate.
+
+**Spec:** `docs/superpowers/specs/2026-07-09-predictive-cognitive-cycle-design.md`
+**Plan:** `docs/superpowers/plans/2026-07-09-predictive-cognitive-cycle.md`
+**Notes:** `implementation-notes.md`
+
+---
+
 ## PHASE 3: API BOUNDARIES (Lexicon/InputLayer) [✅ DONE — January 2026]
 **Goal:** Explicit interfaces instead of global dictionary access
 

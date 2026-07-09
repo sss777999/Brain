@@ -266,6 +266,13 @@ Example:
 | Recurrent excitation | ✅ | Related slots reinforce each other |
 | Distractor resistance | ✅ | GABAergic inhibitory gating (Miller & Cohen 2001) |
 | Attractor dynamics | ✅ | Bistable states for stable activity |
+| **PREDICTIVE COGNITIVE CYCLE (opt-in)** | | |
+| CognitiveCycle | ✅ | Closed thought loop `state_{t+1} = settle(memory, state_t)` — `cognition.py` |
+| Organ adapters | ✅ | Wire cue / predict / settle / step to real organs — `cognition_adapters.py` |
+| Top-down prediction P_t | ✅ | Set of neurons reachable via strong USED/MYELINATED edges |
+| Prediction error | ✅ | Structural set-difference (surprise S_t \ P_t, miss P_t \ S_t) — no metric |
+| Emergent step count | ✅ | Stops on fixpoint / role-goal / collapse / tick budget (~6), not scripted |
+| ask(mode="emergent") | ✅ | Opt-in multi-step reasoning; `mode="legacy"` stays the DEFAULT |
 
 ### Current model (brain_model)
 
@@ -902,6 +909,18 @@ Brain/
 - BG selects cognitive actions: RETRIEVE / MULTI_HOP / INFER / WAIT
 - Working Memory / Semantic Memory / Episodic Memory routing
 - Integrated with PFC for routing
+
+### ✅ PREDICTIVE COGNITIVE CYCLE (thinking loop) [DONE — layer 1 of 3]
+- **First genuine multi-step reasoning in the project** — the missing recurrent loop `state_{t+1} = settle(memory, state_t)`
+- New module `cognition.py` (class `CognitiveCycle`), wired to real organs via `cognition_adapters.py`, reachable through `ask(question, mode="emergent")`
+- **Opt-in, NOT default:** the old scripted path stays as `ask(mode="legacy")` and is still the DEFAULT; legacy regression intact (CURRICULUM 98.0%, STRICT 100.0%, QA AVG 99.0%)
+- **One thought tick:** top-down prediction P_t (set of neurons reachable from the cue via strong USED/MYELINATED edges) → bottom-up CA3 settling S_t → prediction error as a structural SET DIFFERENCE (surprise = S_t \ P_t, miss = P_t \ S_t) → the surprising neurons become the next cue, `PFC.step()` runs recurrent excitation/decay
+- **Number of thought steps is EMERGENT, not scripted** — stop on fixpoint / role-goal met / collapse / tick budget (~6)
+- **FORBIDDEN complied with:** no weights, no gradients, no backprop, no softmax, no distance metric, no global search, no LLM in the reasoning path — prediction is a set, error is a set-difference, "minimization" = attractor settling
+- **Evidence:** 13/13 unit tests green (incl. transitive composition a→b, b→c ⇒ c to a fixpoint, no verb-specific code). On the LIVE model, facts "zorp is in blen" and "blen is in quix" learned SEPARATELY (never in one sentence): `ask("where is zorp", mode="emergent")` composes zorp→blen→quix and answers "blen is in quix" (the deep location), while legacy returns only "is in blen" (single hop)
+- **Honest limitations:** emergent mode is NOT the default yet; a composition probe (`tests/probe_composition.py`) scored 1/10 on the live model, but 9/10 of those failures are a PRE-EXISTING storage bug (`HIPPOCAMPUS.encode` returns None on some "X is in Y" sentences, so the facts never store), NOT a failure of the cycle; P_t prediction-quality and population-readout still need tuning
+- **NORTHSTAR "all like a brain" = 3 layers.** Layer 1 (this) DONE. Layer 2 (TODO): inference during sleep — SWR replay composes a NEW edge A–C from A–B + B–C over multiple cycles. Layer 3 (TODO): basal ganglia with real reward-prediction-error learning so the brain itself decides whether to answer reflexively or deliberate
+- Spec: `docs/superpowers/specs/2026-07-09-predictive-cognitive-cycle-design.md` · plan: `docs/superpowers/plans/2026-07-09-predictive-cognitive-cycle.md` · notes: `implementation-notes.md`
 
 ### 🟡 PHASE 8: Learn VERB_FORMS [NEXT]
 - Remove hardcoded `VERB_FORMS` dict
