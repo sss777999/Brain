@@ -922,6 +922,15 @@ Brain/
 - **NORTHSTAR "all like a brain" = 3 layers.** Layer 1 (this) DONE. Layer 2 (TODO): inference during sleep — SWR replay composes a NEW edge A–C from A–B + B–C over multiple cycles. Layer 3 (TODO): basal ganglia with real reward-prediction-error learning so the brain itself decides whether to answer reflexively or deliberate
 - Spec: `docs/superpowers/specs/2026-07-09-predictive-cognitive-cycle-design.md` · plan: `docs/superpowers/plans/2026-07-09-predictive-cognitive-cycle.md` · notes: `implementation-notes.md`
 
+### ✅ SLEEP INFERENCE (transitive composition during sleep) [DONE — layer 2 of 3]
+- **Inference while the brain sleeps** — new module `sleep_inference.py` (pure `compose_transitive_links`, graph ops dependency-injected) + adapter `Hippocampus._compose_inference_links`, run inside `_rem_reactivation_cycle` during `sleep()`; gated by `CONFIG["REM_COMPOSE_INFERENCE"]` (default on), capped at 50 episodes / 3 cycles
+- **Mechanism:** during recency-weighted SWR replay, for an intermediate node B with strong SEMANTIC edges A→B and B→C (USED/MYELINATED), mint a NEW directed edge A→C tagged connector `composed` at USED state (it derives from already-consolidated knowledge); iterated across cycles so 3+ hop chains close (A→C then C→D ⇒ A→D). This is the transitive inference the old `_create_cross_episode_links` only claimed — that one linked shared surface WORDS, not existing graph edges
+- **FORBIDDEN complied with:** only local one-hop neighbor lookups around B, discrete-state edge creation via the existing connection mechanism — no weights, gradients, metrics, global search, or LLM; the composed knowledge is an EDGE in the graph, not a symbolic if-A-and-B-then-C rule
+- **Biology:** Kumaran & McClelland 2012 (inference via overlapping representations), Buzsáki 2015 (sharp-wave-ripple replay), Wilson & McNaughton 1994 (recency-weighted replay of recent experience)
+- **Evidence:** facts "zorp is in blen" and "blen is in quix" learned as SEPARATE sentences; after `_compose_inference_links` the direct edge zorp→quix exists at USED state (the transitive shortcut was minted). 20/20 new unit+integration tests green; legacy curriculum regression intact
+- **Honest limitation:** the `ask()` answer for a simple 2-hop chain does NOT visibly change yet — answers are read from EPISODES and there is no episode "zorp quix", only the edge. The composed edge is SEMANTIC knowledge that feeds graph-based inference (the layer-1 emergent loop's top-down prediction, `_attempt_inference`); surfacing it as a crisp episodic answer needs a semantic-readout path (the Cortex store is currently unused) — future work. The layer-1 emergent loop already composes simple chains online
+- Spec: `docs/superpowers/specs/2026-07-09-sleep-inference-layer2-design.md`
+
 ### 🟡 PHASE 8: Learn VERB_FORMS [NEXT]
 - Remove hardcoded `VERB_FORMS` dict
 - Morphology via learning (like children)

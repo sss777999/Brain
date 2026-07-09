@@ -804,6 +804,40 @@ Status: DEFERRED. This phase is intentionally postponed until PHASE 3.6 (word or
 
 ---
 
+## PHASE 2.8: SLEEP INFERENCE — TRANSITIVE COMPOSITION (thought loop, layer 2) [✅ LAYER 2 DONE]
+**Goal:** Compose NEW semantic edges offline: during sleep, replay mints a directed transitive edge `A->C` from existing consolidated `A->B` + `B->C`. Layer 2 of the "all like a brain" northstar (Layer 1 = online cognitive cycle; Layer 3 = TODO).
+**Status:** On by default during `sleep()`, gated by `CONFIG["REM_COMPOSE_INFERENCE"]` (default `True`). Caps: `REM_COMPOSE_MAX_EPISODES=50`, `REM_COMPOSE_MAX_CYCLES=3`.
+
+### Implemented:
+- [x] New module `sleep_inference.py` — pure function `compose_transitive_links(...)` with dependency-injected graph ops (no direct organ coupling).
+- [x] Adapter `Hippocampus._compose_inference_links` binds it to the real graph and is wired into `_rem_reactivation_cycle`, so it runs during REM replay inside `sleep()`.
+- [x] Mechanism: during recency-weighted replay, for an intermediate node `B`, if strong SEMANTIC edges `A->B` and `B->C` both exist (USED/MYELINATED), mint a NEW directed edge `A->C`, connector-tagged `"composed"`, created at USED state (it derives from already-consolidated knowledge). Iterated across cycles so 3+ hop chains close (`A->C` then `C->D` => `A->D`).
+- [x] This is the transitive inference the old `_create_cross_episode_links` only claimed but never did — that one links shared SURFACE WORDS, not existing graph edges.
+- [x] Forbidden-compliance held: only local one-hop neighbour lookups (in/out of `B`) and discrete-state edge creation via the existing connection mechanism; no weights, gradients, metrics, global search, or LLM. The composed knowledge is an EDGE in the graph, not a symbolic if-A-and-B-then-C rule.
+
+### Files changed:
+- `sleep_inference.py` — NEW module (`compose_transitive_links`, pure / dependency-injected).
+- `hippocampus.py` — `_compose_inference_links` adapter; call added inside `_rem_reactivation_cycle`.
+- config — `REM_COMPOSE_INFERENCE`, `REM_COMPOSE_MAX_EPISODES`, `REM_COMPOSE_MAX_CYCLES`.
+
+### Biological basis:
+- Kumaran & McClelland 2012 — inference via overlapping representations.
+- Buzsáki 2015 — sharp-wave-ripple replay.
+- Wilson & McNaughton 1994 — recency-weighted replay of recent experience.
+
+### Test Results:
+- New tests: 20/20 green (incl. 7/7 unit + integration for the compose path); legacy curriculum regression intact.
+- Verified live: "zorp is in blen" and "blen is in quix" learned as SEPARATE sentences (never together); after `_compose_inference_links` the direct edge `zorp->quix` exists at USED state — the transitive shortcut was composed.
+
+### Honest limitations:
+- The `ask()` answer for a simple 2-hop chain does NOT visibly change yet: answers are read from EPISODES, and there is no episode "zorp quix", only the edge. The composed edge is SEMANTIC knowledge that feeds graph-based inference (the Layer-1 emergent loop's top-down prediction, and `_attempt_inference`); surfacing it as a crisp episodic answer needs a semantic-readout path (the `Cortex` store is currently unused) — future work.
+- The Layer-1 emergent loop already composes simple chains online; Layer 2's contribution is making that knowledge persistent in the graph rather than re-deriving it each query.
+- Layer 3 (TODO): basal-ganglia reward-prediction-error control deciding when to answer reflexively vs. deliberate.
+
+**Spec:** `docs/superpowers/specs/2026-07-09-sleep-inference-layer2-design.md`
+
+---
+
 ## PHASE 3: API BOUNDARIES (Lexicon/InputLayer) [✅ DONE — January 2026]
 **Goal:** Explicit interfaces instead of global dictionary access
 

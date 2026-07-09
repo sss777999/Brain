@@ -955,6 +955,7 @@ COMBINED LEARNING MODIFIER:
 | `llm_postprocess.py` | **LLM postprocessing** | `postprocess_answer()` — Broca's area |
 | **`cognition.py`** | **Predictive cognitive cycle (layer 1) — reached via `ask(mode="emergent")`, NOT the default** | **`CognitiveCycle`, `think()`, `_prediction_error()` (set-difference), `SettleResult`, `ThoughtTrace`** (Rao & Ballard 1999; Preston & Eichenbaum 2013; Wang 2001) |
 | **`cognition_adapters.py`** | **Real-organ adapters wiring the cycle to CA3 / graph / motor output** | **`predict_from_graph()` (top-down P_t), `settle_with_ca3()` (bottom-up S_t), `parse_question()`, `readout_population()`** |
+| **`sleep_inference.py`** | **Sleep inference (layer 2) — compose a transitive edge A→C from A→B + B→C during SWR replay** | **`compose_transitive_links()`** (pure function, graph ops dependency-injected; Kumaran & McClelland 2012; Buzsáki 2015; run from `Hippocampus._compose_inference_links` in `hippocampus.py`) |
 
 ---
 
@@ -2017,6 +2018,63 @@ NORTHSTAR "all like a brain" = 3 layers. This is layer 1 (done).
 Spec:  docs/superpowers/specs/2026-07-09-predictive-cognitive-cycle-design.md
 Plan:  docs/superpowers/plans/2026-07-09-predictive-cognitive-cycle.md
 Notes: implementation-notes.md
+```
+
+---
+
+### 16. Sleep inference (transitive edge composition, layer 2)
+```
+BIOLOGY (Kumaran & McClelland 2012 inference via overlapping representations;
+Buzsáki 2015 sharp-wave-ripple replay; Wilson & McNaughton 1994 recency-weighted
+replay of recent experience):
+During sleep the hippocampus replays recent episodes, biased toward the most
+recent ones. Replay of episode A–B co-activates the shared node B; if B already
+holds a consolidated edge B–C, the same ripple co-activates A and C through B,
+and Hebbian plasticity wires a new A–C edge. Over several cycles, chains longer
+than two hops close transitively.
+
+IMPLEMENTATION (sleep_inference.py compose_transitive_links + hippocampus.py
+Hippocampus._compose_inference_links, run inside _rem_reactivation_cycle so it
+fires during sleep()):
+- compose_transitive_links() is a pure function: all graph ops (strong_out,
+  strong_in, has_strong_edge, create_edge) are injected as callables. For each
+  intermediate node B in the replayed seed set it looks at ONLY B's local
+  neighbors — A ∈ strong_in(B), C ∈ strong_out(B) over strong SEMANTIC edges
+  (USED / MYELINATED) — and, if A≠C and no strong A→C exists yet, mints a NEW
+  directed edge A→C tagged connector "composed". It iterates up to max_cycles so
+  an A→C minted in one cycle composes with C→D in the next (A→C then C→D ⇒ A→D).
+- _compose_inference_links is the adapter: it selects the recency-weighted
+  replay seeds, binds the four graph callables to the real neuron graph, and
+  creates each composed edge at USED state via the existing connection
+  mechanism (it derives from already-consolidated knowledge). Gated by
+  CONFIG["REM_COMPOSE_INFERENCE"] (default on); capped by
+  REM_COMPOSE_MAX_EPISODES=50 and REM_COMPOSE_MAX_CYCLES=3.
+- This is the transitive inference the older _create_cross_episode_links only
+  claimed: that one links episodes sharing SURFACE WORDS, whereas this composes
+  over EXISTING graph edges.
+
+FORBIDDEN-compatible: only local one-hop neighbor lookups, discrete-state edge
+creation through the existing connection mechanism, no weights, gradients,
+metrics, global search, or LLM. The composed knowledge is an EDGE in the graph,
+not a symbolic if-A-and-B-then-C rule.
+
+STATUS (honest — this is a public research repo):
+- Verified live: "zorp is in blen" and "blen is in quix" learned as SEPARATE
+  sentences; after _compose_inference_links the direct edge zorp→quix exists at
+  USED state. 7/7 unit+integration tests for this module pass (20/20 across the
+  new test files); the legacy curriculum regression is intact.
+- Known limitation: the ask() answer for a simple 2-hop chain does NOT visibly
+  change yet. Answers are read from EPISODES, and there is no episode
+  "zorp quix" — only the composed edge. That edge is SEMANTIC knowledge feeding
+  graph-based inference (the layer-1 emergent loop's top-down prediction and
+  _attempt_inference), not an episodic readout. Surfacing it as a crisp episodic
+  answer needs a semantic-readout path (the Cortex store is currently unused) —
+  future work. The layer-1 emergent loop already composes simple chains online.
+- This is layer 2 of 3. Layer 1 (predictive cognitive cycle, §15) is done.
+  Layer 3 (TODO): basal-ganglia reward-prediction-error control deciding when to
+  answer reflexively vs. deliberate.
+
+Spec: docs/superpowers/specs/2026-07-09-sleep-inference-layer2-design.md
 ```
 
 ---

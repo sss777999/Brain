@@ -1731,8 +1731,9 @@ class Hippocampus:
         Returns:
             Statistics for this REM cycle.
         """
-        stats = {"replayed": 0, "connections_strengthened": 0, "cross_episode_links": 0}
-        
+        stats = {"replayed": 0, "connections_strengthened": 0, "cross_episode_links": 0,
+                 "composed_inference_links": 0}
+
         if not self.episodes or not word_to_neuron:
             return stats
         
@@ -1780,7 +1781,20 @@ class Hippocampus:
         # ================================================================
         cross_links = self._create_cross_episode_links(word_to_neuron)
         stats["cross_episode_links"] = cross_links
-        
+
+        # ================================================================
+        # LAYER 2: TRANSITIVE INFERENCE — compose existing strong edges
+        # ================================================================
+        # BIOLOGY (Kumaran & McClelland 2012, Buzsáki 2015 SWR replay):
+        # Replaying A–B co-activates the shared node B; if B already has a
+        # consolidated edge B–C, replay co-activates A and C through B and
+        # Hebbian plasticity wires a NEW transitive edge A–C. Distinct from
+        # _create_cross_episode_links (which only links shared surface words):
+        # this follows the graph's own strong edges and composes them.
+        # ================================================================
+        composed = self._compose_inference_links(word_to_neuron)
+        stats["composed_inference_links"] = composed
+
         stats["replayed"] += num_episodes
         return stats
     
@@ -1909,7 +1923,85 @@ class Hippocampus:
                     pairs_processed += 1
         
         return links_created
-    
+
+    # API_PRIVATE
+    def _compose_inference_links(self, word_to_neuron: dict) -> int:
+        """LAYER 2: compose transitive edges A→C from strong A→B and B→C during replay.
+
+        Follows the graph's own STRONG SEMANTIC edges (unlike _create_cross_episode_links,
+        which only links shared surface words), so transitive knowledge forms offline:
+        "A in B" + "B in C" → a direct A→C edge. Local (one-hop neighbor lookups),
+        discrete-state, no weights/metrics/global-search — the composed knowledge is an
+        edge in the graph, not a symbolic rule. See sleep_inference.compose_transitive_links.
+        """
+        if not CONFIG.get("REM_COMPOSE_INFERENCE", True):
+            return 0
+        if not word_to_neuron or len(self.episodes) < 2:
+            return 0
+
+        from sleep_inference import compose_transitive_links
+        from connection import Connection, ConnectionState, ConnectionType
+
+        STRONG = (ConnectionState.USED, ConnectionState.MYELINATED)
+
+        # Replay-driven seed: neurons of a bounded set of RECENT episodes (not a
+        # full-graph scan). Recency-weighted replay (Wilson & McNaughton 1994): recent
+        # experiences are replayed preferentially, so freshly-learned facts get composed.
+        max_eps = CONFIG.get("REM_COMPOSE_MAX_EPISODES", 50)
+        episodes = self.episodes[-max_eps:] if len(self.episodes) > max_eps else self.episodes
+        seed_ids: Set[str] = set()
+        for ep in episodes:
+            for w in ep.input_neurons:
+                if w in word_to_neuron:
+                    seed_ids.add(w)
+
+        def strong_out(wid: str) -> Set[str]:
+            n = word_to_neuron.get(wid)
+            if n is None:
+                return set()
+            return {c.to_neuron.id for c in n.connections_out
+                    if c.state in STRONG and c.connection_type == ConnectionType.SEMANTIC}
+
+        def strong_in(wid: str) -> Set[str]:
+            n = word_to_neuron.get(wid)
+            if n is None:
+                return set()
+            return {c.from_neuron.id for c in n.connections_in
+                    if c.state in STRONG and c.connection_type == ConnectionType.SEMANTIC}
+
+        def has_strong_edge(a: str, c: str) -> bool:
+            na = word_to_neuron.get(a)
+            nc = word_to_neuron.get(c)
+            if na is None or nc is None:
+                return False
+            conn = na.get_connection_to(nc)
+            return conn is not None and conn.state in STRONG
+
+        def create_edge(a: str, c: str, via: str) -> None:
+            na = word_to_neuron.get(a)
+            nc = word_to_neuron.get(c)
+            if na is None or nc is None:
+                return
+            conn = na.get_connection_to(nc)
+            if conn is None:
+                if not na.can_add_connection():
+                    return
+                conn = Connection(na, nc)
+                conn.connection_type = ConnectionType.SEMANTIC
+                na.add_outgoing_connection(conn)
+                nc.add_incoming_connection(conn)
+            conn.mark_used_forward(connector="composed", conn_type=ConnectionType.SEMANTIC)
+            # Composed inference derives from ALREADY-consolidated knowledge (both hops
+            # strong) → make it immediately usable; further sleep strengthens it.
+            if conn.state == ConnectionState.NEW:
+                conn.state = ConnectionState.USED
+
+        max_cycles = CONFIG.get("REM_COMPOSE_MAX_CYCLES", 3)
+        return compose_transitive_links(
+            seed_ids, strong_out=strong_out, strong_in=strong_in,
+            has_strong_edge=has_strong_edge, create_edge=create_edge,
+            max_cycles=max_cycles)
+
     # API_PRIVATE
     def _swr_event(self, episode: Episode, word_to_neuron: dict = None) -> Dict:
         """

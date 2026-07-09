@@ -20,7 +20,7 @@ Currently the model has a "flat" topology — all neurons are equal, all connect
 
 ## Step 7: Thinking loop — predictive cognitive cycle (northstar "all like a brain")
 
-Northstar: make the model reason "all like a brain" in three layers. **Layer 1 (predictive cognitive cycle) is DONE.** Layers 2 and 3 are TODO.
+Northstar: make the model reason "all like a brain" in three layers. **Layer 1 (predictive cognitive cycle) is DONE.** Layers 2 and 3 are TODO. **Update: Layer 2 (inference during sleep) is now BUILT** — mechanism, tests, and one live check pass; only Layer 3 (basal-ganglia RPE gating) remains TODO. See the Layer 2 entry below for what works and what does not yet surface.
 
 ### Biology
 **Predictive processing (Rao & Ballard, 1999; Friston active inference):** cognition is a loop where a top-down prediction meets bottom-up evidence and the *prediction error* drives the next step. Thinking is not a scripted number of steps — it runs until the error settles.
@@ -60,6 +60,14 @@ The number of thought steps is *emergent*, not scripted.
 
 ### Layers 2 and 3 (TODO)
 - **Layer 2 — inference during sleep:** sharp-wave-ripple (SWR) replay composes a *new* edge `A-C` from `A-B` + `B-C` over multiple offline cycles, so the composition becomes a stored one-hop fact rather than being recomputed each query.
+
+  **Status — BUILT (layer 2 of 3).** New module `sleep_inference.py` (pure function `compose_transitive_links`, graph ops dependency-injected) plus adapter `Hippocampus._compose_inference_links`, wired into `_rem_reactivation_cycle` so it runs during `sleep()`. Gated by `CONFIG["REM_COMPOSE_INFERENCE"]` (default on), capped at `REM_COMPOSE_MAX_EPISODES=50` and `REM_COMPOSE_MAX_CYCLES=3`.
+  - **Mechanism:** during recency-weighted replay, for an intermediate node `B` with strong SEMANTIC edges `A->B` and `B->C` (USED/MYELINATED), mint a new directed edge `A->C` tagged connector `"composed"` at USED state (it derives from already-consolidated knowledge); iterated across cycles so 3+ hop chains close (`A->C`, then `C->D` ⇒ `A->D`). This is the transitive inference the old `_create_cross_episode_links` only claimed but never did — that one links shared surface words, not existing graph edges.
+  - **Forbidden-compliant:** only local one-hop neighbour lookups in/out of `B`, discrete-state edge creation via the existing connection mechanism — no weights, gradients, metrics, global search, or LLM. The composed knowledge is an *edge* in the graph, not a symbolic if-A-and-B-then-C rule.
+  - **Biology:** Kumaran & McClelland 2012 (inference via overlapping representations); Buzsáki 2015 (sharp-wave-ripple replay); Wilson & McNaughton 1994 (recency-weighted replay).
+  - **Evidence:** "zorp is in blen" and "blen is in quix" learned as *separate* sentences; after `_compose_inference_links` the direct edge `zorp->quix` exists at USED state. 7/7 unit+integration tests green, 20/20 total new tests green, legacy curriculum regression intact.
+  - **Honest limit:** the `ask()` answer for simple 2-hop chains does not visibly change yet, because answers are read from EPISODES (there is no episode `"zorp quix"`, only the edge). The composed edge is SEMANTIC knowledge that feeds graph-based inference (the layer-1 emergent loop's top-down prediction and `_attempt_inference`); surfacing it as a crisp episodic answer needs a semantic-readout path (the `Cortex` store is currently unused) and is future work. The layer-1 emergent loop already composes simple chains online.
+  - Spec: `docs/superpowers/specs/2026-07-09-sleep-inference-layer2-design.md`.
 - **Layer 3 — basal ganglia RPE gating:** a basal-ganglia loop with real reward-prediction-error learning (cf. Schultz, Step 5) so the brain itself decides whether to answer reflexively or to deliberate.
 
 Spec: `docs/superpowers/specs/2026-07-09-predictive-cognitive-cycle-design.md` · plan: `docs/superpowers/plans/2026-07-09-predictive-cognitive-cycle.md` · notes: `implementation-notes.md`.

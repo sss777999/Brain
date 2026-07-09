@@ -1553,10 +1553,13 @@ system. Given ``zorp is in blen'' and ``blen is in quix'' learned as \emph{separ
 facts (never co-stated), the emergent path answers ``where is zorp'' with ``blen is
 in quix''---traversing zorp $\rightarrow$ blen $\rightarrow$ quix---whereas the
 default path resolves only a single hop. This is an early prototype and layer~1 of a
-three-layer program (\textit{all like a brain}): layer~2, inference during sleep, in
-which sharp-wave-ripple replay composes a new edge A--C from A--B and B--C across
-cycles; and layer~3, a basal-ganglia controller trained by reward-prediction error
-that decides when to answer reflexively versus deliberate. The cycle is not yet the
+three-layer program (\textit{all like a brain}): layer~2, inference during sleep
+(implemented), in which recency-weighted sharp-wave-ripple replay composes a new
+transitive edge A--C from consolidated A--B and B--C across cycles
+\citep{kumaran2012inference}---verified to mint the direct shortcut offline,
+though surfacing it as a crisp episodic answer awaits a semantic readout path; and
+layer~3, a basal-ganglia controller trained by reward-prediction error that decides
+when to answer reflexively versus deliberate. The cycle is not yet the
 default answer path, and broader evaluation---including fixing a pre-existing
 episode-storage limitation that currently blocks part of the composition
 probe---is ongoing.
