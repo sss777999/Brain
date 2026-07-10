@@ -1,7 +1,7 @@
 """Unit tests for transitive composition during sleep (sleep_inference.py) on fakes.
 
 The graph is modeled as a set of STRONG directed edges; create_edge adds an
-edge, so the multi-cycle and dedup logic see new edges on the next cycle.
+edge, so the multi-cycle and dedup logic see the new edges in the next cycle.
 """
 from sleep_inference import compose_transitive_links
 
@@ -108,3 +108,11 @@ def test_compose_inference_links_creates_transitive_edge():
     assert conn is not None
     assert conn.state in (ConnectionState.USED, ConnectionState.MYELINATED)
     assert "composed" in conn.connectors
+
+
+def test_max_total_caps_composition():
+    # dense graph: many possible A->C, but the cap limits them
+    edges = {("hub", f"n{i}") for i in range(20)} | {(f"n{i}", "hub") for i in range(20)}
+    g = FakeGraph(edges)
+    n = g.run({"hub"} | {f"n{i}" for i in range(20)}, max_total=5)
+    assert n <= 5

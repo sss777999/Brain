@@ -1606,7 +1606,8 @@ class Hippocampus:
             "reverse_replays": 0,
             "swr_events": 0,
             "downscaled": 0,
-            "cross_episode_links": 0  # NEW: Semantic links via shared context
+            "cross_episode_links": 0,  # Semantic links via shared context
+            "composed_inference_links": 0  # LAYER 2: transitive edges composed in sleep
         }
         
         if len(self.episodes) == 0:
@@ -1635,6 +1636,7 @@ class Hippocampus:
                 stats["replayed"] += rem_stats["replayed"]
                 stats["connections_strengthened"] += rem_stats["connections_strengthened"]
                 stats["cross_episode_links"] += rem_stats.get("cross_episode_links", 0)
+                stats["composed_inference_links"] += rem_stats.get("composed_inference_links", 0)
         
         # Apply decay to all episodes
         stats["decayed"] = self._apply_decay()
@@ -1943,6 +1945,12 @@ class Hippocampus:
         from connection import Connection, ConnectionState, ConnectionType
 
         STRONG = (ConnectionState.USED, ConnectionState.MYELINATED)
+        # Traversal (which edges to compose OVER) requires MYELINATED — deeply
+        # consolidated knowledge only. Biologically: you infer from what you know
+        # WELL, and this keeps composition from exploding on dense recent memories.
+        # Dedup (has_strong_edge) still uses USED|MYELINATED so composed edges (USED)
+        # are not re-created.
+        TRAVERSE = (ConnectionState.MYELINATED,)
 
         # Replay-driven seed: neurons of a bounded set of RECENT episodes (not a
         # full-graph scan). Recency-weighted replay (Wilson & McNaughton 1994): recent
@@ -1960,14 +1968,14 @@ class Hippocampus:
             if n is None:
                 return set()
             return {c.to_neuron.id for c in n.connections_out
-                    if c.state in STRONG and c.connection_type == ConnectionType.SEMANTIC}
+                    if c.state in TRAVERSE and c.connection_type == ConnectionType.SEMANTIC}
 
         def strong_in(wid: str) -> Set[str]:
             n = word_to_neuron.get(wid)
             if n is None:
                 return set()
             return {c.from_neuron.id for c in n.connections_in
-                    if c.state in STRONG and c.connection_type == ConnectionType.SEMANTIC}
+                    if c.state in TRAVERSE and c.connection_type == ConnectionType.SEMANTIC}
 
         def has_strong_edge(a: str, c: str) -> bool:
             na = word_to_neuron.get(a)
@@ -1997,10 +2005,11 @@ class Hippocampus:
                 conn.state = ConnectionState.USED
 
         max_cycles = CONFIG.get("REM_COMPOSE_MAX_CYCLES", 3)
+        max_total = CONFIG.get("REM_COMPOSE_MAX_TOTAL", 20000)  # safety cap per REM cycle
         return compose_transitive_links(
             seed_ids, strong_out=strong_out, strong_in=strong_in,
             has_strong_edge=has_strong_edge, create_edge=create_edge,
-            max_cycles=max_cycles)
+            max_cycles=max_cycles, max_total=max_total)
 
     # API_PRIVATE
     def _swr_event(self, episode: Episode, word_to_neuron: dict = None) -> Dict:

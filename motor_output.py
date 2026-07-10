@@ -31,6 +31,21 @@ if TYPE_CHECKING:
     from connection import Connection
 
 
+# ANCHOR: GRAMMATICAL_CONNECTOR_GATE - only verbalize genuine function words
+def _is_grammatical_connector(connector: str) -> bool:
+    """True only if every part of a connector is a genuine function word.
+
+    Content words leak in as connectors during training (e.g. FineWeb tokens like
+    "eldest"/"russian") and layer-2 composed edges carry a "composed" tag. Emitting
+    those as speech produces noisy answers that the QA precision gate (correctly)
+    rejects, so we never verbalize a connector unless it is purely grammatical.
+    Legitimate connectors ("is", "of", "is_a", "of_the", "after"…) all pass.
+    """
+    from train import is_function_word
+    parts = str(connector).split('_')
+    return bool(parts) and all(is_function_word(str(p)) for p in parts)
+
+
 # ANCHOR: SEQUENCE_GENERATOR - motor pathway for ordered speech production
 class SequenceGenerator:
     """
@@ -144,10 +159,10 @@ class SequenceGenerator:
             
             if connector:
                 # Expand connector format: "is_a" → ["is", "a"], "of" → ["of"]
-                # BIOLOGY: connectors are stored as compressed syntactic links;
-                # Broca's area expands them into individual function words for speech output
+                # (_find_connector already filters out non-grammatical connectors, so
+                #  content words / the layer-2 "composed" tag never reach here.)
                 result.extend(connector.split('_'))
-            
+
             result.append(curr_word)
         
         return result
@@ -178,14 +193,14 @@ class SequenceGenerator:
         
         # Check forward connection
         conn = from_neuron.get_connection_to(to_neuron)
-        if conn and conn.connector:
+        if conn and conn.connector and _is_grammatical_connector(conn.connector):
             return conn.connector
-        
+
         # Check reverse connection
         conn_rev = to_neuron.get_connection_to(from_neuron)
-        if conn_rev and conn_rev.connector:
+        if conn_rev and conn_rev.connector and _is_grammatical_connector(conn_rev.connector):
             return conn_rev.connector
-        
+
         return None
 
 

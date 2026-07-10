@@ -7,24 +7,24 @@ Deliberation gate — a learnable cortico-striatal valve (layer 3).
 
 BIOLOGY (Schultz 1998 DA = reward prediction error; Frank 2005 D1/Go vs D2/NoGo;
 Alexander, DeLong & Strick 1986 cortico-BG-thalamic loops as a learnable controller):
-- The value of an action in context is stored as discrete Go/NoGo counters.
+- The value of an action in a context is stored as discrete Go/NoGo counters.
 - Action selection is argmax(Go − NoGo) (not softmax).
 - Dopamine = reward prediction error: δ = realized − predicted.
   A DA burst (δ>0) potentiates Go (D1); a DA dip (δ<0) potentiates NoGo (D2);
-  the expected reward (δ=0) — no learning.
+  expected reward (δ=0) — no learning.
 - This is how the brain learns ON ITS OWN when to "answer reflexively" and when to "go into deliberation".
 
 FORBIDDEN-compatibility: values are integer discrete counters (like usage on
 edges), NOT float weights; selection is argmax (not softmax); RPE is a comparison of realized vs predicted
-(not a loss under gradient); no metrics/distances/global search/LLM.
+(not a gradient-driven loss); no metrics/distances/global search/LLM.
 """
 from __future__ import annotations
-from typing import Dict, List, Tuple
+from typing import Dict, List, Optional, Tuple
 
 
 # ANCHOR: DELIBERATION_GATE - learnable reflex-vs-deliberate controller
 class DeliberationGate:
-    """A learnable valve: reflex vs deliberation, by context, through a true RPE."""
+    """Learnable valve: reflex vs deliberation, by context, via true RPE."""
 
     def __init__(self, actions: List[str], default_action: str) -> None:
         assert actions, "actions must be non-empty"
@@ -56,9 +56,9 @@ class DeliberationGate:
 
     # --- selection (argmax over discrete value) ---
     def select(self, context: str) -> str:
-        """Select the action argmax(value); on a tie the default wins (conservatively:
+        """Select action argmax(value); on a tie the default wins (conservatively:
         deliberation is tried only when the reflex here has already gone negative, not out of
-        curiosity). Sets the eligibility trace for a subsequent learn()."""
+        curiosity). Sets an eligibility trace for the subsequent learn()."""
         best = self.default
         best_val = self.value(context, best)
         for action in self.actions:
@@ -74,11 +74,36 @@ class DeliberationGate:
         """Discrete action saliences for a context (for an external BG gate)."""
         return {a: self.value(context, a) for a in self.actions}
 
+    @property
+    def last_action(self) -> Optional[str]:
+        """Last selected action (from the eligibility trace), or None."""
+        return self._eligibility[1] if self._eligibility is not None else None
+
+    # --- persistence (so the learned policy survives model save/load) ---
+    def state_dict(self) -> Dict:
+        """Serializable valve state (discrete counters)."""
+        return {
+            "actions": list(self.actions),
+            "default": self.default,
+            "go": dict(self._go),
+            "nogo": dict(self._nogo),
+        }
+
+    def load_state_dict(self, state: Dict) -> None:
+        """Restore valve state from state_dict() (no-op on empty/None)."""
+        if not state:
+            return
+        self.actions = list(state.get("actions", self.actions))
+        self.default = state.get("default", self.default)
+        self._go = dict(state.get("go", {}))
+        self._nogo = dict(state.get("nogo", {}))
+        self._eligibility = None
+
     # --- learning (true RPE) ---
     def learn(self, realized_success: bool) -> int:
-        """Update the valve on the last choice (eligibility) with a true RPE.
+        """Update the valve from the last selection (eligibility) with a true RPE.
 
-        rpe = realized − predicted ∈ {-1, 0, +1} — this is the dopamine signal.
+        rpe = realized − predicted ∈ {-1, 0, +1} — this is the dopamine signal itself.
         rpe>0 → Go+1 (D1); rpe<0 → NoGo+1 (D2); rpe==0 → no change.
         Returns rpe (the DA signal).
         """

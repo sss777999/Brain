@@ -342,20 +342,25 @@ class SDREncoder:
             learned = self._learned_overlaps[word_lower]
             num_learned = min(len(learned), self.num_active // 4)  # Max 25% from learning
             
-            # Combine: keep most of base, add some learned
+            # Combine learned (preferred) + base bits, dedup, take exactly num_active.
+            # NOTE: the previous implementation used
+            #   while len(combined) < num_active: combined.add(base_list[len(combined)-num_learned])
+            # which spins FOREVER when a learned bit already exists in base_list (set.add of a
+            # duplicate never grows the set, so len(combined) never advances). Since base_list
+            # alone already has num_active unique bits, a single ordered dedup pass over
+            # (learned + base) is guaranteed to reach num_active and always terminates.
             base_list = list(base_bits)
             learned_list = list(learned)[:num_learned]
-            
-            # Remove some base bits to make room
-            combined = set(base_list[num_learned:] + learned_list)
-            
-            # Ensure we have exactly num_active bits
-            while len(combined) < self.num_active:
-                combined.add(base_list[len(combined) - num_learned])
-            while len(combined) > self.num_active:
-                combined.pop()
-            
-            base_bits = frozenset(combined)
+
+            result: list[int] = []
+            seen: set[int] = set()
+            for b in learned_list + base_list:
+                if b not in seen:
+                    seen.add(b)
+                    result.append(b)
+                    if len(result) >= self.num_active:
+                        break
+            base_bits = frozenset(result[:self.num_active])
         
         sdr = SDR(active_bits=base_bits, size=self.size)
         self._word_cache[word_lower] = sdr

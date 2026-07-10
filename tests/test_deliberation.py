@@ -1,4 +1,4 @@
-"""Unit tests for the learning deliberation gate (deliberation.py).
+"""Unit tests for the learned deliberation gate (deliberation.py).
 
 We verify: default on empty experience, learning "hard->deliberate" and "easy->reflex",
 signs of the true RPE, discreteness of values.
@@ -23,7 +23,7 @@ def test_hard_context_switches_to_deliberate_and_holds():
     # hard context: reflex fails
     a1 = g.select("hard")
     assert a1 == REFLEX
-    rpe1 = g.learn(realized_success=False)      # failure under an optimistic prior
+    rpe1 = g.learn(realized_success=False)      # failure under optimistic prior
     assert rpe1 == -1                            # DA dip
 
     a2 = g.select("hard")
@@ -49,11 +49,11 @@ def test_easy_context_stays_reflex():
 
 def test_rpe_signs_are_true_prediction_error():
     g = _gate()
-    # DA dip: failure of an expected-successful action (value>=0) → -1
+    # DA dip: failure of an expectedly-successful action (value>=0) → -1
     g.select("c1"); assert g.learn(realized_success=False) == -1
-    # zero: success of an expected-successful action → 0 (no surprise, no learning)
+    # zero: success of an expectedly-successful action → 0 (no surprise, no learning)
     g.select("c2"); assert g.learn(realized_success=True) == 0
-    # DA burst: success of an action that was expected to fail (value<0) → +1.
+    # DA burst: success of an action expected to fail (value<0) → +1.
     # Scenario: in context c3 BOTH actions failed, then one suddenly worked.
     g.select("c3"); g.learn(realized_success=False)          # reflex → value -1
     assert g.select("c3") == DELIBERATE
@@ -83,3 +83,20 @@ def test_salience_is_int_map():
     sal = g.salience("q")
     assert set(sal) == {REFLEX, DELIBERATE}
     assert all(isinstance(v, int) for v in sal.values())
+
+
+def test_state_dict_roundtrip_preserves_learning():
+    g = _gate()
+    g.select("hard"); g.learn(realized_success=False)   # hard/reflex -> nogo
+    saved = g.state_dict()
+    g2 = DeliberationGate(["reflex", "deliberate"], default_action="reflex")
+    g2.load_state_dict(saved)
+    assert g2.value("hard", REFLEX) == g.value("hard", REFLEX) == -1
+    assert g2.select("hard") == g.select("hard")         # the same learned routing
+
+
+def test_load_empty_state_is_noop():
+    g = _gate()
+    g.load_state_dict(None)
+    g.load_state_dict({})
+    assert g.select("x") == REFLEX

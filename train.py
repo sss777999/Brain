@@ -1582,10 +1582,12 @@ def train_sentence_with_context(sentence: str, source: str = "unknown"):
                                       input_words=content_words_ordered,
                                       semantic_roles=roles)
         STATS["episodes_encoded"] += 1
-        
-        # Check consolidation
+
+        # Check consolidation. HIPPOCAMPUS.encode() can return None (e.g. when an
+        # episode is deduplicated against a near-identical existing one), so guard
+        # before dereferencing — otherwise training crashes mid-run on some sentences.
         from episode import EpisodeState
-        if episode.state == EpisodeState.CONSOLIDATED:
+        if episode is not None and episode.state == EpisodeState.CONSOLIDATED:
             STATS["episodes_consolidated"] += 1
 
     return episode
@@ -1908,7 +1910,7 @@ def ask(question: str, mode: str = "legacy") -> str:
 
 
 def _build_emergent_cycle(max_ticks: int = 6):
-    """Assemble a CognitiveCycle with the real organs wired in as services (mode='emergent')."""
+    """Assemble a CognitiveCycle with the real organs as services (mode='emergent')."""
     from cognition import CognitiveCycle
     from cognition_adapters import (
         predict_from_graph, settle_with_ca3, parse_question, readout_population,
@@ -1936,18 +1938,49 @@ DELIBERATION_DEEP_TICKS: int = 6  # tick budget when the gate chooses to deliber
 
 
 def _deliberation_context(question: str) -> str:
-    """Discrete signature of the question, used as context for the deliberation gate."""
+    """Discrete signature of the question as context for the deliberation gate."""
     from pfc import get_expected_roles
     return "|".join(sorted(get_expected_roles(question))) or "generic"
 
 
 def deliberation_feedback(question: str, success: bool) -> int:
-    """Train the gate on the outcome (for a training/practice pass, not INFER).
+    """Train the gate from the outcome (for the training/practice pass, not INFER).
 
     Returns the RPE (dopamine signal). Requires that ask(question, mode="deliberate")
-    was called beforehand — that call sets eligibility via select().
+    was called beforehand — it sets the eligibility via select().
     """
     return DELIBERATION_GATE.learn(realized_success=bool(success))
+
+
+def _deliberation_practice(max_questions: int = 120) -> dict:
+    """LAYER 3: practice pass — the gate experiences questions and learns
+    reflex/deliberate routing from INTERNAL confidence (answer != "don't know").
+
+    Honestly: on an easy curriculum this mostly calibrates "reflex" (the correct default);
+    rich gate training requires a finer context signature and multi-step
+    data — follow-up. Questions are drawn from curriculum facts (not the test set).
+    """
+    from curriculum import get_all_connections
+    pairs = get_all_connections()
+    questions = [f"what is {c[0]}" for c in pairs if len(c) == 2]
+    if len(questions) > max_questions:          # deterministic subsampling (no RNG)
+        step = max(1, len(questions) // max_questions)
+        questions = questions[::step][:max_questions]
+
+    unknown = ("i don't know.", "unknown.", "i do not know.", "")
+    stats = {"reflex": 0, "deliberate": 0, "success": 0, "n": 0}
+    for q in questions:
+        try:
+            ans = (ask(q, mode="deliberate") or "").lower().strip()
+        except Exception:
+            continue
+        action = DELIBERATION_GATE.last_action or "reflex"
+        stats[action] = stats.get(action, 0) + 1
+        success = ans not in unknown
+        stats["success"] += int(success)
+        stats["n"] += 1
+        deliberation_feedback(q, success)
+    return stats
 
 
 # ANCHOR: READOUT_ROLE_TOKEN_EXTRACTION
@@ -4638,6 +4671,13 @@ def save_model_numpy(filepath: str = "graph"):
     with open(f"{base}_episodes.pkl", 'wb') as f:
         pickle.dump(episodes_data, f)
 
+    # LAYER 3: persist the deliberation gate's learned policy with the model
+    try:
+        with open(f"{base}_deliberation.pkl", 'wb') as f:
+            pickle.dump(DELIBERATION_GATE.state_dict(), f)
+    except Exception:
+        pass
+
     # PHASE B: persist learned SDR overlaps so semantic similarity survives reload
     from sdr import GLOBAL_SDR_ENCODER
     overlaps_dump = {
@@ -4832,10 +4872,19 @@ def load_model_numpy(filepath: str = "graph"):
     # PHASE 3: Refresh Lexicon after loading (Hickok & Poeppel 2007)
     _refresh_lexicon()
 
+    # LAYER 3: restore the deliberation gate's learned policy (if the model has one)
+    delib_file = Path(f"{filepath}_deliberation.pkl")
+    if delib_file.exists():
+        try:
+            with open(delib_file, 'rb') as f:
+                DELIBERATION_GATE.load_state_dict(pickle.load(f))
+        except Exception:
+            pass
+
     return True
 
 
-def train_on_fineweb_edu(max_articles: int = 10000, max_sentences: int = 100000, 
+def train_on_fineweb_edu(max_articles: int = 10000, max_sentences: int = 100000,
                          continue_training: bool = True, use_attention_boost: bool = False):
     """
     Train the model on FineWeb-Edu (educational dataset).
@@ -5315,7 +5364,59 @@ def train_full_pipeline(epochs_facts: int = 30, epochs_sentences: int = 50, epoc
     print("\n   💤 Grade1 consolidation (sleep)...")
     sleep_consolidation(cycles=200)
     print(f"   ✓ Episodes consolidated: {len([e for e in HIPPOCAMPUS.episodes if e.state.name == 'CONSOLIDATED'])}")
-    
+
+    # =========================================================================
+    # STAGE 2.5: SOCIAL & PROCEDURAL (CHILDES dialogues, action scripts, theory of mind)
+    # =========================================================================
+    # BIOLOGY: after school knowledge, development adds social/dialogic experience
+    # (CHILDES), procedural action scripts, and theory-of-mind — before adult reading.
+    # Each source is loaded defensively so a data issue can't abort the whole run.
+    print()
+    print("=" * 60)
+    print("STAGE 2.5: SOCIAL & PROCEDURAL (CHILDES / procedures / theory of mind)")
+    print("=" * 60)
+    social_sents = []
+    try:
+        from data.childes_loader import get_childes_sentences
+        childes = get_childes_sentences(max_utterances=500)
+        if childes:
+            social_sents += list(childes)
+            print(f"   CHILDES dialogues: {len(childes)}")
+    except Exception as e:
+        print(f"   ⚠ CHILDES skipped: {e}")
+    try:
+        from data.procedural_knowledge import get_procedural_scripts
+        n_proc = 0
+        for script in get_procedural_scripts():
+            steps = list(script.get('steps', []))
+            social_sents += steps
+            n_proc += len(steps)
+        print(f"   Procedural steps: {n_proc}")
+    except Exception as e:
+        print(f"   ⚠ Procedural skipped: {e}")
+    try:
+        from data.theory_of_mind import get_tom_stories
+        n_tom = 0
+        for story in get_tom_stories():
+            facts = list(story.get('facts', []))
+            social_sents += facts
+            n_tom += len(facts)
+        print(f"   Theory-of-mind facts: {n_tom}")
+    except Exception as e:
+        print(f"   ⚠ Theory-of-mind skipped: {e}")
+
+    if social_sents:
+        epochs_social = 3
+        print(f"\nPhase 2.5: Social & procedural ({len(social_sents)} sentences, {epochs_social} epochs)...")
+        for _epoch in range(epochs_social):
+            for sentence in social_sents:
+                train_sentence_with_context(sentence, source="LEARNING")
+        print("\n   💤 Social/procedural consolidation (sleep)...")
+        sleep_consolidation(cycles=200)
+        print(f"   ✓ Episodes consolidated: {len([e for e in HIPPOCAMPUS.episodes if e.state.name == 'CONSOLIDATED'])}")
+    else:
+        print("   ⚠ No social/procedural data available, skipping stage")
+
     # =========================================================================
     # STAGE 3: FineWeb-Edu (optional)
     # =========================================================================
@@ -5394,8 +5495,17 @@ def train_full_pipeline(epochs_facts: int = 30, epochs_sentences: int = 50, epoc
     
     # PHASE 3: Refresh Lexicon after training (Hickok & Poeppel 2007)
     _refresh_lexicon()
-    
-    # Save unified model
+
+    # LAYER 3: deliberation practice — the gate learns reflex-vs-deliberate routing
+    # from intrinsic confidence, then is persisted with the model. (Mostly calibrates
+    # "reflex" on easy curriculum — see _deliberation_practice docstring.)
+    print("\n   🧠 Deliberation practice (layer 3)...")
+    dp = _deliberation_practice()
+    print(f"   ✓ Gate practice: {dp['n']} questions "
+          f"(reflex={dp.get('reflex', 0)}, deliberate={dp.get('deliberate', 0)}, "
+          f"success={dp['success']})")
+
+    # Save unified model (edges + episodes + deliberation gate)
     save_model_numpy("models/brain_model")
     print(f"\n✅ Model saved: models/brain_model")
     
