@@ -1850,6 +1850,9 @@ def _apply_synaptic_scaling() -> int:
 from activation import Activation
 
 # API_PUBLIC
+_UNKNOWN_ANSWERS = ("I don't know.", "Unknown.", "I do not know.")
+
+
 def ask(question: str, mode: str = "legacy") -> str:
     """
     Answer a question using a BIOLOGICALLY grounded activation model.
@@ -1885,18 +1888,38 @@ def ask(question: str, mode: str = "legacy") -> str:
     
     try:
         if mode == "emergent":
-            answer = _build_emergent_cycle().think(question)
+            answer = _build_emergent_cycle(question).think(question)
         elif mode == "deliberate":
             # LAYER 3: the basal-ganglia gate DECIDES reflex vs deliberate for THIS query.
             ctx = _deliberation_context(question)
             action = DELIBERATION_GATE.select(ctx)
             ticks = 1 if action == "reflex" else DELIBERATION_DEEP_TICKS
-            answer = _build_emergent_cycle(max_ticks=ticks).think(question)
-        else:
+            answer = _build_emergent_cycle(question, max_ticks=ticks).think(question)
+        elif mode == "brain":
+            # DUAL-PROCESS MEMORY (Yonelinas 2002; Norman & O'Reilly 2003):
+            # fast conditioned recall (hippocampal CA3 + PFC modulation by connector)
+            # is PRIMARY; if recall does not settle confidently (unknown), EFFORTFUL reasoning
+            # kicks in — the predictive loop (layer 1), which can multi-hop (zorp→quix). Recall does not
+            # regress (the loop only fills the gaps), and the system gains thinking.
             answer = _ask_impl(question)
+            if answer in _UNKNOWN_ANSWERS:
+                reasoned = _build_emergent_cycle(question).think(question)
+                if reasoned and reasoned not in _UNKNOWN_ANSWERS:
+                    answer = reasoned
+        else:
+            # NORTHSTAR STEP #1: semantic (cortical) readout from the consolidated
+            # graph. Behind a flag (default OFF → _ask_impl byte-for-byte, 597 untouched). Answers
+            # ONLY when there is a dominant typed edge; otherwise fall back to the episodic path.
+            from config import CONFIG
+            answer = None
+            if CONFIG.get("SEMANTIC_READOUT", False):
+                from cortex_readout import answer_semantically
+                answer = answer_semantically(question)
+            if not answer:
+                answer = _ask_impl(question)
 
         # Evaluate success/confidence (heuristic for now: found answer vs "I don't know")
-        success = answer not in ("I don't know.", "Unknown.", "I do not know.")
+        success = answer not in _UNKNOWN_ANSWERS
         confidence = 0.8 if success else 0.0
 
         # BIOLOGY: Neuromodulators respond to outcome (reward/frustration)
@@ -1909,8 +1932,12 @@ def ask(question: str, mode: str = "legacy") -> str:
         set_learning_mode()
 
 
-def _build_emergent_cycle(max_ticks: int = 6):
-    """Assemble a CognitiveCycle with the real organs as services (mode='emergent')."""
+def _build_emergent_cycle(question: str = None, max_ticks: int = 6):
+    """Assemble a CognitiveCycle with the real organs as services (mode='emergent').
+
+    If `question` is provided, we extract the connector/query_words and CONDITION settle
+    on them (top-down modulation): without this CA3 takes the narrative, with it — the defining episode.
+    """
     from cognition import CognitiveCycle
     from cognition_adapters import (
         predict_from_graph, settle_with_ca3, parse_question, readout_population,
@@ -1918,9 +1945,16 @@ def _build_emergent_cycle(max_ticks: int = 6):
     from pfc import get_expected_roles
     ca3 = HIPPOCAMPUS._ca3
 
+    q_words = None
+    q_connector = None
+    if question is not None:
+        _goal, q_words, q_connector = parse_question(question)
+
     def settle(cue_ids):
         return settle_with_ca3(cue_ids, ca3=ca3, word_to_neuron=WORD_TO_NEURON,
-                               hippocampus=HIPPOCAMPUS)
+                               hippocampus=HIPPOCAMPUS,
+                               query_words=q_words, query_connector=q_connector,
+                               question=question)
 
     return CognitiveCycle(
         pfc=PREFRONTAL_CORTEX,
@@ -1944,7 +1978,7 @@ def _deliberation_context(question: str) -> str:
 
 
 def deliberation_feedback(question: str, success: bool) -> int:
-    """Train the gate from the outcome (for the training/practice pass, not INFER).
+    """Train the gate on the outcome (for a training/practice pass, not INFER).
 
     Returns the RPE (dopamine signal). Requires that ask(question, mode="deliberate")
     was called beforehand — it sets the eligibility via select().
@@ -1953,17 +1987,17 @@ def deliberation_feedback(question: str, success: bool) -> int:
 
 
 def _deliberation_practice(max_questions: int = 120) -> dict:
-    """LAYER 3: practice pass — the gate experiences questions and learns
+    """LAYER 3: practice pass — the gate experiences questions and learns the
     reflex/deliberate routing from INTERNAL confidence (answer != "don't know").
 
     Honestly: on an easy curriculum this mostly calibrates "reflex" (the correct default);
     rich gate training requires a finer context signature and multi-step
-    data — follow-up. Questions are drawn from curriculum facts (not the test set).
+    data — follow-up. Questions are drawn from curriculum facts (not from the test set).
     """
     from curriculum import get_all_connections
     pairs = get_all_connections()
     questions = [f"what is {c[0]}" for c in pairs if len(c) == 2]
-    if len(questions) > max_questions:          # deterministic subsampling (no RNG)
+    if len(questions) > max_questions:          # deterministic subsample (no RNG)
         step = max(1, len(questions) // max_questions)
         questions = questions[::step][:max_questions]
 
