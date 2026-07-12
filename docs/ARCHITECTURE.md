@@ -2388,13 +2388,14 @@ set_config("RETRIEVAL_TEMPERATURE", 0.5)       # Probabilistic selection
 
 ### Testing
 ```bash
-python3 test_brain.py              # ALL tests (curriculum + grade1)
+python3 test_brain.py              # ALL tests (mechanism suite + curriculum + grade1)
 python3 test_brain.py --curriculum # Only curriculum tests
 python3 test_brain.py --grade1     # Only grade 1 tests
 python3 test_brain.py --train      # Train curriculum from scratch
 python3 test_brain.py --strict     # Strict tests with correctness check
 python3 test_brain.py --raw        # Without LLM postprocessing
 python3 test_brain.py --no-gpt --no-llm --skip-babi  # Fast run (no LLM, skip bAbI)
+python3 test_brain.py --unit       # Only the pytest mechanism suite (tests/, ~40s)
 ```
 
 ### Model training

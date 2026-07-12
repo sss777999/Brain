@@ -33,27 +33,36 @@ class TestBiologicalPatternSeparation:
     Similar inputs -> DIFFERENT outputs (to prevent interference).
     """
     
-    def test_sparsity_is_around_10_percent(self) -> None:
+    def test_sparsity_matches_biological_dg(self) -> None:
         """
-        BIOLOGICAL REQUIREMENT: DG produces ~10% active neurons.
-        
-        In real DG granule cells have very low activity.
-        This is achieved through strong inhibition from interneurons.
+        BIOLOGICAL REQUIREMENT: DG produces a very sparse code.
+
+        In the real dentate gyrus, granule cells have very low activity —
+        only a few percent are active for a given input (Rolls et al. 2007),
+        achieved through strong inhibition from interneurons. The model uses
+        DG_SPARSITY (~2%); the produced sparsity must track that configured
+        value and stay within the biologically sparse regime (≤ 5%).
         """
         cortex = Cortex()
         hippo = Hippocampus(cortex)
-        
+        target = hippo.SPARSITY
+
         # Test on different input sizes
         for input_size in [50, 100, 200, 500]:
             input_neurons = {f"n{i}" for i in range(input_size)}
             sparse = hippo.pattern_separate(input_neurons)
-            
+
             sparsity = len(sparse) / input_size
-            
-            # Biological requirement: 5-15% (around 10%)
-            assert 0.05 <= sparsity <= 0.15, (
+
+            # DG is a sparse-coding region: a few percent active, not ~10%.
+            assert sparsity <= 0.05, (
                 f"Sparsity {sparsity:.2%} for input {input_size} "
-                f"outside biological range 5-15%"
+                f"is not sparse enough for a dentate-gyrus code (expected ≤ 5%)"
+            )
+            # And it must reflect the configured target (within one neuron of rounding).
+            assert abs(sparsity - target) <= (1 / input_size) + 1e-9, (
+                f"Sparsity {sparsity:.2%} for input {input_size} "
+                f"does not track configured DG_SPARSITY {target:.2%}"
             )
     
     def test_similar_inputs_produce_different_outputs(self) -> None:
@@ -65,11 +74,14 @@ class TestBiologicalPatternSeparation:
         """
         cortex = Cortex()
         hippo = Hippocampus(cortex)
-        
-        # Two inputs with 90% overlap
-        base = {f"n{i}" for i in range(100)}
-        similar = {f"n{i}" for i in range(10, 110)}  # 90 shared neurons
-        
+
+        # Two inputs with 90% overlap. At a biologically sparse ~2% code the
+        # winner set must be large enough to measure separation, so use a
+        # realistically sized input (500 → ~10 survivors) rather than a tiny
+        # one (100 → ~2 survivors, too few to be meaningful).
+        base = {f"n{i}" for i in range(500)}
+        similar = {f"n{i}" for i in range(50, 550)}  # 450/500 shared = 90% overlap
+
         sparse_base = hippo.pattern_separate(base)
         sparse_similar = hippo.pattern_separate(similar)
         

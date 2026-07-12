@@ -28,7 +28,7 @@ from dataclasses import dataclass, field
 import heapq
 import hashlib
 
-from config import CONFIG
+from config import CONFIG, ConfigValue
 
 # Import spiking mechanisms
 from spiking import (
@@ -129,21 +129,11 @@ class Connection:
     #   effective_threshold = BASE - dopamine_boost - capture_bonus
     #
     # All thresholds come from config.py
-    @property
-    def THRESHOLD_NEW_TO_USED(self) -> int:
-        return CONFIG.get("THRESHOLD_NEW_TO_USED", 5)
-    
-    @property
-    def THRESHOLD_USED_TO_MYELINATED(self) -> int:
-        return CONFIG.get("THRESHOLD_USED_TO_MYELINATED", 50)
-    
-    @property
-    def THRESHOLD_MIN_MYELINATION(self) -> int:
-        return CONFIG.get("THRESHOLD_MIN_MYELINATION", 10)
-    
-    @property
-    def THRESHOLD_TO_PRUNE(self) -> int:
-        return CONFIG.get("THRESHOLD_TO_PRUNE", 100)
+    # Class- and instance-readable, CONFIG-driven (see config.ConfigValue).
+    THRESHOLD_NEW_TO_USED = ConfigValue("THRESHOLD_NEW_TO_USED", 5)
+    THRESHOLD_USED_TO_MYELINATED = ConfigValue("THRESHOLD_USED_TO_MYELINATED", 50)
+    THRESHOLD_MIN_MYELINATION = ConfigValue("THRESHOLD_MIN_MYELINATION", 10)
+    THRESHOLD_TO_PRUNE = ConfigValue("THRESHOLD_TO_PRUNE", 100)
     
     # Threshold modulators (biological analogs)
     # dopamine_boost: threshold reduction from contextual salience (0-20)
@@ -867,7 +857,7 @@ class Connection:
         # BIOLOGY (Tononi & Cirelli 2006, Synaptic Homeostasis):
         # Connections with low context diversity (purely episodic, tied to a single event)
         # decay faster than semantic connections (experienced in multiple contexts).
-        if len(self.contexts) <= 1:
+        if self.context_diversity <= 1:
             increment += 1  # Accelerated decay for episodic traces
         
         self._cycles_without_use += increment

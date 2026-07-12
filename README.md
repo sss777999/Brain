@@ -26,10 +26,15 @@ cd brain
 uv sync
 
 # Run tests ((fast, without LLM and without GPT evaluation; baselines: TF-IDF, BM25 for QA, MemNet/NTM for bAbI)
+# The QA run also executes the pytest mechanism suite first (unless --skip-unit).
 uv run python test_brain.py --no-llm --no-gpt
 
 # Run full tests with Broca's area (LLM verbalization) but without gpt evaluation
 uv run python test_brain.py --no-gpt
+
+# Run ONLY the pytest mechanism/unit suite (DG/CA3, consolidation, cognition, sleep, child-knowledge, …)
+uv run python test_brain.py --unit
+# (equivalently: uv run pytest tests/ ; ~40s)
 ```
 
 ### Requirements
@@ -290,33 +295,37 @@ Episodes: 76,688
   - DECAYING: 1,352
 ```
 
-**Test results** (07.02.2026):
+**Test results** (10.07.2026, latest full run — see `logs/`):
 ```
-CURRICULUM: 50/50 (100.0%) — hard tests
-STRICT: 3/3 (100%) — tests for "I do not know"
-PRESCHOOL: 48/48 (100.0%) — preschool tests
-GRADE1: 64/64 (100.0%) — world-knowledge tests
-FineWeb-Edu: 9/9 (100.0%) — direct facts from educational texts
-PARAPHRASE: 50/50 (100.0%) — paraphrase robustness tests
-bAbI Tasks 1-20: 481/481 (100%) — working memory + cognitive abilities
-TOTAL: 705/705 (100.0%)
+CURRICULUM:      49/50  (98.0%)  — hard tests
+STRICT:           3/3   (100.0%) — tests for "I do not know"
+PRESCHOOL:       48/48  (100.0%) — preschool tests
+GRADE1:          63/64  (98.4%)  — world-knowledge tests
+FineWeb-Edu:      6/9   (66.7%)  — direct facts from educational texts
+PARAPHRASE:      47/50  (94.0%)  — paraphrase robustness tests
+bAbI Tasks 1-20: 381/481 (79.2%) — working memory + cognitive abilities
+TOTAL:           597/705 (84.7%)
 ```
+bAbI is not uniform: most tasks are at or near 100%, but tasks 14 (time), 17/18
+(positional/size reasoning) and 19 (path finding) are currently weak (0–20%) and
+pull the bAbI total down. QA-only macro-average (excluding bAbI) is 92.9%.
 
 **Comparison with baselines** (same training data):
 ```
 Test          Brain    TF-IDF   BM25    MemNet   NTM
-CURRICULUM    100.0%   64.0%    70.0%    N/A     N/A
+CURRICULUM     98.0%   64.0%    70.0%    N/A     N/A
 STRICT        100.0%   33.3%    33.3%    N/A     N/A
-PRESCHOOL     100.0%   81.2%    87.5%    N/A     N/A
-GRADE1        100.0%   68.8%    71.9%    N/A     N/A
-FINEWEB       100.0%   11.1%    33.3%    N/A     N/A
-PARAPHRASE    100.0%   48.0%    48.0%    N/A     N/A
-bAbI 1-20*    100.0%    0.0%     0.0%   24.3%   19.4%
+PRESCHOOL     100.0%   79.2%    87.5%    N/A     N/A
+GRADE1         98.4%   67.2%    68.8%    N/A     N/A
+FINEWEB        66.7%   11.1%    11.1%    N/A     N/A
+PARAPHRASE     94.0%   48.0%    48.0%    N/A     N/A
+bAbI 1-20*     79.2%    N/A      N/A    20.4%   20.4%
 ─────────────────────────────────────────────────────
-AVERAGE       100.0%   51.1%    57.3%    N/A     N/A
+QA SUITE AVG   92.9%   50.5%    53.1%    N/A     N/A
 ```
 *bAbI requires working memory — TF-IDF/BM25 cannot track entity states.
  MemNet/NTM baselines tested on all 20 bAbI tasks (481 questions).
+ QA SUITE AVG is a macro-average across the QA suites (not weighted by count, bAbI excluded).
 
 📊 **[Full results with analysis](docs/RESULTS.md)**
 
@@ -509,7 +518,11 @@ The LLM (Qwen2.5:3b via Ollama) **verbalizes** the thought into speech—similar
 - Emotions (laugh→happy, cry→sad)
 - Places (learn→school, play→park)
 
-### ✅ Why 100% is NOT test-specific tuning
+### ✅ Why the accuracy is NOT test-specific tuning
+
+> Note: the per-phase "100%" figures below are dated development-log records from when
+> each phase landed. The current reproducible total is **597/705 (84.7%)** — see the
+> "Test results" block above. The generalization argument here still holds regardless.
 
 Each Phase 19–21 mechanism solves a **class of problems**, not a specific test case. None contains hardcoded words, question-specific thresholds, or answer lookups.
 
@@ -978,12 +991,14 @@ PYTHONPATH=. python train.py
 
 ### Brain model tests
 ```bash
-python3 test_brain.py              # ALL tests (curriculum + grade1)
+python3 test_brain.py              # ALL tests (mechanism suite + curriculum + grade1)
 python3 test_brain.py --curriculum # Curriculum-only tests
 python3 test_brain.py --grade1     # Grade 1 tests only
 python3 test_brain.py --train      # Train a single model (curriculum → grade1)
 python3 test_brain.py --strict     # Hard tests with correctness checks
 python3 test_brain.py --raw        # Without LLM post-processing
+python3 test_brain.py --unit       # Only the pytest mechanism suite (tests/, ~40s)
+python3 test_brain.py --skip-unit  # Skip the mechanism suite before the QA run
 ```
 
 ### Model training
@@ -1473,6 +1488,7 @@ TOTAL: 419/424 (98.8%)
 ```bash
 python3 test_brain.py --no-gpt --no-llm --skip-babi  # Fast tests
 python3 test_brain.py                                 # All tests with LLM
+python3 test_brain.py --unit                          # Only mechanism/unit suite (pytest tests/, ~40s)
 ```
 
 **Model training:**

@@ -460,6 +460,28 @@ CONFIG = {
 # ANCHOR: CONFIG_ACCESS
 # Convenience functions for config access
 
+class ConfigValue:
+    """Descriptor exposing a CONFIG entry as a class- AND instance-readable attribute.
+
+    Unlike ``@property`` (which only fires on instance access and raises the bare
+    ``property`` object on class access), ``__get__`` returns the live CONFIG value
+    for both ``Cls.ATTR`` and ``obj.attr``. This keeps biological parameters
+    CONFIG-driven while restoring the class-level constant contract the model and
+    tests read (e.g. ``Connection.THRESHOLD_NEW_TO_USED``).
+
+    It is a NON-DATA descriptor (no ``__set__``): assigning ``obj.attr = x`` writes
+    to the instance ``__dict__`` and shadows the descriptor for that instance only,
+    which is the per-instance override some tests rely on (e.g. capping MAX_EPISODES).
+    """
+
+    def __init__(self, key: str, default) -> None:
+        self._key = key
+        self._default = default
+
+    def __get__(self, obj, objtype=None):
+        return CONFIG.get(self._key, self._default)
+
+
 def get_config(key: str, default=None):
     """
     Get value from config.

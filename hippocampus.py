@@ -28,7 +28,7 @@ Episodic memory:
 
 from __future__ import annotations
 
-from config import CONFIG
+from config import CONFIG, ConfigValue
 
 import random
 import hashlib
@@ -269,28 +269,20 @@ class Hippocampus:
         _ca1: CA1 instance for output layer.
     
     Biological parameters:
-        SPARSITY: Fraction of active neurons after pattern separation (~10%)
+        SPARSITY: Fraction of active neurons after pattern separation (~2%, sparse DG code)
         CONSOLIDATION_THRESHOLD: How many replays are needed for consolidation
         MAX_EPISODES: Hippocampal capacity
     """
     
     # ANCHOR: HIPPOCAMPUS_BIOLOGICAL_PARAMS - biological parameters
     # All parameters come from config.py
-    @property
-    def SPARSITY(self) -> float:
-        return CONFIG.get("DG_SPARSITY", 0.1)
-    
-    @property
-    def CONSOLIDATION_THRESHOLD(self) -> int:
-        return CONFIG.get("CONSOLIDATION_REPLAYS", 5)
-    
-    @property
-    def MAX_EPISODES(self) -> int:
-        return CONFIG.get("MAX_EPISODES", 100000)
-    
-    @property
-    def PATTERN_COMPLETION_THRESHOLD(self) -> float:
-        return CONFIG.get("PATTERN_COMPLETION_THRESHOLD", 0.3)
+    # Class- and instance-readable, CONFIG-driven (see config.ConfigValue).
+    # Non-data descriptors, so a per-instance override (e.g. hippo.MAX_EPISODES = n
+    # to cap capacity in a test) shadows the CONFIG value for that instance only.
+    SPARSITY = ConfigValue("DG_SPARSITY", 0.02)
+    CONSOLIDATION_THRESHOLD = ConfigValue("CONSOLIDATION_REPLAYS", 5)
+    MAX_EPISODES = ConfigValue("MAX_EPISODES", 100000)
+    PATTERN_COMPLETION_THRESHOLD = ConfigValue("PATTERN_COMPLETION_THRESHOLD", 0.3)
     
     # API_PUBLIC
     def __init__(self, cortex: Cortex) -> None:
@@ -484,43 +476,51 @@ class Hippocampus:
         'rabbits': {'rabbit'},
     }
     
-    def pattern_complete(self, cue_neurons: Set[str], word_to_neuron: dict = None, 
+    def pattern_complete(self, cue_neurons: Set[str], word_to_neuron: dict = None,
                          query_words: Set[str] = None, query_connector: str = None,
-                         pfc: Optional['PFC'] = None, question: str = None) -> Optional[Episode]:
+                         pfc: Optional['PFC'] = None, question: str = None,
+                         max_timestamp: Optional[int] = None) -> Optional[Episode]:
         """
         Pattern Completion in CA3.
-        
+
         Intent: CA3 is a recurrent network that recovers
                 full episode from partial cue.
                 This is the recall mechanism.
-        
+
         RETRIEVAL_MODE (config):
         - "HEURISTIC": Legacy scoring-based approach (default)
         - "CA3": Attractor dynamics with iterative spreading
-        
+
         BIOLOGY: CA3 has extensive recurrent connections (recurrent collaterals)
                  that allow activation to spread and recover
                  full pattern from partial cue.
-        
+
         Args:
             cue_neurons: Activated neurons (after spreading activation).
             word_to_neuron: Neuron lookup dictionary.
             query_words: Query words for scoring.
             query_connector: Connector type for top-down modulation.
             pfc: PFC for binding token extraction (optional).
-        
+            question: Original question string (optional).
+            max_timestamp: Max episode timestamp to consider (optional).
+
         Returns:
             Found episode or None.
         """
         # ANCHOR: RETRIEVAL_MODE_SWITCH - switch between HEURISTIC and CA3
         retrieval_mode = CONFIG.get("RETRIEVAL_MODE", "HEURISTIC")
-        
-        if retrieval_mode == "CA3":
+
+        # The CA3 attractor needs the Neuron lookup map to spread activation. When
+        # no map is available (e.g. the string-only retrieve() convenience path used
+        # by tests / brain_audit), fall back to HEURISTIC scoring instead of hitting
+        # the attractor's `word_to_neuron is not None` assertion.
+        if retrieval_mode == "CA3" and word_to_neuron is not None:
             # Delegate to CA3 attractor dynamics
             return self.pattern_complete_attractor(
-                cue_neurons, word_to_neuron, query_words, query_connector, pfc, question
+                cue_neurons, word_to_neuron, query_words, query_connector,
+                pfc, question, max_timestamp
             )
-        
+
         # Legacy HEURISTIC mode below
         if len(cue_neurons) == 0:
             return None
@@ -623,7 +623,11 @@ class Hippocampus:
             #
             # Instead of hard filtering, use scoring: episodes with larger overlap
             # get exponentially larger score via lateral inhibition.
-            if query_overlap == 0:
+            #
+            # Only enforced when query_words were supplied. Pure cue-based recall
+            # (retrieve(): autoassociative completion with no query words) scores
+            # on cue overlap alone, so it must not require a query overlap here.
+            if query_words and query_overlap == 0:
                 continue
             
             # If there is no neuron dictionary, use overlap + query_bonus only
@@ -968,43 +972,7 @@ class Hippocampus:
                         return None  # NEW episode with weak overlap
         
         return best_episode
-    
-    # API_PUBLIC
-    def pattern_complete(
-        self,
-        cue_neurons: Set[str],
-        word_to_neuron: Dict[str, 'Neuron'],
-        query_words: Optional[Set[str]] = None,
-        query_connector: Optional[str] = None,
-        pfc: Optional['PFC'] = None,
-        question: Optional[str] = None,
-        max_timestamp: Optional[int] = None
-    ) -> Optional[Episode]:
-        """
-        Pattern completion via iterative CA3 dynamics.
-        
-        Args:
-            cue_neurons: Initial active neuron IDs
-            word_to_neuron: Dictionary for lookup
-            query_words: Query words for scoring (optional)
-            query_connector: Connector type for top-down modulation (optional)
-            pfc: PFC instance for structural goal parsing (optional)
-            question: Original question string (optional)
-            max_timestamp: Max timestamp to consider (optional)
-            
-        Returns:
-            Found episode or None
-        """
-        return self.pattern_complete_attractor(
-            cue_neurons,
-            word_to_neuron,
-            query_words,
-            query_connector,
-            pfc,
-            question,
-            max_timestamp
-        )
-    
+
     # API_PUBLIC
     def pattern_complete_attractor(
         self, 

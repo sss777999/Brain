@@ -2,7 +2,7 @@
 """Unified Brain model test file.
 
 Usage:
-    python3 test_brain.py              # ALL tests (curriculum + preschool + grade1 + fineweb + paraphrase + babi)
+    python3 test_brain.py              # ALL tests (mechanism suite + curriculum + preschool + grade1 + fineweb + paraphrase + babi)
     python3 test_brain.py --curriculum # Only curriculum tests
     python3 test_brain.py --preschool  # Only preschool tests (3-6 years)
     python3 test_brain.py --grade1     # Only grade 1 tests
@@ -15,6 +15,8 @@ Usage:
     python3 test_brain.py --no-gpt     # Without GPT answer quality evaluation
     python3 test_brain.py --no-llm     # Without LLM postprocessing (shows raw model output)
     python3 test_brain.py --skip-babi  # Skip bAbI tests (slow, needed only for PFC changes)
+    python3 test_brain.py --unit       # Only the pytest mechanism suite (tests/, ~40s)
+    python3 test_brain.py --skip-unit  # Skip the mechanism suite that runs before the QA suites
 
 GPT evaluation:
     Each answer is evaluated by GPT-4o-mini on criteria:
@@ -2427,6 +2429,37 @@ def test_pfc_persistent_activity() -> dict:
     }
 
 
+def run_unit_tests() -> dict:
+    """Run the pytest mechanism/unit suite (tests/) as a subprocess.
+
+    Separate from the QA suites: these check biological mechanisms and API
+    contracts (DG/CA3, connection states, consolidation, cognition, sleep
+    inference, deliberation) plus the child-knowledge integration tests, not
+    the QA answer batteries. Runs the whole tests/ directory (~40 s).
+
+    Returns:
+        {'passed': int, 'failed': int, 'ok': bool, 'returncode': int}.
+    """
+    import subprocess
+
+    log('=' * 70)
+    log('UNIT / MECHANISM TESTS (pytest tests/)')
+    log('=' * 70)
+
+    cmd = [sys.executable, '-m', 'pytest', 'tests/', '-q', '-p', 'no:cacheprovider']
+
+    result = subprocess.run(cmd, capture_output=True, text=True)
+    output = result.stdout + result.stderr
+    print(output.rstrip())
+
+    passed = int(m.group(1)) if (m := re.search(r'(\d+) passed', output)) else 0
+    failed = int(m.group(1)) if (m := re.search(r'(\d+) failed', output)) else 0
+    ok = result.returncode == 0
+    log(f"UNIT: {passed} passed, {failed} failed | "
+        f"{'✅ OK' if ok else '❌ FAILED'}")
+    return {'passed': passed, 'failed': failed, 'ok': ok, 'returncode': result.returncode}
+
+
 def main():
     """Main function."""
     import argparse
@@ -2448,6 +2481,10 @@ def main():
     parser.add_argument('--no-gpt', action='store_true', help='Disable GPT evaluation')
     parser.add_argument('--no-llm', action='store_true', help='Disable LLM postprocessing')
     parser.add_argument('--skip-babi', action='store_true', help='Skip bAbI tests')
+    parser.add_argument('--unit', action='store_true',
+                        help='Run ONLY the pytest mechanism suite (tests/, ~40s) and exit')
+    parser.add_argument('--skip-unit', action='store_true',
+                        help='Skip the mechanism suite that otherwise runs before the QA suites')
     args = parser.parse_args()
     
     do_train = args.train
@@ -2482,7 +2519,13 @@ def main():
     
     # Show config
     print_config()
-    
+
+    # Unit / mechanism suite only mode
+    if args.unit:
+        unit = run_unit_tests()
+        print("\nTests completed.")
+        sys.exit(0 if unit['ok'] else 1)
+
     # Preschool tests only mode
     if preschool_only:
         from train import load_model_numpy
@@ -2586,7 +2629,13 @@ def main():
         run_babi_tests(babi_limit=args.babi_limit, babi_task=args.babi_task)
         print("\nTests completed.")
         return
-    
+
+    # Mechanism suite first (fast, model-independent): a broken biological
+    # mechanism or API contract should surface before the long QA battery.
+    unit_result = None
+    if not args.skip_unit:
+        unit_result = run_unit_tests()
+
     # Run tests and collect results
     all_results = []
     
@@ -2709,8 +2758,12 @@ def main():
         
         log('')
         log(f"TOTAL: {total_passed}/{total_passed + total_failed} | Total time: {total_time:.1f}s")
+        if unit_result is not None:
+            u_status = '✅' if unit_result['ok'] else '❌'
+            log(f"{u_status} MECHANISM TESTS: {unit_result['passed']} passed, "
+                f"{unit_result['failed']} failed (pytest tests/)")
         log('=' * 70)
-        
+
         # === UNIFIED BASELINE COMPARISON TABLE ===
         log('')
         log('=' * 90)
@@ -2995,6 +3048,9 @@ def generate_results_md(all_results: list, stats: dict) -> None:
     lines.append("")
     lines.append("# Run specific test suite")
     lines.append("python test_brain.py --curriculum --no-gpt --no-llm")
+    lines.append("")
+    lines.append("# Run only the mechanism/unit suite (fast, no model needed)")
+    lines.append("python test_brain.py --unit")
     lines.append("```")
     lines.append("")
     lines.append("---")

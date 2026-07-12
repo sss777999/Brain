@@ -51,6 +51,16 @@ class NeuromodulatorSystem:
             ModulatorType.SEROTONIN: 0.5
         }
         
+    def reset(self) -> None:
+        """Restore all neuromodulators to their baseline (resting) levels.
+
+        Returns the global chemical bath to the encoding-ready resting state
+        (ACh = 0.5, above the 0.3 encode() gate). Useful between independent
+        sessions and for deterministic test isolation, since the singleton
+        otherwise carries query-induced state (e.g. lowered ACh) across uses.
+        """
+        self._initialize()
+
     def get_level(self, modulator: ModulatorType) -> float:
         """Get current level of a neuromodulator."""
         return self.levels.get(modulator, 0.5)
