@@ -138,6 +138,17 @@ class NeuromodulatorSystem:
         """
         self.set_level(ModulatorType.ACETYLCHOLINE, 0.9)
 
+    def restore_acetylcholine_for_learning(self) -> None:
+        """Restore ACh to baseline when leaving an inference query.
+
+        BIOLOGY (Hasselmo 2006): retrieval lowers ACh (update_on_query → 0.2, BELOW the
+        0.3 encode() gate — correct for recall). But once the query ends and the system
+        returns to LEARN mode, ACh must return to baseline; otherwise a single decay step
+        (0.2 → 0.26) stays below the gate and subsequent encode() is silently suppressed —
+        so learning interleaved with questions in one process stops writing new memory.
+        """
+        self.set_level(ModulatorType.ACETYLCHOLINE, 0.5)  # baseline (encode-ready, > 0.3 gate)
+
 
 # Global instance
 GLOBAL_MODULATORS = NeuromodulatorSystem()
