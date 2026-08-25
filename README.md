@@ -1526,16 +1526,17 @@ morph = pymorphy2.MorphAnalyzer()
 If you use this work in your research, please cite:
 
 ```bibtex
-@article{belyi2026brain,
+@misc{belyi2026brain,
   title={Brain: Structural Memory, Thought Formation, and Language in a Biologically Grounded System},
   author={Belyi, Vitalii},
-  journal={arXiv preprint arXiv:XXXX.XXXXX},
   year={2026},
-  url={https://github.com/sss777999/Brain}
+  doi={10.5281/zenodo.22102388},
+  url={https://doi.org/10.5281/zenodo.22102388},
+  note={Preprint}
 }
 ```
 
-Full paper: [docs/arxiv.pdf](docs/arxiv.pdf)
+Full paper: [docs/arxiv.pdf](docs/arxiv.pdf) · [Preprint on Zenodo](https://doi.org/10.5281/zenodo.22102388)
 
 ---
 
