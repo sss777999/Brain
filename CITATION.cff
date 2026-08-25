@@ -1,0 +1,22 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+type: software
+title: "Brain: Biologically Plausible Cognitive Architecture"
+authors:
+  - family-names: "Belyi"
+    given-names: "Vitalii"
+    affiliation: "Independent researcher"
+    email: "aiops9a1@protonmail.com"
+license: MIT
+doi: "10.5281/zenodo.18704592"
+repository-code: "https://github.com/sss777999/Brain"
+keywords:
+  - cognitive architecture
+  - biologically plausible learning
+  - Hebbian learning
+  - hippocampus
+  - sparse distributed representations
+  - spiking neurons
+  - STDP
+  - memory
+  - neuroscience
